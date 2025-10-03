@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type { GameState, WallPicture, Enemy } from './types.ts';
+import type { GameState, WallPicture, Enemy, Item } from './types.ts';
 import { Difficulty, WeaponType, WallPictureType, EnemyType, ItemType } from './types.ts';
 import { loadTextures } from './textures.ts';
 import './App.css';
@@ -18,7 +18,7 @@ import { castRay, getSpritesToRender } from './raycasting.ts';
 import { WEAPONS } from './weapons.ts';
 import { saveGame, loadGame, getAllSaveGames, deleteSaveGame } from './saveLoadSystem.ts';
 import { soundSystem } from './soundSystem.ts';
-import { getTexture, getWallTexture, getItemTexture } from './textures.ts';
+import { getTexture, getWallTexture, getItemTexture, getCorpseTexture } from './textures.ts';
 import MiniMap from './MiniMap.tsx';
 
 type GameMode = 'menu' | 'playing' | 'paused' | 'help' | 'save' | 'load' | 'difficulty' | 'levelComplete';
@@ -61,10 +61,10 @@ function App() {
   // Hilfsfunktion zum Zuweisen von Texturen an Gegner
   const assignEnemyTextures = (gameState: GameState) => {
     gameState.enemies.forEach(enemy => {
-      if (enemy.isAlive) {
+      if (enemy.state === 'alive') {
         enemy.texture = getTexture(enemy.type);
       } else {
-        enemy.texture = undefined;
+        enemy.texture = undefined; // Leichen und sterbende Gegner bekommen ihre Textur im Render-Loop
       }
     });
     return gameState;
@@ -180,7 +180,7 @@ function App() {
         // Debug: Zeige lebende Gegner
         setGameState((prev) => {
           if (prev && gameMode === 'playing' && !prev.isPaused) {
-            const aliveEnemies = prev.enemies.filter(enemy => enemy.isAlive);
+            const aliveEnemies = prev.enemies.filter(enemy => enemy.state === 'alive');
             console.log('Lebende Gegner:', aliveEnemies);
             console.log(`Anzahl lebender Gegner: ${aliveEnemies.length}`);
             console.log('Spieler-Position:', prev.player.x, prev.player.y);
@@ -313,7 +313,7 @@ function App() {
 
         if (result.hit) {
           soundSystem.playEnemyHit();
-          if (result.enemyHit && !result.enemyHit.isAlive) {
+          if (result.enemyHit && result.enemyHit.state === 'dying') {
             soundSystem.playEnemyDeath();
           }
         }
@@ -551,7 +551,7 @@ function App() {
     }
 
     // Sprites (Gegner und Items) rendern
-    const sprites = getSpritesToRender(
+    const allSprites = getSpritesToRender(
       player.x,
       player.y,
       dirX,
@@ -562,57 +562,64 @@ function App() {
       gameState.items
     );
 
-    sprites.forEach((sprite) => {
+    // Sprites nach Typ und Zustand für korrekte Render-Reihenfolge sortieren
+    const deadSprites = allSprites.filter(s => s.type === 'enemy' && (s.object as Enemy).state === 'dead');
+    const otherSprites = allSprites.filter(s => !(s.type === 'enemy' && (s.object as Enemy).state === 'dead'));
+
+    // Zuerst Leichen rendern, dann alles andere
+    [...deadSprites, ...otherSprites].forEach((sprite) => {
       const spriteScreenX = ((width / 2) * (1 + sprite.x / sprite.y));
-      const spriteHeight = Math.abs(height / sprite.y);
-      const spriteWidth = spriteHeight;
+      let spriteHeight = Math.abs(height / sprite.y);
+      let spriteWidth = spriteHeight;
+      let drawStartY = -spriteHeight / 2 + height / 2;
+      
+      const enemy = sprite.type === 'enemy' ? sprite.object as Enemy : null;
+
+      // Todesanimation
+      if (enemy && enemy.state === 'dying') {
+        const timeSinceDeath = Date.now() - (enemy.timeOfDeath || 0);
+        const animationProgress = Math.min(timeSinceDeath / 500, 1); // 500ms Animation
+        
+        spriteHeight *= (1 - animationProgress * 0.8); // Schrumpft auf 20% Höhe
+        spriteWidth *= (1 + animationProgress * 0.5); // Wird 50% breiter
+        drawStartY += (spriteHeight * animationProgress); // Bewegt sich nach unten
+      }
 
       const drawStartX = -spriteWidth / 2 + spriteScreenX;
       const drawEndX = spriteWidth / 2 + spriteScreenX;
-      const drawStartY = -spriteHeight / 2 + height / 2;
-      const drawEndY = spriteHeight / 2 + height / 2;
+      const drawEndY = drawStartY + spriteHeight;
 
       // Nur zeichnen wenn vor der Kamera
-      for (let stripe = Math.max(0, drawStartX); stripe < Math.min(width, drawEndX); stripe++) {
-        if (sprite.distance < zBuffer[Math.floor(stripe)]) {
+      for (let stripe = Math.floor(drawStartX); stripe < Math.ceil(drawEndX); stripe++) {
+        if (stripe >= 0 && stripe < width && sprite.distance < zBuffer[stripe]) {
           const brightness = Math.max(0.3, 1 - sprite.distance / 15);
           ctx.globalAlpha = brightness;
 
-          if (sprite.type === 'enemy') {
-            const enemy = gameState.enemies.find(e => e.id === (sprite.object as Enemy).id);
-            if (enemy && texturesLoaded && enemy.texture) {
-              const texture = enemy.texture as HTMLCanvasElement;
-              const texX = Math.floor(((stripe - drawStartX) / spriteWidth) * texture.width);
+          if (sprite.type === 'enemy' && enemy) {
+            let texture: CanvasImageSource | undefined;
+            if (enemy.state === 'alive') {
+              texture = getTexture(enemy.type);
+            } else if (enemy.state === 'dying') {
+              texture = getTexture(enemy.type); // Normale Textur während der Animation
+            } else if (enemy.state === 'dead') {
+              texture = getCorpseTexture(enemy.type);
+            }
+
+            if (texture && texturesLoaded) {
+              const texX = Math.floor(((stripe - drawStartX) / spriteWidth) * (texture as HTMLCanvasElement).width);
               ctx.drawImage(
                 texture,
-                texX, 0, 1, texture.height,
+                texX, 0, 1, (texture as HTMLCanvasElement).height,
                 stripe, drawStartY, 1, drawEndY - drawStartY
               );
-            } else if (enemy) {
-              // Fallback to colored rectangles if textures are not loaded
-              switch (enemy.type) {
-                case EnemyType.ZOMBIE:
-                  ctx.fillStyle = '#0f0'; // Grün für Zombies
-                  break;
-                case EnemyType.MONSTER:
-                  ctx.fillStyle = '#f00'; // Rot für Monster
-                  break;
-                case EnemyType.GHOST:
-                  ctx.fillStyle = '#fff'; // Weiß für Geister
-                  break;
-                default:
-                  ctx.fillStyle = '#0f0'; // Fallback
-              }
-              ctx.fillRect(stripe, drawStartY, 1, drawEndY - drawStartY);
             }
-          } else {
-            // Items mit verschiedenen Texturen rendern
+          } else if (sprite.type === 'item') {
+            // Items rendern
             const item = sprite.object as Item;
             const itemTexture = getItemTexture(item.type);
 
             if (itemTexture && texturesLoaded) {
               const texture = itemTexture as HTMLCanvasElement;
-              // Optimiert: Verwende stretchBlt für gesamtes Sprite statt pixelweise
               const texX = Math.floor(((stripe - drawStartX) / spriteWidth) * texture.width);
 
               if (texX >= 0 && texX < texture.width) {
@@ -622,28 +629,6 @@ function App() {
                   stripe, drawStartY, 1, drawEndY - drawStartY
                 );
               }
-            } else {
-              // Fallback: verschiedene Farben für verschiedene Item-Typen
-              switch (item.type) {
-                case ItemType.HEALTH_SMALL:
-                  ctx.fillStyle = '#ff4444'; // Rot für kleine Heilung
-                  break;
-                case ItemType.HEALTH_LARGE:
-                  ctx.fillStyle = '#ff0000'; // Dunkelrot für große Heilung
-                  break;
-                case ItemType.TREASURE:
-                  ctx.fillStyle = '#ffd700'; // Gold für Schätze
-                  break;
-                case ItemType.AMMO:
-                  ctx.fillStyle = '#888888'; // Grau für Munition
-                  break;
-                case ItemType.WEAPON:
-                  ctx.fillStyle = '#444444'; // Dunkelgrau für Waffen
-                  break;
-                default:
-                  ctx.fillStyle = '#ff0'; // Gelb als Fallback
-              }
-              ctx.fillRect(stripe, drawStartY, 1, drawEndY - drawStartY);
             }
           }
         }
@@ -1001,7 +986,7 @@ function App() {
           <div className="hud-right">
             <div>Punkte: {gameState.player.score}</div>
             <div>
-              Gegner: {gameState.enemies.filter((e) => e.isAlive).length} /{' '}
+              Gegner: {gameState.enemies.filter((e) => e.state === 'alive').length} /{' '}
               {gameState.enemies.length}
             </div>
           </div>
@@ -1014,7 +999,7 @@ function App() {
   const renderExitDoorIndicator = () => {
     if (!gameState || gameMode !== 'playing') return null;
 
-    const allEnemiesDead = gameState.enemies.every(enemy => !enemy.isAlive);
+    const allEnemiesDead = gameState.enemies.every(enemy => enemy.state !== 'alive');
     if (!allEnemiesDead) return null;
 
     return (
@@ -1113,7 +1098,7 @@ function App() {
 
     if (
       gameState.currentLevel === 4 &&
-      gameState.enemies.every((e) => !e.isAlive)
+      gameState.enemies.every((e) => e.state !== 'alive')
     ) {
       return (
         <div className="menu-overlay">

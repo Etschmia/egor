@@ -1,6 +1,7 @@
 import { EnemyType } from './types.ts';
 
 const textures: Partial<Record<EnemyType, CanvasImageSource>> = {};
+const corpseTextures: Partial<Record<EnemyType, CanvasImageSource>> = {};
 const wallTextures: Record<string, CanvasImageSource> = {};
 const itemTextures: Record<string, CanvasImageSource> = {};
 
@@ -8,6 +9,10 @@ export function loadTextures(): Promise<void[]> {
   textures[EnemyType.ZOMBIE] = createZombieTexture();
   textures[EnemyType.MONSTER] = createMonsterTexture();
   textures[EnemyType.GHOST] = createGhostTexture();
+
+  corpseTextures[EnemyType.ZOMBIE] = createZombieCorpseTexture();
+  corpseTextures[EnemyType.MONSTER] = createMonsterCorpseTexture();
+  corpseTextures[EnemyType.GHOST] = createGhostCorpseTexture();
 
   // Wandtexturen erstellen
   wallTextures['brick'] = createBrickTexture();
@@ -582,4 +587,65 @@ function createWeaponTexture(): HTMLCanvasElement {
 
 
   return canvas;
+}
+
+function createZombieCorpseTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Dunklere, flachere Version des Zombies
+  ctx.fillStyle = '#3A4A1F'; // Dunkles Grün
+  ctx.fillRect(12, 48, 40, 12); // Körper
+
+  ctx.fillStyle = '#5A0000'; // Dunkelrot (Blutlache)
+  ctx.beginPath();
+  ctx.ellipse(32, 54, 25, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#222'; // Dunkle Gliedmaßen
+  ctx.fillRect(8, 46, 8, 8);
+  ctx.fillRect(48, 46, 8, 8);
+
+  return canvas;
+}
+
+function createMonsterCorpseTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Dunklere, flachere Version des Monsters
+  ctx.fillStyle = '#5A0000';
+  ctx.beginPath();
+  ctx.ellipse(32, 52, 28, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#D2691E'; // Horn-Farbe
+  ctx.fillRect(10, 50, 8, 4);
+  ctx.fillRect(46, 50, 8, 4);
+
+  return canvas;
+}
+
+function createGhostCorpseTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Verblassender Geist
+  const gradient = ctx.createRadialGradient(32, 50, 5, 32, 50, 25);
+  gradient.addColorStop(0, 'rgba(200, 220, 255, 0.5)');
+  gradient.addColorStop(1, 'rgba(150, 200, 255, 0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 64, 64);
+
+  return canvas;
+}
+
+export function getCorpseTexture(enemyType: EnemyType): CanvasImageSource | undefined {
+  return corpseTextures[enemyType];
 }

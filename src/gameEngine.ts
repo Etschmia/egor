@@ -65,6 +65,7 @@ export function createInitialGameState(difficulty: Difficulty): GameState {
   };
   state.enemies.forEach((enemy: Enemy) => {
     enemy.texture = getTexture(enemy.type);
+    enemy.state = 'alive';
   });
   return state;
 }
@@ -133,7 +134,16 @@ export function updateEnemies(
   const multiplier = difficultyMultiplier[difficulty];
 
   enemies.forEach((enemy) => {
-    if (!enemy.isAlive) return;
+    // Animation vom Sterben zum toten Zustand
+    if (enemy.state === 'dying') {
+      const DEATH_ANIMATION_TIME = 500; // 0.5 Sekunden
+      if (Date.now() - (enemy.timeOfDeath || 0) > DEATH_ANIMATION_TIME) {
+        enemy.state = 'dead';
+      }
+      return; // Keine weitere Logik für sterbende Gegner
+    }
+
+    if (enemy.state !== 'alive') return;
 
     const dx = player.x - enemy.x;
     const dy = player.y - enemy.y;
@@ -190,7 +200,7 @@ export function fireWeapon(
   let closestDistance = weapon.range;
 
   for (const enemy of enemies) {
-    if (!enemy.isAlive) continue;
+    if (enemy.state !== 'alive') continue;
 
     const dx = enemy.x - player.x;
     const dy = enemy.y - player.y;
@@ -213,7 +223,8 @@ export function fireWeapon(
   if (closestEnemy) {
     closestEnemy.health -= weapon.damage;
     if (closestEnemy.health <= 0) {
-      closestEnemy.isAlive = false;
+      closestEnemy.state = 'dying';
+      closestEnemy.timeOfDeath = Date.now();
       player.score += 100;
       // Statistiken aktualisieren
       player.killedEnemies[closestEnemy.type]++;
@@ -282,7 +293,7 @@ export function collectItem(player: Player, items: Item[], gameState?: GameState
 }
 
 export function checkLevelComplete(enemies: Enemy[]): boolean {
-  return enemies.every((enemy) => !enemy.isAlive);
+  return enemies.every((enemy) => enemy.state !== 'alive');
 }
 
 export function loadNextLevel(gameState: GameState): GameState {
@@ -363,8 +374,8 @@ export function openDoor(player: Player, tiles: number[][], enemies: Enemy[]): {
       tilesCopy[mapY][mapX] === 3
     ) {
       // Prüfe ob alle Gegner tot sind
-      const allEnemiesDead = enemies.every(enemy => !enemy.isAlive);
-      const aliveEnemies = enemies.filter(enemy => enemy.isAlive);
+      const allEnemiesDead = enemies.every(enemy => enemy.state !== 'alive');
+      const aliveEnemies = enemies.filter(enemy => enemy.state === 'alive');
 
       console.log(`Exit-Tür gefunden bei (${mapX}, ${mapY})`);
       console.log(`Alle Gegner tot? ${allEnemiesDead}`);

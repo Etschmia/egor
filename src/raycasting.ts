@@ -114,9 +114,31 @@ export function getSpritesToRender(
 ): SpriteRender[] {
   const sprites: SpriteRender[] = [];
 
-  // Lebende Gegner hinzufügen
+  // Gegner hinzufügen (lebend und sterbend)
   enemies.forEach((enemy) => {
-    if (enemy.isAlive) {
+    if (enemy.state !== 'dead') { // Rendere lebende und sterbende Gegner
+      const spriteX = enemy.x - posX;
+      const spriteY = enemy.y - posY;
+
+      const invDet = 1.0 / (planeX * dirY - dirX * planeY);
+      const transformX = invDet * (dirY * spriteX - dirX * spriteY);
+      const transformY = invDet * (-planeY * spriteX + planeX * spriteY);
+
+      if (transformY > 0) {
+        sprites.push({
+          x: transformX,
+          y: transformY,
+          distance: transformY,
+          type: 'enemy',
+          object: enemy
+        });
+      }
+    }
+  });
+
+  // Leichen hinzufügen (werden separat behandelt, aber müssen auch transformiert werden)
+  enemies.forEach((enemy) => {
+    if (enemy.state === 'dead') {
       const spriteX = enemy.x - posX;
       const spriteY = enemy.y - posY;
 

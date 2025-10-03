@@ -40,7 +40,8 @@ export interface Enemy {
   maxHealth: number;
   damage: number;
   speed: number;
-  isAlive: boolean;
+  state: 'alive' | 'dying' | 'dead';
+  timeOfDeath?: number;
   direction: number;
   lastAttackTime: number;
   attackCooldown: number;
