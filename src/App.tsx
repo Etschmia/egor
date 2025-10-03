@@ -19,6 +19,7 @@ import { WEAPONS } from './weapons.ts';
 import { saveGame, loadGame, getAllSaveGames, deleteSaveGame } from './saveLoadSystem.ts';
 import { soundSystem } from './soundSystem.ts';
 import { getTexture, getWallTexture, getItemTexture } from './textures.ts';
+import MiniMap from './MiniMap.tsx';
 
 type GameMode = 'menu' | 'playing' | 'paused' | 'help' | 'save' | 'load' | 'difficulty' | 'levelComplete';
 
@@ -1149,6 +1150,7 @@ function App() {
       <div className="canvas-container">
         <canvas ref={canvasRef} width={screenWidth} height={screenHeight} />
       </div>
+      {gameState && gameMode === 'playing' && <MiniMap gameState={gameState} />}
       {renderHUD()}
       {renderItemNotification()}
       {renderAllEnemiesDefeatedNotification()}
