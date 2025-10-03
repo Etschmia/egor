@@ -958,4 +958,240 @@ export const LEVEL_5: GameMap = {
   playerStartDirection: 0
 };
 
-export const LEVELS = [LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4, LEVEL_5];
+export const LEVEL_6: GameMap = {
+  width: 20,
+  height: 20,
+  tiles: [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,0,1],
+    [1,0,1,0,0,0,1,0,0,1,1,0,0,1,0,0,0,1,0,1],
+    [1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,1],
+    [1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,1],
+    [1,0,1,1,1,2,1,0,0,1,1,0,0,1,1,1,1,1,0,1],
+    [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,1,0,0,1,1,0,0,1,0,0,0,0,0,1],
+    [1,0,0,0,0,0,1,0,0,1,1,0,0,1,0,0,0,0,0,1],
+    [1,0,1,1,1,1,1,0,0,1,1,0,0,1,1,1,1,1,0,1],
+    [1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,1],
+    [1,0,1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,1,0,1],
+    [1,0,1,0,0,0,1,0,0,1,1,0,0,1,0,0,0,1,0,1],
+    [1,0,1,1,1,2,1,0,0,1,1,0,0,1,1,1,1,1,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ],
+  enemies: [
+    {
+      id: 'e1',
+      type: EnemyType.MONSTER,
+      x: 4,
+      y: 4,
+      health: 200,
+      maxHealth: 200,
+      damage: 20,
+      speed: 0.025,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 700
+    },
+    {
+      id: 'e2',
+      type: EnemyType.MONSTER,
+      x: 15,
+      y: 4,
+      health: 200,
+      maxHealth: 200,
+      damage: 20,
+      speed: 0.025,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 700
+    },
+    {
+      id: 'e3',
+      type: EnemyType.GHOST,
+      x: 8,
+      y: 8,
+      health: 150,
+      maxHealth: 150,
+      damage: 15,
+      speed: 0.04,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 900
+    },
+        {
+      id: 'e4',
+      type: EnemyType.GHOST,
+      x: 12,
+      y: 12,
+      health: 150,
+      maxHealth: 150,
+      damage: 15,
+      speed: 0.04,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 900
+    }
+  ],
+  items: [
+    {
+      id: 'i1',
+      type: ItemType.WEAPON,
+      x: 10,
+      y: 10,
+      collected: false,
+      weaponType: WeaponType.ASSAULT_RIFLE
+    },
+    {
+      id: 'i2',
+      type: ItemType.AMMO,
+      x: 2,
+      y: 17,
+      collected: false,
+      value: 100
+    }
+  ],
+  wallPictures: [],
+  playerStartX: 2,
+  playerStartY: 2,
+  playerStartDirection: 0
+};
+
+export const LEVEL_7: GameMap = {
+  width: 20,
+  height: 20,
+  tiles: [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+    [1,0,0,0,1,0,0,0,1,2,2,0,1,0,0,0,1,0,0,1],
+    [1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,1,1,1,1],
+    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+    [1,0,0,0,1,0,0,0,2,0,0,2,1,0,0,0,1,0,0,1],
+    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+    [1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,1,1,1,1],
+    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+    [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+    [1,0,0,0,1,0,0,0,1,2,2,0,1,0,0,0,1,0,0,1],
+    [1,3,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ],
+  enemies: [
+    {
+      id: 'e1',
+      type: EnemyType.ZOMBIE,
+      x: 6,
+      y: 6,
+      health: 300,
+      maxHealth: 300,
+      damage: 25,
+      speed: 0.03,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 600
+    },
+    {
+      id: 'e2',
+      type: EnemyType.ZOMBIE,
+      x: 14,
+      y: 6,
+      health: 300,
+      maxHealth: 300,
+      damage: 25,
+      speed: 0.03,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 600
+    },
+    {
+      id: 'e3',
+      type: EnemyType.MONSTER,
+      x: 6,
+      y: 14,
+      health: 400,
+      maxHealth: 400,
+      damage: 30,
+      speed: 0.02,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 500
+    },
+    {
+      id: 'e4',
+      type: EnemyType.MONSTER,
+      x: 14,
+      y: 14,
+      health: 400,
+      maxHealth: 400,
+      damage: 30,
+      speed: 0.02,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 500
+    },
+    {
+      id: 'e5',
+      type: EnemyType.GHOST,
+      x: 10,
+      y: 10,
+      health: 200,
+      maxHealth: 200,
+      damage: 20,
+      speed: 0.05,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 800
+    }
+  ],
+  items: [
+    {
+      id: 'i1',
+      type: ItemType.HEALTH_LARGE,
+      x: 2,
+      y: 2,
+      collected: false,
+      value: 100
+    },
+    {
+      id: 'i2',
+      type: ItemType.HEALTH_LARGE,
+      x: 18,
+      y: 2,
+      collected: false,
+      value: 100
+    },
+    {
+      id: 'i3',
+      type: ItemType.TREASURE,
+      x: 10,
+      y: 1,
+      collected: false,
+      value: 500
+    }
+  ],
+  wallPictures: [],
+  playerStartX: 2,
+  playerStartY: 18,
+  playerStartDirection: -Math.PI / 2
+};
+
+export const LEVELS = [LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4, LEVEL_5, LEVEL_6, LEVEL_7];

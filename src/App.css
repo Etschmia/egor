@@ -138,7 +138,8 @@
 .level-info {
   position: absolute;
   top: 20px;
-  left: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 8px 15px;

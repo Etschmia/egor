@@ -16,6 +16,7 @@ import {
 } from './gameEngine.ts';
 import { castRay, getSpritesToRender } from './raycasting.ts';
 import { WEAPONS } from './weapons.ts';
+import { LEVELS } from './levels.ts';
 import { saveGame, loadGame, getAllSaveGames, deleteSaveGame } from './saveLoadSystem.ts';
 import { soundSystem } from './soundSystem.ts';
 import { getTexture, getWallTexture, getItemTexture, getCorpseTexture } from './textures.ts';
@@ -943,7 +944,7 @@ function App() {
     return (
       <>
         <div className="level-info">
-          Level {gameState.currentLevel + 1} / 5
+          Level {gameState.currentLevel + 1} / {LEVELS.length}
         </div>
         <div className="crosshair"></div>
         <div className="hud">
@@ -1061,6 +1062,10 @@ function App() {
               <span className="stat-icon" style={{ color: '#fff' }}>👻</span>
               <span>Geister: {gameState.player.killedEnemies[EnemyType.GHOST]}</span>
             </div>
+            <div className="stat-item">
+              <span className="stat-icon" style={{ color: '#brown' }}>🐶</span>
+              <span>Hunde: {gameState.player.killedEnemies[EnemyType.DOG]}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1081,7 +1086,7 @@ function App() {
                 Punkte: {gameState.player.score}
               </div>
               <div style={{ fontSize: '18px' }}>
-                Level erreicht: {gameState.currentLevel + 1} / 5
+                Level erreicht: {gameState.currentLevel + 1} / {LEVELS.length}
               </div>
             </div>
             <button className="menu-button" onClick={() => {
@@ -1097,7 +1102,7 @@ function App() {
     }
 
     if (
-      gameState.currentLevel === 4 &&
+      gameState.currentLevel === LEVELS.length - 1 &&
       gameState.enemies.every((e) => e.state !== 'alive')
     ) {
       return (
