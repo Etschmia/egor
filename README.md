@@ -1,75 +1,105 @@
-# React + TypeScript + Vite
+# EGOR - Wolfenstein 3D Klon
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Spielmechanik
+- **3D-Raycasting-Engine** für klassisches Retro-Gameplay
+- **5 Level** mit steigendem Schwierigkeitsgrad
+- **6 verschiedene Waffen**:
+  - Messer
+  - Pistole
+  - Maschinenpistole
+  - Kettensäge
+  - Sturmgewehr
+  - Schweres Maschinengewehr
+- **Gegner**: Zombies und Monster mit KI
+- **Items**: Gesundheitspakete, Munition, Schätze und Waffen
 
-## React Compiler
+### Schwierigkeitsgrade
+- **Leicht**: 150 HP
+- **Normal**: 100 HP
+- **Schwer**: 75 HP (Gegner machen mehr Schaden und bewegen sich schneller)
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+### Speichersystem
+- Spielstände können jederzeit gespeichert werden (Taste **M**)
+- Spielstände können geladen werden (Taste **L**)
+- Alle Spielstände werden im Browser-LocalStorage gespeichert
 
-Note: This will impact Vite dev & build performances.
+## Steuerung
 
-## Expanding the ESLint configuration
+### Bewegung
+- **W** / **↑**: Vorwärts
+- **S** / **↓**: Rückwärts
+- **A**: Links bewegen (Strafe)
+- **D**: Rechts bewegen (Strafe)
+- **←** / **→**: Umschauen
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Kampf
+- **Leertaste**: Schießen / Angreifen
+- **1-6**: Waffe wechseln
+  - 1: Messer
+  - 2: Pistole
+  - 3: Maschinenpistole
+  - 4: Kettensäge
+  - 5: Sturmgewehr
+  - 6: Schweres Maschinengewehr
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Spiel-Menü
+- **M**: Spielstand speichern
+- **L**: Spielstand laden
+- **H**: Hilfe anzeigen/verbergen
+- **P**: Pause
+- **ESC**: Dialog schließen
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Installation & Start
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Abhängigkeiten installieren
+npm install
+
+# Entwicklungsserver starten
+npm run dev
+
+# Produktions-Build erstellen
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Technische Details
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Architektur
+- **React 19** mit TypeScript
+- **Vite** als Build-Tool
+- **Raycasting-Engine** für 3D-Rendering auf Canvas
+- **Web Audio API** für Sound-Effekte
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Projektstruktur
 ```
+src/
+├── App.tsx              # Haupt-Spielkomponente
+├── types.ts             # TypeScript-Typdefinitionen
+├── gameEngine.ts        # Spiel-Logik und Update-Loop
+├── raycasting.ts        # 3D-Rendering-Engine
+├── weapons.ts           # Waffen-Definitionen
+├── levels.ts            # Level-Maps und Gegner
+├── saveLoadSystem.ts    # Speichern/Laden-System
+├── soundSystem.ts       # Audio-System
+├── index.css            # Globale Styles
+└── main.tsx            # App-Entry-Point
+```
+
+## Spielziel
+
+Kämpfe dich durch 5 Level voller Zombies und Monster. Finde neue Waffen, sammle Items und besiege alle Gegner, um das Spiel zu gewinnen!
+
+## Hinweise
+
+- Das Spiel läuft komplett im Browser ohne Backend
+- Spielstände werden lokal im Browser gespeichert
+- Sound-Effekte werden prozedural mit der Web Audio API erzeugt
+- Keine Nazi-Symbole (im Gegensatz zum Original Wolfenstein 3D)
+
+## Entwickelt von
+
+Erstellt mit Claude Sonnet als Wolfenstein 3D-Hommage für moderne Browser.
