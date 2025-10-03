@@ -299,3 +299,145 @@ canvas {
   width: 100%;
   transform: translateY(-50%);
 }
+
+/* Item-Benachrichtigungen */
+.item-notification {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #ff0;
+  z-index: 1000;
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  white-space: nowrap;
+}
+
+/* All-Enemies-Defeated Benachrichtigungen */
+.all-enemies-notification {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 128, 0, 0.9);
+  color: #fff;
+  padding: 15px 25px;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  border: 3px solid #0f0;
+  z-index: 1000;
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+  white-space: nowrap;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+}
+
+/* Exit-Tür Indikator */
+.exit-door-indicator {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(34, 139, 34, 0.95);
+  color: #fff;
+  padding: 15px 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #32cd32;
+  z-index: 800;
+  box-shadow: 0 0 15px rgba(50, 205, 50, 0.6);
+  animation: pulse 2s infinite;
+}
+
+.exit-door-text {
+  color: #90ee90;
+  margin-bottom: 5px;
+}
+
+.exit-door-hint {
+  font-size: 14px;
+  color: #98fb98;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 15px rgba(50, 205, 50, 0.6); }
+  50% { box-shadow: 0 0 25px rgba(50, 205, 50, 0.9); }
+  100% { box-shadow: 0 0 15px rgba(50, 205, 50, 0.6); }
+}
+
+/* Statistiken-Panel */
+.stats-panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  border: 2px solid #333;
+  width: 250px;
+  max-height: 70vh;
+  overflow-y: auto;
+  font-size: 14px;
+  z-index: 500;
+}
+
+.stats-section {
+  margin-bottom: 15px;
+}
+
+.stats-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #ff0;
+  border-bottom: 1px solid #333;
+  padding-bottom: 5px;
+}
+
+.stats-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.stat-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+/* Scrollbar für Stats-Panel */
+.stats-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.stats-panel::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.stats-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.stats-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}

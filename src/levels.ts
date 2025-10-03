@@ -1,6 +1,6 @@
 import { type GameMap, EnemyType, ItemType, WeaponType, WallPictureType } from './types.ts';
 
-// 1 = Wand, 0 = freier Raum, 2 = Tür
+// 1 = Wand, 0 = freier Raum, 2 = normale Tür, 3 = Exit-Tür (öffnet sich nur wenn alle Gegner tot sind)
 // Map-Größe: 20x20
 
 export const LEVEL_1: GameMap = {
@@ -25,15 +25,15 @@ export const LEVEL_1: GameMap = {
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
   enemies: [
     {
       id: 'e1',
       type: EnemyType.ZOMBIE,
-      x: 5,
-      y: 5,
+      x: 10,
+      y: 8,
       health: 100,
       maxHealth: 100,
       damage: 10,
@@ -46,7 +46,7 @@ export const LEVEL_1: GameMap = {
     {
       id: 'e2',
       type: EnemyType.ZOMBIE,
-      x: 15,
+      x: 17,
       y: 5,
       health: 100,
       maxHealth: 100,
@@ -61,7 +61,7 @@ export const LEVEL_1: GameMap = {
       id: 'e3',
       type: EnemyType.ZOMBIE,
       x: 10,
-      y: 15,
+      y: 16,
       health: 100,
       maxHealth: 100,
       damage: 10,
@@ -131,15 +131,15 @@ export const LEVEL_2: GameMap = {
     [1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
     [1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
     [1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
   enemies: [
     {
       id: 'e1',
       type: EnemyType.ZOMBIE,
-      x: 3,
-      y: 3,
+      x: 7,
+      y: 7,
       health: 100,
       maxHealth: 100,
       damage: 10,
@@ -152,8 +152,8 @@ export const LEVEL_2: GameMap = {
     {
       id: 'e2',
       type: EnemyType.ZOMBIE,
-      x: 16,
-      y: 3,
+      x: 17,
+      y: 2,
       health: 100,
       maxHealth: 100,
       damage: 10,
@@ -180,8 +180,8 @@ export const LEVEL_2: GameMap = {
     {
       id: 'e4',
       type: EnemyType.ZOMBIE,
-      x: 3,
-      y: 16,
+      x: 7,
+      y: 15,
       health: 100,
       maxHealth: 100,
       damage: 10,
@@ -194,8 +194,8 @@ export const LEVEL_2: GameMap = {
     {
       id: 'e5',
       type: EnemyType.ZOMBIE,
-      x: 16,
-      y: 16,
+      x: 17,
+      y: 17,
       health: 100,
       maxHealth: 100,
       damage: 10,
@@ -274,15 +274,15 @@ export const LEVEL_3: GameMap = {
     [1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,2,0,0,0,0,2,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
   enemies: [
     {
       id: 'e1',
       type: EnemyType.ZOMBIE,
-      x: 5,
-      y: 5,
+      x: 9,
+      y: 7,
       health: 120,
       maxHealth: 120,
       damage: 12,
@@ -352,7 +352,7 @@ export const LEVEL_3: GameMap = {
       id: 'e6',
       type: EnemyType.ZOMBIE,
       x: 10,
-      y: 16,
+      y: 17,
       health: 120,
       maxHealth: 120,
       damage: 12,
@@ -361,6 +361,20 @@ export const LEVEL_3: GameMap = {
       direction: 0,
       lastAttackTime: 0,
       attackCooldown: 900
+    },
+    {
+      id: 'e7',
+      type: EnemyType.GHOST,
+      x: 7,
+      y: 11,
+      health: 80,
+      maxHealth: 80,
+      damage: 8,
+      speed: 0.035,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1200
     }
   ],
   items: [
@@ -449,6 +463,7 @@ export const LEVEL_4: GameMap = {
     [1,0,0,1,1,1,1,0,0,2,2,0,0,1,1,1,1,0,0,1],
     [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1],
+    [1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
   enemies: [
@@ -456,7 +471,7 @@ export const LEVEL_4: GameMap = {
       id: 'e1',
       type: EnemyType.MONSTER,
       x: 5,
-      y: 5,
+      y: 8,
       health: 250,
       maxHealth: 250,
       damage: 18,
@@ -469,7 +484,7 @@ export const LEVEL_4: GameMap = {
     {
       id: 'e2',
       type: EnemyType.MONSTER,
-      x: 15,
+      x: 16,
       y: 5,
       health: 250,
       maxHealth: 250,
@@ -483,7 +498,7 @@ export const LEVEL_4: GameMap = {
     {
       id: 'e3',
       type: EnemyType.ZOMBIE,
-      x: 5,
+      x: 7,
       y: 10,
       health: 150,
       maxHealth: 150,
@@ -525,7 +540,7 @@ export const LEVEL_4: GameMap = {
     {
       id: 'e6',
       type: EnemyType.MONSTER,
-      x: 15,
+      x: 16,
       y: 15,
       health: 250,
       maxHealth: 250,
@@ -563,6 +578,20 @@ export const LEVEL_4: GameMap = {
       direction: 0,
       lastAttackTime: 0,
       attackCooldown: 800
+    },
+    {
+      id: 'e9',
+      type: EnemyType.GHOST,
+      x: 3,
+      y: 12,
+      health: 100,
+      maxHealth: 100,
+      damage: 12,
+      speed: 0.04,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
     }
   ],
   items: [
@@ -659,13 +688,14 @@ export const LEVEL_5: GameMap = {
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
   enemies: [
     {
       id: 'e1',
       type: EnemyType.MONSTER,
-      x: 5,
+      x: 8,
       y: 4,
       health: 300,
       maxHealth: 300,
@@ -801,6 +831,34 @@ export const LEVEL_5: GameMap = {
       direction: 0,
       lastAttackTime: 0,
       attackCooldown: 700
+    },
+    {
+      id: 'e11',
+      type: EnemyType.GHOST,
+      x: 5,
+      y: 8,
+      health: 120,
+      maxHealth: 120,
+      damage: 15,
+      speed: 0.045,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 900
+    },
+    {
+      id: 'e12',
+      type: EnemyType.GHOST,
+      x: 15,
+      y: 8,
+      health: 120,
+      maxHealth: 120,
+      damage: 15,
+      speed: 0.045,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 900
     }
   ],
   items: [

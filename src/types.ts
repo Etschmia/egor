@@ -27,7 +27,8 @@ export interface Weapon {
 
 export enum EnemyType {
   ZOMBIE = 'ZOMBIE',
-  MONSTER = 'MONSTER'
+  MONSTER = 'MONSTER',
+  GHOST = 'GHOST'
 }
 
 export interface Enemy {
@@ -106,6 +107,8 @@ export interface Player {
   weapons: WeaponType[];
   ammo: Record<WeaponType, number>;
   score: number;
+  collectedItems: Record<ItemType, number>;
+  killedEnemies: Record<EnemyType, number>;
 }
 
 export interface GameState {
@@ -118,6 +121,14 @@ export interface GameState {
   items: Item[];
   currentMap: GameMap;
   gameStartTime: number;
+  lastItemNotification?: {
+    message: string;
+    timestamp: number;
+  };
+  allEnemiesDefeatedNotification?: {
+    message: string;
+    timestamp: number;
+  };
 }
 
 export interface SaveGame {

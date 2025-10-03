@@ -1,4 +1,4 @@
-import { type GameState, type Player, Difficulty, WeaponType, type Enemy, type Item, ItemType } from './types.ts';
+import { type GameState, type Player, Difficulty, WeaponType, EnemyType, type Enemy, type Item, ItemType } from './types.ts';
 import { LEVELS } from './levels.ts';
 import { WEAPONS } from './weapons.ts';
 
@@ -27,7 +27,19 @@ export function createInitialPlayer(difficulty: Difficulty): Player {
       [WeaponType.ASSAULT_RIFLE]: 0,
       [WeaponType.HEAVY_MG]: 0
     },
-    score: 0
+    score: 0,
+    collectedItems: {
+      [ItemType.HEALTH_SMALL]: 0,
+      [ItemType.HEALTH_LARGE]: 0,
+      [ItemType.TREASURE]: 0,
+      [ItemType.AMMO]: 0,
+      [ItemType.WEAPON]: 0
+    },
+    killedEnemies: {
+      [EnemyType.ZOMBIE]: 0,
+      [EnemyType.MONSTER]: 0,
+      [EnemyType.GHOST]: 0
+    }
   };
 }
 
@@ -198,6 +210,8 @@ export function fireWeapon(
     if (closestEnemy.health <= 0) {
       closestEnemy.isAlive = false;
       player.score += 100;
+      // Statistiken aktualisieren
+      player.killedEnemies[closestEnemy.type]++;
     }
     return { player, enemies, hit: true, enemyHit: closestEnemy };
   }
@@ -205,7 +219,9 @@ export function fireWeapon(
   return { player, enemies, hit: false };
 }
 
-export function collectItem(player: Player, items: Item[]): Player {
+export function collectItem(player: Player, items: Item[], gameState?: GameState): { player: Player; notification?: string } {
+  let notification: string | undefined;
+
   items.forEach((item) => {
     if (item.collected) return;
 
@@ -216,15 +232,22 @@ export function collectItem(player: Player, items: Item[]): Player {
     if (distance < 0.7) {
       item.collected = true;
 
+      // Statistiken aktualisieren
+      player.collectedItems[item.type]++;
+
+      let itemMessage = '';
       switch (item.type) {
         case ItemType.HEALTH_SMALL:
           player.health = Math.min(player.health + (item.value || 25), player.maxHealth);
+          itemMessage = `Kleine Heilung (+${item.value || 25} HP)`;
           break;
         case ItemType.HEALTH_LARGE:
           player.health = Math.min(player.health + (item.value || 50), player.maxHealth);
+          itemMessage = `Große Heilung (+${item.value || 50} HP)`;
           break;
         case ItemType.TREASURE:
           player.score += item.value || 0;
+          itemMessage = `Schatz (+${item.value || 0} Punkte)`;
           break;
         case ItemType.AMMO:
           Object.keys(player.ammo).forEach((key) => {
@@ -233,18 +256,24 @@ export function collectItem(player: Player, items: Item[]): Player {
               player.ammo[weaponType] += item.value || 30;
             }
           });
+          itemMessage = `Munition (+${item.value || 30})`;
           break;
         case ItemType.WEAPON:
           if (item.weaponType && !player.weapons.includes(item.weaponType)) {
             player.weapons.push(item.weaponType);
             player.ammo[item.weaponType] = WEAPONS[item.weaponType].ammo;
+            itemMessage = `${WEAPONS[item.weaponType!].name} gefunden!`;
+          } else {
+            itemMessage = 'Waffe bereits vorhanden';
           }
           break;
       }
+
+      notification = itemMessage;
     }
   });
 
-  return player;
+  return { player, notification };
 }
 
 export function checkLevelComplete(enemies: Enemy[]): boolean {
@@ -268,26 +297,32 @@ export function loadNextLevel(gameState: GameState): GameState {
   gameState.player.y = level.playerStartY;
   gameState.player.direction = level.playerStartDirection;
 
+  // Benachrichtigung zurücksetzen
+  delete gameState.lastItemNotification;
+
   return gameState;
 }
 
-export function openDoor(player: Player, tiles: number[][]): { tiles: number[][]; doorOpened: boolean } {
+export function openDoor(player: Player, tiles: number[][], enemies: Enemy[]): { tiles: number[][]; doorOpened: boolean; isExitDoor?: boolean } {
   const dirX = Math.cos(player.direction);
   const dirY = Math.sin(player.direction);
-  
-  // Prüfe Position direkt vor dem Spieler
-  const checkDistance = 1.5;
+
+  // Prüfe Position direkt vor dem Spieler (größerer Radius für bessere Erkennung)
+  const checkDistance = 2.0;
   const checkX = player.x + dirX * checkDistance;
   const checkY = player.y + dirY * checkDistance;
-  
+
   const mapX = Math.floor(checkX);
   const mapY = Math.floor(checkY);
-  
-  // Prüfe ob es eine Tür ist (Wert 2)
+
+  // Debug-Ausgabe für Tür-Erkennung (kann später entfernt werden)
+  console.log(`Tür-Prüfung bei (${mapX}, ${mapY}): Wert = ${tiles[mapY]?.[mapX] || 'undefined'}`);
+
+  // Prüfe ob es eine normale Tür ist (Wert 2)
   if (
-    mapX >= 0 && 
-    mapX < tiles[0].length && 
-    mapY >= 0 && 
+    mapX >= 0 &&
+    mapX < tiles[0].length &&
+    mapY >= 0 &&
     mapY < tiles.length &&
     tiles[mapY][mapX] === 2
   ) {
@@ -295,6 +330,34 @@ export function openDoor(player: Player, tiles: number[][]): { tiles: number[][]
     tiles[mapY][mapX] = 0;
     return { tiles, doorOpened: true };
   }
-  
+
+  // Prüfe ob es eine Exit-Tür ist (Wert 3)
+  if (
+    mapX >= 0 &&
+    mapX < tiles[0].length &&
+    mapY >= 0 &&
+    mapY < tiles.length &&
+    tiles[mapY][mapX] === 3
+  ) {
+    // Prüfe ob alle Gegner tot sind
+    const allEnemiesDead = enemies.every(enemy => !enemy.isAlive);
+    const aliveEnemies = enemies.filter(enemy => enemy.isAlive);
+
+    console.log(`Exit-Tür gefunden bei (${mapX}, ${mapY})`);
+    console.log(`Alle Gegner tot? ${allEnemiesDead}`);
+    console.log(`Lebende Gegner: ${aliveEnemies.length}`);
+
+    if (allEnemiesDead) {
+      console.log('Exit-Tür wird geöffnet!');
+      // Exit-Tür öffnen (setze auf 0)
+      tiles[mapY][mapX] = 0;
+      return { tiles, doorOpened: true, isExitDoor: true };
+    } else {
+      console.log('Exit-Tür kann noch nicht geöffnet werden - Gegner leben noch');
+      // Exit-Tür kann noch nicht geöffnet werden
+      return { tiles, doorOpened: false };
+    }
+  }
+
   return { tiles, doorOpened: false };
 }

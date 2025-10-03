@@ -7,7 +7,9 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
 ### Spielmechanik
 - **3D-Raycasting-Engine** für klassisches Retro-Gameplay
 - **5 Level** mit steigendem Schwierigkeitsgrad
-- **Türen** die mit der Taste 'E' geöffnet werden können
+- **Türen** die mit der Taste 'E' geöffnet werden können:
+  - Normale Türen (braune Wände)
+  - Spezielle "Nächste Ebene" Tür (grüne Wand) - öffnet sich nur wenn alle Gegner besiegt sind
 - **6 verschiedene Waffen**:
   - Messer
   - Pistole
@@ -15,8 +17,12 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
   - Kettensäge
   - Sturmgewehr
   - Schweres Maschinengewehr
-- **Gegner**: Zombies und Monster mit KI
-- **Items**: Gesundheitspakete, Munition, Schätze und Waffen
+- **Gegner**: Drei verschiedene Gegner-Typen mit KI
+  - **Zombies** (grün): Grundlegende Gegner mit mäßiger Geschwindigkeit
+  - **Monster** (rot): Starke, gefährliche Gegner mit hoher Gesundheit
+  - **Geister** (weiß): Schnelle, schwer zu treffende Gegner mit geringerer Gesundheit
+- **Items**: Gesundheitspakete, Munition, Schätze und Waffen mit Benachrichtigungen beim Sammeln
+- **Statistiken**: Übersicht über gesammelte Items und besiegte Gegner (Taste **T**)
 
 ### Schwierigkeitsgrade
 - **Leicht**: 150 HP
@@ -39,6 +45,8 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
 
 ### Interaktion
 - **E**: Tür öffnen (wenn man davor steht)
+- **T**: Statistiken anzeigen/verbergen
+- **G**: Debug-Info (zeigt lebende Gegner in Konsole)
 
 ### Kampf
 - **Leertaste**: Schießen / Angreifen
@@ -95,7 +103,7 @@ src/
 
 ## Spielziel
 
-Kämpfe dich durch 5 Level voller Zombies und Monster. Öffne Türen, finde neue Waffen, sammle Items und besiege alle Gegner, um das Spiel zu gewinnen!
+Kämpfe dich durch 5 Level voller Zombies, Monster und Geister. Besiege alle Gegner in einem Level und suche nach der speziellen "Nächste Ebene" Tür, um zum nächsten Level zu gelangen. Sammle alle Items bevor du das Level verlässt!
 
 ## Hinweise
 
@@ -103,8 +111,12 @@ Kämpfe dich durch 5 Level voller Zombies und Monster. Öffne Türen, finde neue
 - Spielstände werden lokal im Browser gespeichert
 - Sound-Effekte werden prozedural mit der Web Audio API erzeugt
 - Keine Nazi-Symbole (im Gegensatz zum Original Wolfenstein 3D)
-- Türen (braune Wände) können mit der Taste 'E' geöffnet werden
+- Normale Türen (braune Wände) können mit der Taste 'E' geöffnet werden
+- Die spezielle "Nächste Ebene" Tür (grüne Wand) öffnet sich nur wenn alle Gegner besiegt sind
+- Ein pulsierender Indikator zeigt an, wenn die Exit-Tür verfügbar ist
+- Items zeigen Benachrichtigungen beim Sammeln
+- Statistiken über Items und besiegte Gegner mit Taste 'T' abrufbar
 
 ## Entwickelt von
 
-Erstellt mit Claude Sonnet als Wolfenstein 3D-Hommage für moderne Browser.
+Erstellt mit Code-Supernova als Wolfenstein 3D-Hommage für moderne Browser.

@@ -26,6 +26,7 @@ function App() {
   const [gameMode, setGameMode] = useState<GameMode>('menu');
   const [saveName, setSaveName] = useState('spielstand1');
   const [keys, setKeys] = useState<Record<string, boolean>>({});
+  const [showStats, setShowStats] = useState(false);
   const animationFrameRef = useRef<number>();
   const lastTimeRef = useRef<number>(Date.now());
   const lastFireTimeRef = useRef<number>(0);
@@ -117,17 +118,46 @@ function App() {
         // Tür öffnen
         setGameState((prev) => {
           if (prev && gameMode === 'playing' && !prev.isPaused) {
-            const result = openDoor(prev.player, prev.currentMap.tiles);
+            const result = openDoor(prev.player, prev.currentMap.tiles, prev.enemies);
             if (result.doorOpened) {
               soundSystem.playDoorOpen();
-              return {
+              const newState = {
                 ...prev,
                 currentMap: {
                   ...prev.currentMap,
                   tiles: result.tiles
                 }
               };
+
+              // Wenn es eine Exit-Tür war, zum nächsten Level wechseln
+              if (result.isExitDoor && prev.currentLevel < 4) {
+                soundSystem.playLevelComplete();
+                setTimeout(() => {
+                  const nextState = loadNextLevel(newState);
+                  setGameState(nextState);
+                }, 1000); // Kurze Verzögerung für den Sound
+                return newState;
+              }
+
+              return newState;
             }
+          }
+          return prev;
+        });
+      } else if (e.key.toLowerCase() === 't') {
+        // Statistiken-Panel togglen
+        setShowStats(prev => !prev);
+        soundSystem.playMenuSelect();
+      } else if (e.key.toLowerCase() === 'g') {
+        // Debug: Zeige lebende Gegner
+        setGameState((prev) => {
+          if (prev && gameMode === 'playing' && !prev.isPaused) {
+            const aliveEnemies = prev.enemies.filter(enemy => enemy.isAlive);
+            console.log('Lebende Gegner:', aliveEnemies);
+            console.log(`Anzahl lebender Gegner: ${aliveEnemies.length}`);
+            console.log('Spieler-Position:', prev.player.x, prev.player.y);
+            console.log('Spieler-Richtung:', prev.player.direction);
+            alert(`Lebende Gegner: ${aliveEnemies.length}. Siehe Konsole für Details.`);
           }
           return prev;
         });
@@ -277,15 +307,24 @@ function App() {
     newState.player = enemyUpdate.player;
 
     // Items sammeln
-    newState.player = collectItem(newState.player, newState.items);
+    const itemCollection = collectItem(newState.player, newState.items);
+    newState.player = itemCollection.player;
 
-    // Level-Check
-    if (checkLevelComplete(newState.enemies)) {
-      if (newState.currentLevel < 4) {
-        soundSystem.playLevelComplete();
-        setGameMode('levelComplete');
-        newState.isPaused = true;
-      }
+    // Benachrichtigung setzen
+    if (itemCollection.notification) {
+      newState.lastItemNotification = {
+        message: itemCollection.notification,
+        timestamp: Date.now()
+      };
+    }
+
+    // Prüfe ob alle Gegner tot sind und zeige Benachrichtigung
+    if (checkLevelComplete(newState.enemies) && !newState.allEnemiesDefeatedNotification) {
+      newState.allEnemiesDefeatedNotification = {
+        message: "Alle Gegner besiegt! Suche nach der 'Nächste Ebene' Tür zum Weiterkommen.",
+        timestamp: Date.now()
+      };
+      soundSystem.playLevelComplete();
     }
 
     // Game Over?
@@ -363,9 +402,21 @@ function App() {
       wallX -= Math.floor(wallX);
 
       // Wandfarbe basierend auf Typ und Seite
-      let color = result.wallType === 2 ? '#654321' : '#888';
+      let color = '#888';
+      if (result.wallType === 2) {
+        color = '#654321'; // Normale Tür - braun
+      } else if (result.wallType === 3) {
+        color = '#228B22'; // Exit-Tür - grün
+      }
+
       if (result.side === 1) {
-        color = result.wallType === 2 ? '#543210' : '#666';
+        if (result.wallType === 2) {
+          color = '#543210'; // Normale Tür - dunkleres braun
+        } else if (result.wallType === 3) {
+          color = '#006400'; // Exit-Tür - dunkleres grün
+        } else {
+          color = '#666';
+        }
       }
 
       // Prüfe ob ein Bild an dieser Wand ist
@@ -462,9 +513,27 @@ function App() {
           ctx.globalAlpha = brightness;
 
           if (sprite.type === 'enemy') {
-            ctx.fillStyle = '#0f0';
+            // Unterschiedliche Farben für verschiedene Gegner-Typen
+            const enemy = gameState.enemies.find(e => e.id === sprite.id);
+            if (enemy) {
+              switch (enemy.type) {
+                case EnemyType.ZOMBIE:
+                  ctx.fillStyle = '#0f0'; // Grün für Zombies
+                  break;
+                case EnemyType.MONSTER:
+                  ctx.fillStyle = '#f00'; // Rot für Monster
+                  break;
+                case EnemyType.GHOST:
+                  ctx.fillStyle = '#fff'; // Weiß für Geister
+                  break;
+                default:
+                  ctx.fillStyle = '#0f0'; // Fallback
+              }
+            } else {
+              ctx.fillStyle = '#0f0'; // Fallback
+            }
           } else {
-            ctx.fillStyle = '#ff0';
+            ctx.fillStyle = '#ff0'; // Items bleiben gelb
           }
 
           ctx.fillRect(stripe, drawStartY, 1, drawEndY - drawStartY);
@@ -653,6 +722,10 @@ function App() {
                   <span>Tür öffnen</span>
                 </div>
                 <div className="help-key">
+                  <span className="help-key-button">T</span>
+                  <span>Statistiken anzeigen/verbergen</span>
+                </div>
+                <div className="help-key">
                   <span className="help-key-button">M</span>
                   <span>Spielstand speichern</span>
                 </div>
@@ -716,6 +789,56 @@ function App() {
     }
   };
 
+  // Item-Benachrichtigung
+  const renderItemNotification = () => {
+    if (!gameState?.lastItemNotification) return null;
+
+    const now = Date.now();
+    const timeDiff = now - gameState.lastItemNotification.timestamp;
+
+    // Benachrichtigung nach 3 Sekunden ausblenden
+    if (timeDiff > 3000) return null;
+
+    const opacity = Math.max(0, 1 - (timeDiff / 3000));
+
+    return (
+      <div
+        className="item-notification"
+        style={{
+          opacity,
+          transform: `translateY(${Math.max(-50, -50 * (timeDiff / 3000))}px)`
+        }}
+      >
+        {gameState.lastItemNotification.message}
+      </div>
+    );
+  };
+
+  // All-Enemies-Defeated Benachrichtigung
+  const renderAllEnemiesDefeatedNotification = () => {
+    if (!gameState?.allEnemiesDefeatedNotification) return null;
+
+    const now = Date.now();
+    const timeDiff = now - gameState.allEnemiesDefeatedNotification.timestamp;
+
+    // Benachrichtigung nach 5 Sekunden ausblenden (länger als normale Item-Benachrichtigungen)
+    if (timeDiff > 5000) return null;
+
+    const opacity = Math.max(0, 1 - (timeDiff / 5000));
+
+    return (
+      <div
+        className="all-enemies-notification"
+        style={{
+          opacity,
+          transform: `translateY(${Math.max(-50, -50 * (timeDiff / 5000))}px)`
+        }}
+      >
+        {gameState.allEnemiesDefeatedNotification.message}
+      </div>
+    );
+  };
+
   // HUD
   const renderHUD = () => {
     if (!gameState || gameMode !== 'playing') return null;
@@ -754,6 +877,78 @@ function App() {
           </div>
         </div>
       </>
+    );
+  };
+
+  // Exit-Tür Indikator
+  const renderExitDoorIndicator = () => {
+    if (!gameState || gameMode !== 'playing') return null;
+
+    const allEnemiesDead = gameState.enemies.every(enemy => !enemy.isAlive);
+    if (!allEnemiesDead) return null;
+
+    return (
+      <div className="exit-door-indicator">
+        <div className="exit-door-text">
+          🚪 NÄCHSTE EBENE TÜR VERFÜGBAR
+        </div>
+        <div className="exit-door-hint">
+          Suche nach der grünen Wand und drücke 'E'
+        </div>
+      </div>
+    );
+  };
+
+  // Statistiken-Panel
+  const renderStatsPanel = () => {
+    if (!gameState || gameMode !== 'playing' || !showStats) return null;
+
+    return (
+      <div className="stats-panel">
+        <div className="stats-section">
+          <h3>Gesammelte Items</h3>
+          <div className="stats-grid">
+            <div className="stat-item">
+              <span className="stat-icon">💊</span>
+              <span>Kleine Heilung: {gameState.player.collectedItems[ItemType.HEALTH_SMALL]}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">🏥</span>
+              <span>Große Heilung: {gameState.player.collectedItems[ItemType.HEALTH_LARGE]}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">💰</span>
+              <span>Schätze: {gameState.player.collectedItems[ItemType.TREASURE]}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">🔫</span>
+              <span>Waffen: {gameState.player.collectedItems[ItemType.WEAPON]}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon">📦</span>
+              <span>Munition: {gameState.player.collectedItems[ItemType.AMMO]}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="stats-section">
+          <h3>Besiegte Gegner</h3>
+          <div className="stats-grid">
+            <div className="stat-item">
+              <span className="stat-icon" style={{ color: '#0f0' }}>🧟</span>
+              <span>Zombies: {gameState.player.killedEnemies[EnemyType.ZOMBIE]}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon" style={{ color: '#f00' }}>👹</span>
+              <span>Monster: {gameState.player.killedEnemies[EnemyType.MONSTER]}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-icon" style={{ color: '#fff' }}>👻</span>
+              <span>Geister: {gameState.player.killedEnemies[EnemyType.GHOST]}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -826,6 +1021,10 @@ function App() {
         <canvas ref={canvasRef} width={screenWidth} height={screenHeight} />
       </div>
       {renderHUD()}
+      {renderItemNotification()}
+      {renderAllEnemiesDefeatedNotification()}
+      {renderExitDoorIndicator()}
+      {renderStatsPanel()}
       {renderMenu()}
       {renderGameStatus()}
     </div>
