@@ -502,17 +502,37 @@ function createAmmoTexture(): HTMLCanvasElement {
   canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
-  // Grauer Hintergrund
-  ctx.fillStyle = '#666666';
-  ctx.fillRect(0, 0, 32, 32);
+  // --- Detailliertere Munitionskiste ---
 
-  // Patronenhülse
-  ctx.fillStyle = '#8B4513';
-  ctx.fillRect(8, 8, 16, 24);
+  // Box-Körper mit Farbverlauf für 3D-Effekt
+  const gradient = ctx.createLinearGradient(0, 0, 32, 32);
+  gradient.addColorStop(0, '#556B2F'); // Dunkelolivgrün
+  gradient.addColorStop(1, '#8FBC8F'); // Helles Seegrün
+  ctx.fillStyle = gradient;
+  ctx.fillRect(4, 8, 24, 20);
 
-  // Kugelkopf
-  ctx.fillStyle = '#C0C0C0';
-  ctx.fillRect(10, 4, 12, 8);
+  // Deckel der Box
+  ctx.fillStyle = '#3A4A1F';
+  ctx.fillRect(2, 6, 28, 4);
+
+  // Riemen
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(14, 6, 4, 24);
+
+  // Label
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(6, 12, 8, 8);
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 6px Arial';
+  ctx.fillText('AMMO', 7, 18);
+
+
+  // Sichtbare Patronenspitzen
+  ctx.fillStyle = '#FFD700'; // Gold
+  ctx.fillRect(20, 10, 2, 4);
+  ctx.fillRect(23, 10, 2, 4);
+  ctx.fillRect(26, 10, 2, 4);
+
 
   return canvas;
 }
@@ -523,18 +543,43 @@ function createWeaponTexture(): HTMLCanvasElement {
   canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
-  // Dunkler Hintergrund
+  // --- Detaillierteres Sturmgewehr ---
+
+  // Hauptkörper der Waffe
+  const bodyGradient = ctx.createLinearGradient(0, 12, 0, 22);
+  bodyGradient.addColorStop(0, '#4A4A4A'); // Dunkelgrau
+  bodyGradient.addColorStop(1, '#2A2A2A'); // Sehr dunkelgrau
+  ctx.fillStyle = bodyGradient;
+  ctx.fillRect(4, 12, 24, 6); // Hauptteil
+
+  // Lauf
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(24, 13, 6, 4);
+
+  // Magazin
   ctx.fillStyle = '#333333';
-  ctx.fillRect(0, 0, 32, 32);
+  ctx.fillRect(12, 18, 6, 8);
 
-  // Waffe (vereinfachte Pistole)
-  ctx.fillStyle = '#4A4A4A';
-  ctx.fillRect(6, 12, 20, 8);  // Lauf
-  ctx.fillRect(4, 10, 8, 12);  // Griff
+  // Griff
+  ctx.fillStyle = '#222222';
+  ctx.beginPath();
+  ctx.moveTo(8, 18);
+  ctx.lineTo(6, 26);
+  ctx.lineTo(10, 26);
+  ctx.lineTo(12, 18);
+  ctx.closePath();
+  ctx.fill();
 
-  // Mündung
-  ctx.fillStyle = '#000000';
-  ctx.fillRect(26, 14, 4, 4);
+  // Visier
+  ctx.fillStyle = '#111111';
+  ctx.fillRect(6, 10, 4, 2);
+  ctx.fillRect(20, 10, 4, 2);
+
+  // Schulterstütze
+  ctx.fillStyle = '#2A2A2A';
+  ctx.fillRect(2, 14, 4, 2);
+  ctx.fillRect(2, 14, 2, 8);
+
 
   return canvas;
 }
