@@ -1,4 +1,5 @@
 import { type GameState, type Player, Difficulty, WeaponType, EnemyType, type Enemy, type Item, ItemType } from './types.ts';
+import { getTexture } from './textures.ts';
 import { LEVELS } from './levels.ts';
 import { WEAPONS } from './weapons.ts';
 
@@ -51,7 +52,7 @@ export function createInitialGameState(difficulty: Difficulty): GameState {
   player.y = level.playerStartY;
   player.direction = level.playerStartDirection;
 
-  return {
+  const state = {
     player,
     currentLevel: 0,
     difficulty,
@@ -62,6 +63,10 @@ export function createInitialGameState(difficulty: Difficulty): GameState {
     currentMap: level,
     gameStartTime: Date.now()
   };
+  state.enemies.forEach((enemy: Enemy) => {
+    enemy.texture = getTexture(enemy.type);
+  });
+  return state;
 }
 
 export function checkCollision(x: number, y: number, tiles: number[][]): boolean {
@@ -292,6 +297,9 @@ export function loadNextLevel(gameState: GameState): GameState {
   gameState.currentLevel = nextLevel;
   gameState.currentMap = level;
   gameState.enemies = JSON.parse(JSON.stringify(level.enemies));
+  gameState.enemies.forEach((enemy: Enemy) => {
+    enemy.texture = getTexture(enemy.type);
+  });
   gameState.items = JSON.parse(JSON.stringify(level.items));
   gameState.player.x = level.playerStartX;
   gameState.player.y = level.playerStartY;

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import type { GameState, WallPicture, Enemy } from './types.ts';
+import { Difficulty, WeaponType, WallPictureType, EnemyType, ItemType } from './types.ts';
+import { loadTextures } from './textures.ts';
 import './App.css';
-import type { GameState, WallPicture } from './types.ts';
-import { Difficulty, WeaponType, WallPictureType } from './types.ts';
 import {
   createInitialGameState,
   movePlayer,
@@ -27,11 +28,21 @@ function App() {
   const [saveName, setSaveName] = useState('spielstand1');
   const [keys, setKeys] = useState<Record<string, boolean>>({});
   const [showStats, setShowStats] = useState(false);
-  const animationFrameRef = useRef<number>();
+  const [texturesLoaded, setTexturesLoaded] = useState(false);
+  const animationFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(Date.now());
   const lastFireTimeRef = useRef<number>(0);
   const gameStateRef = useRef<GameState | null>(null);
   const gameModeRef = useRef<GameMode>('menu');
+
+  useEffect(() => {
+    loadTextures().then(() => {
+      setTexturesLoaded(true);
+    }).catch((err) => {
+      console.error('Failed to load textures:', err);
+      setTexturesLoaded(true); // Proceed with fallbacks
+    });
+  }, []);
 
   const screenWidth = 800;
   const screenHeight = 600;
@@ -513,9 +524,17 @@ function App() {
           ctx.globalAlpha = brightness;
 
           if (sprite.type === 'enemy') {
-            // Unterschiedliche Farben für verschiedene Gegner-Typen
-            const enemy = gameState.enemies.find(e => e.id === sprite.id);
-            if (enemy) {
+            const enemy = gameState.enemies.find(e => e.id === (sprite.object as Enemy).id);
+            if (enemy && texturesLoaded && enemy.texture) {
+              const texture = enemy.texture as HTMLCanvasElement;
+              const texX = Math.floor(((stripe - drawStartX) / spriteWidth) * texture.width);
+              ctx.drawImage(
+                texture,
+                texX, 0, 1, texture.height,
+                stripe, drawStartY, 1, drawEndY - drawStartY
+              );
+            } else if (enemy) {
+              // Fallback to colored rectangles if textures are not loaded
               switch (enemy.type) {
                 case EnemyType.ZOMBIE:
                   ctx.fillStyle = '#0f0'; // Grün für Zombies
@@ -529,14 +548,12 @@ function App() {
                 default:
                   ctx.fillStyle = '#0f0'; // Fallback
               }
-            } else {
-              ctx.fillStyle = '#0f0'; // Fallback
+              ctx.fillRect(stripe, drawStartY, 1, drawEndY - drawStartY);
             }
           } else {
             ctx.fillStyle = '#ff0'; // Items bleiben gelb
+            ctx.fillRect(stripe, drawStartY, 1, drawEndY - drawStartY);
           }
-
-          ctx.fillRect(stripe, drawStartY, 1, drawEndY - drawStartY);
         }
       }
       ctx.globalAlpha = 1;

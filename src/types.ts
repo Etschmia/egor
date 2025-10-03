@@ -44,6 +44,8 @@ export interface Enemy {
   direction: number;
   lastAttackTime: number;
   attackCooldown: number;
+  texture?: CanvasImageSource;
+  texture?: HTMLImageElement;
 }
 
 export enum ItemType {
