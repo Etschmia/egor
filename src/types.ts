@@ -28,7 +28,8 @@ export interface Weapon {
 export enum EnemyType {
   ZOMBIE = 'ZOMBIE',
   MONSTER = 'MONSTER',
-  GHOST = 'GHOST'
+  GHOST = 'GHOST',
+  DOG = 'DOG'
 }
 
 export interface Enemy {

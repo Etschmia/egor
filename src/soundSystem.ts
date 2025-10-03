@@ -90,6 +90,35 @@ class SoundSystem {
     setTimeout(() => this.playTone(100, 0.15, 'sawtooth', 0.25), 150);
   }
 
+  playDogBark() {
+    this.playTone(600, 0.1, 'sawtooth', 0.2);
+    setTimeout(() => this.playTone(550, 0.1, 'sawtooth', 0.15), 120);
+  }
+
+  play3dSound(source: { x: number; y: number }, listener: { x: number; y: number }, soundFunction: () => void) {
+    if (!this.audioContext || !this.enabled) return;
+
+    const dx = source.x - listener.x;
+    const dy = source.y - listener.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    const maxDistance = 20;
+    let volume = 1 - distance / maxDistance;
+
+    if (volume < 0) {
+      volume = 0;
+    }
+
+    const originalPlayTone = this.playTone;
+    this.playTone = (frequency: number, duration: number, type: OscillatorType = 'sine', baseVolume: number = 0.3) => {
+      originalPlayTone.call(this, frequency, duration, type, baseVolume * volume);
+    };
+
+    soundFunction();
+
+    this.playTone = originalPlayTone;
+  }
+
   setEnabled(enabled: boolean) {
     this.enabled = enabled;
   }

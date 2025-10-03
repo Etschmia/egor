@@ -2,6 +2,7 @@ import { type GameState, type Player, Difficulty, WeaponType, EnemyType, type En
 import { getTexture } from './textures.ts';
 import { LEVELS } from './levels.ts';
 import { WEAPONS } from './weapons.ts';
+import { soundSystem } from './soundSystem.ts';
 
 export function createInitialPlayer(difficulty: Difficulty): Player {
   const maxHealthMap = {
@@ -39,7 +40,8 @@ export function createInitialPlayer(difficulty: Difficulty): Player {
     killedEnemies: {
       [EnemyType.ZOMBIE]: 0,
       [EnemyType.MONSTER]: 0,
-      [EnemyType.GHOST]: 0
+      [EnemyType.GHOST]: 0,
+      [EnemyType.DOG]: 0
     }
   };
 }
@@ -67,7 +69,56 @@ export function createInitialGameState(difficulty: Difficulty): GameState {
     enemy.texture = getTexture(enemy.type);
     enemy.state = 'alive';
   });
+
+  // Füge einen Hund hinzu
+  const dog = createDog(state.currentMap.tiles);
+  if (dog) {
+    state.enemies.push(dog);
+  }
+
   return state;
+}
+
+function findRandomValidPosition(tiles: number[][]): { x: number; y: number } | null {
+  const freeTiles: { x: number; y: number }[] = [];
+  for (let y = 0; y < tiles.length; y++) {
+    for (let x = 0; x < tiles[y].length; x++) {
+      if (tiles[y][x] === 0) {
+        freeTiles.push({ x, y });
+      }
+    }
+  }
+
+  if (freeTiles.length === 0) {
+    return null;
+  }
+
+  const randomIndex = Math.floor(Math.random() * freeTiles.length);
+  return freeTiles[randomIndex];
+}
+
+function createDog(tiles: number[][]): Enemy | null {
+  const position = findRandomValidPosition(tiles);
+  if (!position) {
+    return null;
+  }
+
+  return {
+    id: `dog-${Date.now()}`,
+    type: EnemyType.DOG,
+    x: position.x,
+    y: position.y,
+    health: 50,
+    maxHealth: 50,
+    damage: 15,
+    speed: 0.04,
+    isAlive: true,
+    direction: 0,
+    lastAttackTime: 0,
+    attackCooldown: 500,
+    state: 'alive',
+    texture: getTexture(EnemyType.DOG)
+  };
 }
 
 export function checkCollision(x: number, y: number, tiles: number[][]): boolean {
@@ -144,6 +195,15 @@ export function updateEnemies(
     }
 
     if (enemy.state !== 'alive') return;
+
+    // Bell-Sound für den Hund
+    if (enemy.type === EnemyType.DOG) {
+      if (Math.random() < 0.01) {
+        soundSystem.play3dSound({ x: enemy.x, y: enemy.y }, { x: player.x, y: player.y }, () => {
+          soundSystem.playDogBark();
+        });
+      }
+    }
 
     const dx = player.x - enemy.x;
     const dy = player.y - enemy.y;
@@ -315,6 +375,12 @@ export function loadNextLevel(gameState: GameState): GameState {
   gameState.player.x = level.playerStartX;
   gameState.player.y = level.playerStartY;
   gameState.player.direction = level.playerStartDirection;
+
+  // Füge einen Hund hinzu
+  const dog = createDog(gameState.currentMap.tiles);
+  if (dog) {
+    gameState.enemies.push(dog);
+  }
 
   // Benachrichtigung zurücksetzen
   delete gameState.lastItemNotification;

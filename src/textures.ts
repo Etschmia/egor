@@ -9,10 +9,12 @@ export function loadTextures(): Promise<void[]> {
   textures[EnemyType.ZOMBIE] = createZombieTexture();
   textures[EnemyType.MONSTER] = createMonsterTexture();
   textures[EnemyType.GHOST] = createGhostTexture();
+  textures[EnemyType.DOG] = createDogTexture();
 
   corpseTextures[EnemyType.ZOMBIE] = createZombieCorpseTexture();
   corpseTextures[EnemyType.MONSTER] = createMonsterCorpseTexture();
   corpseTextures[EnemyType.GHOST] = createGhostCorpseTexture();
+  corpseTextures[EnemyType.DOG] = createDogCorpseTexture();
 
   // Wandtexturen erstellen
   wallTextures['brick'] = createBrickTexture();
@@ -648,4 +650,86 @@ function createGhostCorpseTexture(): HTMLCanvasElement {
 
 export function getCorpseTexture(enemyType: EnemyType): CanvasImageSource | undefined {
   return corpseTextures[enemyType];
+}
+
+function createDogTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // --- Aggressiver Hund ---
+  // Da der Hund kleiner ist, zentrieren wir ihn etwas tiefer
+  const yOffset = 16;
+
+  // Beine
+  ctx.fillStyle = '#4A2A0A'; // Dunkelbraun
+  ctx.fillRect(16, 32 + yOffset, 6, 12); // Vorne links
+  ctx.fillRect(42, 32 + yOffset, 6, 12); // Vorne rechts
+  ctx.fillRect(18, 30 + yOffset, 6, 10); // Hinten links
+  ctx.fillRect(40, 30 + yOffset, 6, 10); // Hinten rechts
+
+  // Körper
+  const bodyGradient = ctx.createLinearGradient(0, 20 + yOffset, 0, 36 + yOffset);
+  bodyGradient.addColorStop(0, '#6B4A2A');
+  bodyGradient.addColorStop(1, '#3A1A0A');
+  ctx.fillStyle = bodyGradient;
+  ctx.fillRect(16, 20 + yOffset, 32, 16);
+
+  // Kopf
+  ctx.fillStyle = '#5A3A1A';
+  ctx.fillRect(24, 12 + yOffset, 16, 12);
+
+  // Ohren
+  ctx.fillStyle = '#3A1A0A';
+  ctx.beginPath();
+  ctx.moveTo(24, 12 + yOffset);
+  ctx.lineTo(20, 6 + yOffset);
+  ctx.lineTo(28, 12 + yOffset);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(40, 12 + yOffset);
+  ctx.lineTo(44, 6 + yOffset);
+  ctx.lineTo(36, 12 + yOffset);
+  ctx.fill();
+
+  // Augen (rot leuchtend)
+  ctx.fillStyle = '#FF0000';
+  ctx.fillRect(28, 16 + yOffset, 4, 4);
+  ctx.fillRect(36, 16 + yOffset, 4, 4);
+
+  // Schnauze und Zähne
+  ctx.fillStyle = '#3A1A0A';
+  ctx.fillRect(28, 20 + yOffset, 8, 4);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(30, 22 + yOffset, 2, 2);
+  ctx.fillRect(34, 22 + yOffset, 2, 2);
+
+  return canvas;
+}
+
+function createDogCorpseTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Liegender Hund
+  ctx.fillStyle = '#3A1A0A'; // Dunkles Braun
+  ctx.beginPath();
+  ctx.ellipse(32, 54, 22, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Blutlache
+  ctx.fillStyle = 'rgba(139, 0, 0, 0.7)';
+  ctx.beginPath();
+  ctx.ellipse(32, 56, 28, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Ohren
+  ctx.fillStyle = '#2A0A0A';
+  ctx.fillRect(18, 48, 6, 4);
+  ctx.fillRect(40, 48, 6, 4);
+
+  return canvas;
 }
