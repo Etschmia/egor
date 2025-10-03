@@ -18,7 +18,7 @@ import { castRay, getSpritesToRender } from './raycasting.ts';
 import { WEAPONS } from './weapons.ts';
 import { saveGame, loadGame, getAllSaveGames, deleteSaveGame } from './saveLoadSystem.ts';
 import { soundSystem } from './soundSystem.ts';
-import { getWallTexture, getItemTexture } from './textures.ts';
+import { getTexture, getWallTexture, getItemTexture } from './textures.ts';
 
 type GameMode = 'menu' | 'playing' | 'paused' | 'help' | 'save' | 'load' | 'difficulty' | 'levelComplete';
 
@@ -57,10 +57,23 @@ function App() {
     gameModeRef.current = gameMode;
   }, [gameMode]);
 
+  // Hilfsfunktion zum Zuweisen von Texturen an Gegner
+  const assignEnemyTextures = (gameState: GameState) => {
+    gameState.enemies.forEach(enemy => {
+      if (enemy.isAlive) {
+        enemy.texture = getTexture(enemy.type);
+      } else {
+        enemy.texture = undefined;
+      }
+    });
+    return gameState;
+  };
+
   // Initialisiere Spiel mit gewähltem Schwierigkeitsgrad
   const startNewGame = (difficulty: Difficulty) => {
     const newGameState = createInitialGameState(difficulty);
-    setGameState(newGameState);
+    const gameStateWithTextures = assignEnemyTextures(newGameState);
+    setGameState(gameStateWithTextures);
     setGameMode('playing');
     soundSystem.playMenuSelect();
   };
@@ -83,7 +96,8 @@ function App() {
   const handleLoadGame = (name: string) => {
     const loadedState = loadGame(name);
     if (loadedState) {
-      setGameState(loadedState);
+      const gameStateWithTextures = assignEnemyTextures(loadedState);
+      setGameState(gameStateWithTextures);
       setGameMode('playing');
       soundSystem.playPickup();
     } else {
@@ -96,7 +110,8 @@ function App() {
     if (gameState) {
       const newState = loadNextLevel(gameState);
       newState.isPaused = false;
-      setGameState(newState);
+      const gameStateWithTextures = assignEnemyTextures(newState);
+      setGameState(gameStateWithTextures);
       setGameMode('playing');
       soundSystem.playMenuSelect();
     }
