@@ -6,8 +6,8 @@ interface MiniMapProps {
   gameState: GameState;
 }
 
-const TILE_SIZE = 8; // Größe jeder Kachel auf der Mini-Map
-const PLAYER_SIZE = 4; // Größe des Spieler-Punktes
+const TILE_SIZE = 6; // Größe jeder Kachel auf der Mini-Map
+const PLAYER_SIZE = 8; // Größe des Spieler-Punktes
 
 function MiniMap({ gameState }: MiniMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
