@@ -1,11 +1,28 @@
 import { EnemyType } from './types.ts';
 
 const textures: Partial<Record<EnemyType, CanvasImageSource>> = {};
+const wallTextures: Record<string, CanvasImageSource> = {};
+const itemTextures: Record<string, CanvasImageSource> = {};
 
 export function loadTextures(): Promise<void[]> {
   textures[EnemyType.ZOMBIE] = createZombieTexture();
   textures[EnemyType.MONSTER] = createMonsterTexture();
   textures[EnemyType.GHOST] = createGhostTexture();
+
+  // Wandtexturen erstellen
+  wallTextures['brick'] = createBrickTexture();
+  wallTextures['wood'] = createWoodTexture();
+  wallTextures['stone'] = createStoneTexture();
+  wallTextures['door'] = createDoorTexture();
+  wallTextures['exitDoor'] = createExitDoorTexture();
+
+  // Item-Texturen erstellen
+  itemTextures['HEALTH_SMALL'] = createHealthSmallTexture();
+  itemTextures['HEALTH_LARGE'] = createHealthLargeTexture();
+  itemTextures['TREASURE'] = createTreasureTexture();
+  itemTextures['AMMO'] = createAmmoTexture();
+  itemTextures['WEAPON'] = createWeaponTexture();
+
   return Promise.resolve([]);
 }
 
@@ -113,4 +130,272 @@ function createGhostTexture(): HTMLCanvasElement {
 
 export function getTexture(enemyType: EnemyType): CanvasImageSource | undefined {
   return textures[enemyType];
+}
+
+export function getWallTexture(textureName: string): CanvasImageSource | undefined {
+  return wallTextures[textureName];
+}
+
+export function getItemTexture(itemType: string): CanvasImageSource | undefined {
+  return itemTextures[itemType];
+}
+
+function createBrickTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Hintergrund - Mörtel
+  ctx.fillStyle = '#D3D3D3';
+  ctx.fillRect(0, 0, 64, 64);
+
+  // Backstein-Muster
+  ctx.fillStyle = '#8B4513';
+
+  // Horizontale Backsteinreihen
+  for (let y = 0; y < 64; y += 16) {
+    // Versetzte Backsteine für realistisches Mauerwerk
+    const offset = (y / 16) % 2 === 0 ? 0 : 32;
+
+    for (let x = 0; x < 64; x += 64) {
+      ctx.fillRect(x + offset, y, 32, 8);
+    }
+  }
+
+  // Vertikale Fugen
+  ctx.fillStyle = '#A0522D';
+  for (let x = 0; x < 64; x += 32) {
+    ctx.fillRect(x, 0, 2, 64);
+  }
+
+  return canvas;
+}
+
+function createWoodTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Grundfarbe - dunkles Holz
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(0, 0, 64, 64);
+
+  // Holztäfelung - vertikale Bretter
+  ctx.fillStyle = '#654321';
+
+  for (let x = 0; x < 64; x += 16) {
+    ctx.fillRect(x, 0, 8, 64);
+
+    // Fugen zwischen Brettern
+    ctx.fillStyle = '#4A4A4A';
+    ctx.fillRect(x + 8, 0, 2, 64);
+    ctx.fillStyle = '#654321';
+  }
+
+  // Holzmaserung - horizontale Linien
+  ctx.fillStyle = '#5D4037';
+  for (let y = 8; y < 64; y += 16) {
+    ctx.fillRect(0, y, 64, 2);
+  }
+
+  return canvas;
+}
+
+function createStoneTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Grundfarbe - grauer Stein
+  ctx.fillStyle = '#708090';
+  ctx.fillRect(0, 0, 64, 64);
+
+  // Große Steinblöcke mit verschiedenen Grautönen
+  const stoneColors = ['#778899', '#696969', '#808080', '#2F4F4F'];
+
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      ctx.fillStyle = stoneColors[Math.floor(Math.random() * stoneColors.length)];
+      ctx.fillRect(i * 16, j * 16, 16, 16);
+
+      // Schatten an den Rändern für 3D-Effekt
+      ctx.fillStyle = '#2F4F4F';
+      ctx.fillRect(i * 16, j * 16, 16, 2);
+      ctx.fillRect(i * 16, j * 16, 2, 16);
+    }
+  }
+
+  return canvas;
+}
+
+function createDoorTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Tür-Grundfarbe - dunkles Holz
+  ctx.fillStyle = '#654321';
+  ctx.fillRect(0, 0, 64, 64);
+
+  // Türfüllungen - vertikale Bretter
+  ctx.fillStyle = '#8B4513';
+  for (let x = 0; x < 64; x += 16) {
+    ctx.fillRect(x, 0, 8, 64);
+
+    // Fugen
+    ctx.fillStyle = '#4A4A4A';
+    ctx.fillRect(x + 8, 0, 2, 64);
+    ctx.fillStyle = '#8B4513';
+  }
+
+  // Türgriff (rechte Seite)
+  ctx.fillStyle = '#FFD700';
+  ctx.fillRect(48, 28, 8, 8);
+
+  // Türklinke
+  ctx.fillStyle = '#B8860B';
+  ctx.fillRect(56, 30, 6, 4);
+
+  return canvas;
+}
+
+function createExitDoorTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Exit-Tür - grünes Holz
+  ctx.fillStyle = '#228B22';
+  ctx.fillRect(0, 0, 64, 64);
+
+  // Türfüllungen
+  ctx.fillStyle = '#32CD32';
+  for (let x = 0; x < 64; x += 16) {
+    ctx.fillRect(x, 0, 8, 64);
+
+    // Fugen
+    ctx.fillStyle = '#006400';
+    ctx.fillRect(x + 8, 0, 2, 64);
+    ctx.fillStyle = '#32CD32';
+  }
+
+  // Exit-Symbol (X)
+  ctx.fillStyle = '#FFD700';
+  ctx.font = 'bold 24px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('X', 32, 32);
+
+  return canvas;
+}
+
+function createHealthSmallTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 32;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d')!;
+
+  // Weißes Kreuz auf rotem Hintergrund
+  ctx.fillStyle = '#FF0000';
+  ctx.fillRect(0, 0, 32, 32);
+
+  // Weißes Kreuz
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(12, 6, 8, 20);  // Vertikaler Balken
+  ctx.fillRect(6, 12, 20, 8);  // Horizontaler Balken
+
+  return canvas;
+}
+
+function createHealthLargeTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 32;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d')!;
+
+  // Roter Hintergrund mit weißem Rand
+  ctx.fillStyle = '#CC0000';
+  ctx.fillRect(0, 0, 32, 32);
+  ctx.fillStyle = '#FF4444';
+  ctx.fillRect(2, 2, 28, 28);
+
+  // Weißes Kreuz (größer als kleines)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(10, 4, 12, 24);  // Vertikaler Balken
+  ctx.fillRect(4, 10, 24, 12);  // Horizontaler Balken
+
+  return canvas;
+}
+
+function createTreasureTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 32;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d')!;
+
+  // Goldener Schatz
+  ctx.fillStyle = '#FFD700';
+  ctx.fillRect(0, 0, 32, 32);
+
+  // Schatz-Symbol (Münzen)
+  ctx.fillStyle = '#FFA500';
+  ctx.beginPath();
+  ctx.arc(16, 16, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Glanz-Effekt
+  ctx.fillStyle = '#FFFFE0';
+  ctx.beginPath();
+  ctx.arc(12, 12, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  return canvas;
+}
+
+function createAmmoTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 32;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d')!;
+
+  // Grauer Hintergrund
+  ctx.fillStyle = '#666666';
+  ctx.fillRect(0, 0, 32, 32);
+
+  // Patronenhülse
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(8, 8, 16, 24);
+
+  // Kugelkopf
+  ctx.fillStyle = '#C0C0C0';
+  ctx.fillRect(10, 4, 12, 8);
+
+  return canvas;
+}
+
+function createWeaponTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 32;
+  canvas.height = 32;
+  const ctx = canvas.getContext('2d')!;
+
+  // Dunkler Hintergrund
+  ctx.fillStyle = '#333333';
+  ctx.fillRect(0, 0, 32, 32);
+
+  // Waffe (vereinfachte Pistole)
+  ctx.fillStyle = '#4A4A4A';
+  ctx.fillRect(6, 12, 20, 8);  // Lauf
+  ctx.fillRect(4, 10, 8, 12);  // Griff
+
+  // Mündung
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(26, 14, 4, 4);
+
+  return canvas;
 }

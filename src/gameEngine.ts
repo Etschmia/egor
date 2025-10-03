@@ -315,55 +315,68 @@ export function openDoor(player: Player, tiles: number[][], enemies: Enemy[]): {
   const dirX = Math.cos(player.direction);
   const dirY = Math.sin(player.direction);
 
-  // Prüfe Position direkt vor dem Spieler (größerer Radius für bessere Erkennung)
-  const checkDistance = 2.0;
-  const checkX = player.x + dirX * checkDistance;
-  const checkY = player.y + dirY * checkDistance;
+  // Prüfe mehrere Positionen vor dem Spieler für bessere Tür-Erkennung
+  const checkDistance = 1.5; // Kürzerer Abstand für genauere Erkennung
+  const checkPositions = [
+    { x: player.x + dirX * checkDistance, y: player.y + dirY * checkDistance }, // Direkt vor dem Spieler
+    { x: player.x + dirX * checkDistance * 0.7, y: player.y + dirY * checkDistance * 0.7 }, // Etwas näher
+    { x: player.x + dirX * checkDistance * 1.3, y: player.y + dirY * checkDistance * 1.3 }, // Etwas weiter
+  ];
 
-  const mapX = Math.floor(checkX);
-  const mapY = Math.floor(checkY);
+  // Zusätzlich prüfe seitlich versetzt (für breitere Tür-Erkennung)
+  const perpDirX = Math.cos(player.direction + Math.PI / 2) * 0.3;
+  const perpDirY = Math.sin(player.direction + Math.PI / 2) * 0.3;
 
-  // Debug-Ausgabe für Tür-Erkennung (kann später entfernt werden)
-  console.log(`Tür-Prüfung bei (${mapX}, ${mapY}): Wert = ${tiles[mapY]?.[mapX] || 'undefined'}`);
+  checkPositions.push(
+    { x: player.x + dirX * checkDistance + perpDirX, y: player.y + dirY * checkDistance + perpDirY },
+    { x: player.x + dirX * checkDistance - perpDirX, y: player.y + dirY * checkDistance - perpDirY }
+  );
 
-  // Prüfe ob es eine normale Tür ist (Wert 2)
-  if (
-    mapX >= 0 &&
-    mapX < tiles[0].length &&
-    mapY >= 0 &&
-    mapY < tiles.length &&
-    tiles[mapY][mapX] === 2
-  ) {
-    // Öffne die Tür (setze auf 0)
-    tiles[mapY][mapX] = 0;
-    return { tiles, doorOpened: true };
-  }
+  for (const pos of checkPositions) {
+    const mapX = Math.floor(pos.x);
+    const mapY = Math.floor(pos.y);
 
-  // Prüfe ob es eine Exit-Tür ist (Wert 3)
-  if (
-    mapX >= 0 &&
-    mapX < tiles[0].length &&
-    mapY >= 0 &&
-    mapY < tiles.length &&
-    tiles[mapY][mapX] === 3
-  ) {
-    // Prüfe ob alle Gegner tot sind
-    const allEnemiesDead = enemies.every(enemy => !enemy.isAlive);
-    const aliveEnemies = enemies.filter(enemy => enemy.isAlive);
+    // Debug-Ausgabe für Tür-Erkennung (kann später entfernt werden)
+    console.log(`Tür-Prüfung bei (${mapX}, ${mapY}): Wert = ${tiles[mapY]?.[mapX] || 'undefined'}`);
 
-    console.log(`Exit-Tür gefunden bei (${mapX}, ${mapY})`);
-    console.log(`Alle Gegner tot? ${allEnemiesDead}`);
-    console.log(`Lebende Gegner: ${aliveEnemies.length}`);
-
-    if (allEnemiesDead) {
-      console.log('Exit-Tür wird geöffnet!');
-      // Exit-Tür öffnen (setze auf 0)
+    // Prüfe ob es eine normale Tür ist (Wert 2)
+    if (
+      mapX >= 0 &&
+      mapX < tiles[0].length &&
+      mapY >= 0 &&
+      mapY < tiles.length &&
+      tiles[mapY][mapX] === 2
+    ) {
+      // Öffne die Tür (setze auf 0)
       tiles[mapY][mapX] = 0;
-      return { tiles, doorOpened: true, isExitDoor: true };
-    } else {
-      console.log('Exit-Tür kann noch nicht geöffnet werden - Gegner leben noch');
-      // Exit-Tür kann noch nicht geöffnet werden
-      return { tiles, doorOpened: false };
+      return { tiles, doorOpened: true };
+    }
+
+    // Prüfe ob es eine Exit-Tür ist (Wert 3)
+    if (
+      mapX >= 0 &&
+      mapX < tiles[0].length &&
+      mapY >= 0 &&
+      mapY < tiles.length &&
+      tiles[mapY][mapX] === 3
+    ) {
+      // Prüfe ob alle Gegner tot sind
+      const allEnemiesDead = enemies.every(enemy => !enemy.isAlive);
+      const aliveEnemies = enemies.filter(enemy => enemy.isAlive);
+
+      console.log(`Exit-Tür gefunden bei (${mapX}, ${mapY})`);
+      console.log(`Alle Gegner tot? ${allEnemiesDead}`);
+      console.log(`Lebende Gegner: ${aliveEnemies.length}`);
+
+      if (allEnemiesDead) {
+        console.log('Exit-Tür wird geöffnet!');
+        // Exit-Tür öffnen (setze auf 0)
+        tiles[mapY][mapX] = 0;
+        return { tiles, doorOpened: true, isExitDoor: true };
+      } else {
+        console.log('Exit-Tür kann nicht geöffnet werden - Gegner leben noch');
+        return { tiles, doorOpened: false };
+      }
     }
   }
 

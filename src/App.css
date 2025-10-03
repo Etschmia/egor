@@ -1,1 +1,152 @@
 /* Spezifische App-Styles */
+
+/* HUD Styles */
+.hud {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  color: white;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  z-index: 100;
+}
+
+.hud-left, .hud-center, .hud-right {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.hud-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 300px;
+}
+
+.weapon-list {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.weapon-list-title {
+  font-size: 12px;
+  color: #cccccc;
+  margin-bottom: 5px;
+}
+
+.weapon-slots {
+  display: flex;
+  gap: 3px;
+}
+
+.weapon-slot {
+  width: 24px;
+  height: 24px;
+  border: 2px solid;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.weapon-slot.available {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+}
+
+.weapon-slot.available:hover {
+  background: rgba(76, 175, 80, 0.4);
+  transform: scale(1.1);
+}
+
+.weapon-slot.locked {
+  border-color: #666666;
+  background: rgba(102, 102, 102, 0.2);
+  color: #999999;
+}
+
+.weapon-slot.current {
+  border-color: #FFD700;
+  background: rgba(255, 215, 0, 0.3);
+  color: #FFD700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.health-bar {
+  width: 150px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 5px 0;
+}
+
+.health-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff4444, #ff6666, #ff8888);
+  transition: width 0.3s ease;
+  border-radius: 8px;
+}
+
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  z-index: 200;
+}
+
+.crosshair::before,
+.crosshair::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.crosshair::before {
+  width: 20px;
+  height: 2px;
+  top: 9px;
+  left: 0;
+}
+
+.crosshair::after {
+  width: 2px;
+  height: 20px;
+  top: 0;
+  left: 9px;
+}
+
+.level-info {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  font-family: 'Courier New', monospace;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  z-index: 100;
+}

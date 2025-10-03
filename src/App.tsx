@@ -18,6 +18,7 @@ import { castRay, getSpritesToRender } from './raycasting.ts';
 import { WEAPONS } from './weapons.ts';
 import { saveGame, loadGame, getAllSaveGames, deleteSaveGame } from './saveLoadSystem.ts';
 import { soundSystem } from './soundSystem.ts';
+import { getWallTexture, getItemTexture } from './textures.ts';
 
 type GameMode = 'menu' | 'playing' | 'paused' | 'help' | 'save' | 'load' | 'difficulty' | 'levelComplete';
 
@@ -359,6 +360,56 @@ function App() {
     });
   };
 
+  // Hilfsfunktion zum Ermitteln der Wandtextur basierend auf Position und Typ
+  const getWallTextureForType = (wallType: number, hitX: number, hitY: number) => {
+    if (wallType === 2) return 'door'; // Normale Tür
+    if (wallType === 3) return 'exitDoor'; // Exit-Tür
+
+    // Für normale Wände verschiedene Texturen basierend auf Position
+    const textureTypes = ['brick', 'wood', 'stone'];
+    const textureIndex = (hitX + hitY * 3) % textureTypes.length;
+    return textureTypes[textureIndex];
+  };
+
+  // Funktion zum Rendern einer Wandtextur
+  const renderWallTexture = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    height: number,
+    texture: CanvasImageSource,
+    wallX: number,
+    brightness: number
+  ) => {
+    const texWidth = (texture as HTMLCanvasElement).width;
+    const texHeight = (texture as HTMLCanvasElement).height;
+
+    // Berechne Texturkoordinate (0.0 bis 1.0) - verwende genauere Berechnung
+    const texX = Math.floor((wallX * texWidth) % texWidth);
+
+    // Höhe der Textur basierend auf Wandhöhe skalieren
+    const step = texHeight / height;
+    let texY = 0;
+
+    ctx.globalAlpha = brightness;
+
+    for (let stripeY = y; stripeY < y + height; stripeY++) {
+      // Nächste Texturzeile
+      const currentTexY = Math.floor(texY);
+      texY += step;
+
+      // Verhindere Überläufe
+      if (currentTexY >= texHeight) break;
+
+      // Rendere die Texturspalte
+      ctx.drawImage(
+        texture as CanvasImageSource,
+        texX, currentTexY, 1, 1,
+        x, stripeY, 1, 1
+      );
+    }
+  };
+
   // Rendering
   const render = useCallback(() => {
     const gameState = gameStateRef.current;
@@ -412,47 +463,37 @@ function App() {
       }
       wallX -= Math.floor(wallX);
 
-      // Wandfarbe basierend auf Typ und Seite
-      let color = '#888';
-      if (result.wallType === 2) {
-        color = '#654321'; // Normale Tür - braun
-      } else if (result.wallType === 3) {
-        color = '#228B22'; // Exit-Tür - grün
-      }
+      // Wandtextur basierend auf Typ und Position
+      const textureName = getWallTextureForType(result.wallType, result.hitX, result.hitY);
+      const texture = getWallTexture(textureName);
 
-      if (result.side === 1) {
-        if (result.wallType === 2) {
-          color = '#543210'; // Normale Tür - dunkleres braun
-        } else if (result.wallType === 3) {
-          color = '#006400'; // Exit-Tür - dunkleres grün
-        } else {
-          color = '#666';
-        }
-      }
+      // Helligkeit basierend auf Entfernung und Seite
+      const brightness = result.side === 1 ? Math.max(0.3, 1 - result.distance / 20) * 0.8 : Math.max(0.3, 1 - result.distance / 20);
 
       // Prüfe ob ein Bild an dieser Wand ist
       const picture = findWallPicture(result.hitX, result.hitY, result.side, wallX, gameState.currentMap.wallPictures);
 
-      // Schatten basierend auf Entfernung
-      const brightness = Math.max(0.3, 1 - result.distance / 20);
-      
       if (picture && result.distance < 15) {
         // Rendere Bild
         const pictureHeight = lineHeight * 0.5; // Bild nimmt 50% der Wandhöhe ein
-        
+
         const pictureDrawStart = height / 2 - pictureHeight / 2;
         const pictureDrawEnd = height / 2 + pictureHeight / 2;
 
         // Prüfe ob wir im Bild-Bereich sind
         const distFromCenter = Math.abs(wallX - picture.offset);
         const pictureWidthNormalized = 0.15; // Bildbreite auf der Wand
-        
+
         if (distFromCenter < pictureWidthNormalized) {
-          // Zeichne erst die Wand
-          ctx.fillStyle = color;
-          ctx.globalAlpha = brightness;
-          ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
-          
+          // Zeichne erst die Wand mit Textur
+          if (texture) {
+            renderWallTexture(ctx, x, drawStart, drawEnd - drawStart, texture, wallX, brightness);
+          } else {
+            ctx.fillStyle = '#888';
+            ctx.globalAlpha = brightness;
+            ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+          }
+
           // Dann das Bild darüber
           let pictureColor: string;
           switch (picture.type) {
@@ -466,11 +507,11 @@ function App() {
               pictureColor = '#c46090'; // Pink/Lila
               break;
           }
-          
+
           ctx.fillStyle = pictureColor;
           ctx.globalAlpha = brightness * 0.9;
           ctx.fillRect(x, pictureDrawStart, 1, pictureDrawEnd - pictureDrawStart);
-          
+
           // Rahmen
           if (Math.random() < 0.3) { // Nur bei einigen Stripes für Rahmen-Effekt
             ctx.fillStyle = '#333';
@@ -479,18 +520,26 @@ function App() {
             ctx.fillRect(x, pictureDrawEnd - 2, 1, 2);
           }
         } else {
-          // Normale Wand
-          ctx.fillStyle = color;
+          // Normale Wand mit Textur
+          if (texture) {
+            renderWallTexture(ctx, x, drawStart, drawEnd - drawStart, texture, wallX, brightness);
+          } else {
+            ctx.fillStyle = '#888';
+            ctx.globalAlpha = brightness;
+            ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+          }
+        }
+      } else {
+        // Normale Wand ohne Bild mit Textur
+        if (texture) {
+          renderWallTexture(ctx, x, drawStart, drawEnd - drawStart, texture, wallX, brightness);
+        } else {
+          ctx.fillStyle = '#888';
           ctx.globalAlpha = brightness;
           ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
         }
-      } else {
-        // Normale Wand ohne Bild
-        ctx.fillStyle = color;
-        ctx.globalAlpha = brightness;
-        ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
       }
-      
+
       ctx.globalAlpha = 1;
     }
 
@@ -550,8 +599,43 @@ function App() {
               ctx.fillRect(stripe, drawStartY, 1, drawEndY - drawStartY);
             }
           } else {
-            ctx.fillStyle = '#ff0'; // Items bleiben gelb
-            ctx.fillRect(stripe, drawStartY, 1, drawEndY - drawStartY);
+            // Items mit verschiedenen Texturen rendern
+            const item = sprite.object as Item;
+            const itemTexture = getItemTexture(item.type);
+
+            if (itemTexture && texturesLoaded) {
+              const texture = itemTexture as HTMLCanvasElement;
+              const texX = Math.floor(((stripe - drawStartX) / spriteWidth) * texture.width);
+
+              // Skaliere die Textur auf die Sprite-Größe
+              ctx.drawImage(
+                texture,
+                texX, 0, 1, texture.height,
+                stripe, drawStartY, 1, drawEndY - drawStartY
+              );
+            } else {
+              // Fallback: verschiedene Farben für verschiedene Item-Typen
+              switch (item.type) {
+                case ItemType.HEALTH_SMALL:
+                  ctx.fillStyle = '#ff4444'; // Rot für kleine Heilung
+                  break;
+                case ItemType.HEALTH_LARGE:
+                  ctx.fillStyle = '#ff0000'; // Dunkelrot für große Heilung
+                  break;
+                case ItemType.TREASURE:
+                  ctx.fillStyle = '#ffd700'; // Gold für Schätze
+                  break;
+                case ItemType.AMMO:
+                  ctx.fillStyle = '#888888'; // Grau für Munition
+                  break;
+                case ItemType.WEAPON:
+                  ctx.fillStyle = '#444444'; // Dunkelgrau für Waffen
+                  break;
+                default:
+                  ctx.fillStyle = '#ff0'; // Gelb als Fallback
+              }
+              ctx.fillRect(stripe, drawStartY, 1, drawEndY - drawStartY);
+            }
           }
         }
       }
@@ -882,6 +966,27 @@ function App() {
               {weapon.needsAmmo
                 ? `Munition: ${gameState.player.ammo[gameState.player.currentWeapon]}`
                 : 'Unendlich'}
+            </div>
+            <div className="weapon-list">
+              <div className="weapon-list-title">Waffen:</div>
+              <div className="weapon-slots">
+                {[1, 2, 3, 4, 5, 6].map((slot) => {
+                  const weaponKeys = ['KNIFE', 'PISTOL', 'MACHINE_PISTOL', 'CHAINSAW', 'ASSAULT_RIFLE', 'HEAVY_MG'];
+                  const weaponType = weaponKeys[slot - 1];
+                  const hasWeapon = gameState.player.weapons.includes(weaponType as WeaponType);
+                  const isCurrentWeapon = gameState.player.currentWeapon === weaponType;
+
+                  return (
+                    <div
+                      key={slot}
+                      className={`weapon-slot ${hasWeapon ? 'available' : 'locked'} ${isCurrentWeapon ? 'current' : ''}`}
+                      title={hasWeapon ? WEAPONS[weaponType as WeaponType].name : 'Nicht verfügbar'}
+                    >
+                      {slot}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
           <div className="hud-right">
