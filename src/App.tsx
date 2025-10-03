@@ -156,16 +156,16 @@ function App() {
                 }
               };
 
-              // Wenn es eine Exit-Tür war, zum nächsten Level wechseln
-              if (result.isExitDoor && prev.currentLevel < 4) {
+              // Wenn es eine Exit-Tür war, den Spielmodus ändern
+              if (result.isExitDoor) {
                 soundSystem.playLevelComplete();
-                setTimeout(() => {
-                  const nextState = loadNextLevel(newState);
-                  setGameState(nextState);
-                }, 1000); // Kurze Verzögerung für den Sound
-                return newState;
+                setGameMode('levelComplete');
+                // Der Zustand der Tür wird nicht mehr direkt hier geändert.
+                // Der Übergang wird über das "levelComplete"-Menü gesteuert.
+                return prev; // Zustand vorerst unverändert lassen
               }
 
+              // Für normale Türen, den Zustand mit der geöffneten Tür zurückgeben
               return newState;
             }
           }

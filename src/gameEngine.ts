@@ -372,9 +372,9 @@ export function openDoor(player: Player, tiles: number[][], enemies: Enemy[]): {
 
       if (allEnemiesDead) {
         console.log('Exit-Tür wird geöffnet!');
-        // Exit-Tür öffnen (setze auf 0)
-        tilesCopy[mapY][mapX] = 0;
-        return { tiles: tilesCopy, doorOpened: true, isExitDoor: true };
+        // Die Tür wird NICHT mehr hier entfernt.
+        // Stattdessen signalisieren wir nur, dass sie geöffnet werden kann.
+        return { tiles: tiles, doorOpened: true, isExitDoor: true };
       } else {
         console.log('Exit-Tür kann nicht geöffnet werden - Gegner leben noch');
         // Bei Exit-Türen: Wenn nicht alle Gegner tot sind, Tür NICHT öffnen aber auch nicht verschwinden lassen
