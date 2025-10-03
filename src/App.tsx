@@ -10,7 +10,8 @@ import {
   fireWeapon,
   collectItem,
   checkLevelComplete,
-  loadNextLevel
+  loadNextLevel,
+  openDoor
 } from './gameEngine.ts';
 import { castRay, getSpritesToRender } from './raycasting.ts';
 import { WEAPONS } from './weapons.ts';
@@ -112,6 +113,24 @@ function App() {
         });
       } else if (e.key === 'Escape') {
         setGameMode((prev) => prev !== 'menu' ? 'playing' : prev);
+      } else if (e.key.toLowerCase() === 'e') {
+        // Tür öffnen
+        setGameState((prev) => {
+          if (prev && gameMode === 'playing' && !prev.isPaused) {
+            const result = openDoor(prev.player, prev.currentMap.tiles);
+            if (result.doorOpened) {
+              soundSystem.playDoorOpen();
+              return {
+                ...prev,
+                currentMap: {
+                  ...prev.currentMap,
+                  tiles: result.tiles
+                }
+              };
+            }
+          }
+          return prev;
+        });
       }
 
       // Waffen wechseln (1-6)
@@ -147,7 +166,7 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [gameMode]);
 
   // Spiel-Loop
   const gameLoop = useCallback(() => {
@@ -551,6 +570,10 @@ function App() {
 
               <div className="help-section">
                 <h3>Spiel:</h3>
+                <div className="help-key">
+                  <span className="help-key-button">E</span>
+                  <span>Tür öffnen</span>
+                </div>
                 <div className="help-key">
                   <span className="help-key-button">M</span>
                   <span>Spielstand speichern</span>

@@ -80,10 +80,14 @@ class SoundSystem {
     this.playTone(500, 0.1, 'square', 0.2);
   }
 
+  playDoorOpen() {
+    this.playTone(300, 0.15, 'sine', 0.25);
+    setTimeout(() => this.playTone(350, 0.2, 'sine', 0.2), 100);
+  }
+
   setEnabled(enabled: boolean) {
     this.enabled = enabled;
   }
 }
 
 export const soundSystem = new SoundSystem();
-

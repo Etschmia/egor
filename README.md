@@ -7,6 +7,7 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
 ### Spielmechanik
 - **3D-Raycasting-Engine** für klassisches Retro-Gameplay
 - **5 Level** mit steigendem Schwierigkeitsgrad
+- **Türen** die mit der Taste 'E' geöffnet werden können
 - **6 verschiedene Waffen**:
   - Messer
   - Pistole
@@ -35,6 +36,9 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
 - **A**: Links bewegen (Strafe)
 - **D**: Rechts bewegen (Strafe)
 - **←** / **→**: Umschauen
+
+### Interaktion
+- **E**: Tür öffnen (wenn man davor steht)
 
 ### Kampf
 - **Leertaste**: Schießen / Angreifen
@@ -91,7 +95,7 @@ src/
 
 ## Spielziel
 
-Kämpfe dich durch 5 Level voller Zombies und Monster. Finde neue Waffen, sammle Items und besiege alle Gegner, um das Spiel zu gewinnen!
+Kämpfe dich durch 5 Level voller Zombies und Monster. Öffne Türen, finde neue Waffen, sammle Items und besiege alle Gegner, um das Spiel zu gewinnen!
 
 ## Hinweise
 
@@ -99,6 +103,7 @@ Kämpfe dich durch 5 Level voller Zombies und Monster. Finde neue Waffen, sammle
 - Spielstände werden lokal im Browser gespeichert
 - Sound-Effekte werden prozedural mit der Web Audio API erzeugt
 - Keine Nazi-Symbole (im Gegensatz zum Original Wolfenstein 3D)
+- Türen (braune Wände) können mit der Taste 'E' geöffnet werden
 
 ## Entwickelt von
 

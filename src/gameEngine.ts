@@ -271,3 +271,30 @@ export function loadNextLevel(gameState: GameState): GameState {
   return gameState;
 }
 
+export function openDoor(player: Player, tiles: number[][]): { tiles: number[][]; doorOpened: boolean } {
+  const dirX = Math.cos(player.direction);
+  const dirY = Math.sin(player.direction);
+  
+  // Prüfe Position direkt vor dem Spieler
+  const checkDistance = 1.5;
+  const checkX = player.x + dirX * checkDistance;
+  const checkY = player.y + dirY * checkDistance;
+  
+  const mapX = Math.floor(checkX);
+  const mapY = Math.floor(checkY);
+  
+  // Prüfe ob es eine Tür ist (Wert 2)
+  if (
+    mapX >= 0 && 
+    mapX < tiles[0].length && 
+    mapY >= 0 && 
+    mapY < tiles.length &&
+    tiles[mapY][mapX] === 2
+  ) {
+    // Öffne die Tür (setze auf 0)
+    tiles[mapY][mapX] = 0;
+    return { tiles, doorOpened: true };
+  }
+  
+  return { tiles, doorOpened: false };
+}
