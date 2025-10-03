@@ -142,31 +142,31 @@ export function getItemTexture(itemType: string): CanvasImageSource | undefined 
 
 function createBrickTexture(): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = 32;
+  canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
   // Hintergrund - Mörtel
   ctx.fillStyle = '#D3D3D3';
-  ctx.fillRect(0, 0, 64, 64);
+  ctx.fillRect(0, 0, 32, 32);
 
   // Backstein-Muster
   ctx.fillStyle = '#8B4513';
 
   // Horizontale Backsteinreihen
-  for (let y = 0; y < 64; y += 16) {
+  for (let y = 0; y < 32; y += 8) {
     // Versetzte Backsteine für realistisches Mauerwerk
-    const offset = (y / 16) % 2 === 0 ? 0 : 32;
+    const offset = (y / 8) % 2 === 0 ? 0 : 16;
 
-    for (let x = 0; x < 64; x += 64) {
-      ctx.fillRect(x + offset, y, 32, 8);
+    for (let x = 0; x < 32; x += 32) {
+      ctx.fillRect(x + offset, y, 16, 4);
     }
   }
 
   // Vertikale Fugen
   ctx.fillStyle = '#A0522D';
-  for (let x = 0; x < 64; x += 32) {
-    ctx.fillRect(x, 0, 2, 64);
+  for (let x = 0; x < 32; x += 16) {
+    ctx.fillRect(x, 0, 1, 32);
   }
 
   return canvas;
@@ -174,30 +174,30 @@ function createBrickTexture(): HTMLCanvasElement {
 
 function createWoodTexture(): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = 32;
+  canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
   // Grundfarbe - dunkles Holz
   ctx.fillStyle = '#8B4513';
-  ctx.fillRect(0, 0, 64, 64);
+  ctx.fillRect(0, 0, 32, 32);
 
   // Holztäfelung - vertikale Bretter
   ctx.fillStyle = '#654321';
 
-  for (let x = 0; x < 64; x += 16) {
-    ctx.fillRect(x, 0, 8, 64);
+  for (let x = 0; x < 32; x += 8) {
+    ctx.fillRect(x, 0, 4, 32);
 
     // Fugen zwischen Brettern
     ctx.fillStyle = '#4A4A4A';
-    ctx.fillRect(x + 8, 0, 2, 64);
+    ctx.fillRect(x + 4, 0, 1, 32);
     ctx.fillStyle = '#654321';
   }
 
   // Holzmaserung - horizontale Linien
   ctx.fillStyle = '#5D4037';
-  for (let y = 8; y < 64; y += 16) {
-    ctx.fillRect(0, y, 64, 2);
+  for (let y = 4; y < 32; y += 8) {
+    ctx.fillRect(0, y, 32, 1);
   }
 
   return canvas;
@@ -205,26 +205,26 @@ function createWoodTexture(): HTMLCanvasElement {
 
 function createStoneTexture(): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = 32;
+  canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
   // Grundfarbe - grauer Stein
   ctx.fillStyle = '#708090';
-  ctx.fillRect(0, 0, 64, 64);
+  ctx.fillRect(0, 0, 32, 32);
 
   // Große Steinblöcke mit verschiedenen Grautönen
   const stoneColors = ['#778899', '#696969', '#808080', '#2F4F4F'];
 
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 2; j++) {
       ctx.fillStyle = stoneColors[Math.floor(Math.random() * stoneColors.length)];
       ctx.fillRect(i * 16, j * 16, 16, 16);
 
       // Schatten an den Rändern für 3D-Effekt
       ctx.fillStyle = '#2F4F4F';
-      ctx.fillRect(i * 16, j * 16, 16, 2);
-      ctx.fillRect(i * 16, j * 16, 2, 16);
+      ctx.fillRect(i * 16, j * 16, 16, 1);
+      ctx.fillRect(i * 16, j * 16, 1, 16);
     }
   }
 
@@ -233,63 +233,63 @@ function createStoneTexture(): HTMLCanvasElement {
 
 function createDoorTexture(): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = 32;
+  canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
   // Tür-Grundfarbe - dunkles Holz
   ctx.fillStyle = '#654321';
-  ctx.fillRect(0, 0, 64, 64);
+  ctx.fillRect(0, 0, 32, 32);
 
   // Türfüllungen - vertikale Bretter
   ctx.fillStyle = '#8B4513';
-  for (let x = 0; x < 64; x += 16) {
-    ctx.fillRect(x, 0, 8, 64);
+  for (let x = 0; x < 32; x += 8) {
+    ctx.fillRect(x, 0, 4, 32);
 
     // Fugen
     ctx.fillStyle = '#4A4A4A';
-    ctx.fillRect(x + 8, 0, 2, 64);
+    ctx.fillRect(x + 4, 0, 1, 32);
     ctx.fillStyle = '#8B4513';
   }
 
   // Türgriff (rechte Seite)
   ctx.fillStyle = '#FFD700';
-  ctx.fillRect(48, 28, 8, 8);
+  ctx.fillRect(24, 14, 4, 4);
 
   // Türklinke
   ctx.fillStyle = '#B8860B';
-  ctx.fillRect(56, 30, 6, 4);
+  ctx.fillRect(28, 15, 3, 2);
 
   return canvas;
 }
 
 function createExitDoorTexture(): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = 32;
+  canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
   // Exit-Tür - grünes Holz
   ctx.fillStyle = '#228B22';
-  ctx.fillRect(0, 0, 64, 64);
+  ctx.fillRect(0, 0, 32, 32);
 
   // Türfüllungen
   ctx.fillStyle = '#32CD32';
-  for (let x = 0; x < 64; x += 16) {
-    ctx.fillRect(x, 0, 8, 64);
+  for (let x = 0; x < 32; x += 8) {
+    ctx.fillRect(x, 0, 4, 32);
 
     // Fugen
     ctx.fillStyle = '#006400';
-    ctx.fillRect(x + 8, 0, 2, 64);
+    ctx.fillRect(x + 4, 0, 1, 32);
     ctx.fillStyle = '#32CD32';
   }
 
   // Exit-Symbol (X)
   ctx.fillStyle = '#FFD700';
-  ctx.font = 'bold 24px Arial';
+  ctx.font = 'bold 12px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('X', 32, 32);
+  ctx.fillText('X', 16, 16);
 
   return canvas;
 }

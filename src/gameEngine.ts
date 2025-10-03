@@ -316,16 +316,15 @@ export function openDoor(player: Player, tiles: number[][], enemies: Enemy[]): {
   const dirY = Math.sin(player.direction);
 
   // Prüfe mehrere Positionen vor dem Spieler für bessere Tür-Erkennung
-  const checkDistance = 1.5; // Kürzerer Abstand für genauere Erkennung
+  const checkDistance = 1.8; // Optimaler Abstand für Tür-Erkennung
   const checkPositions = [
     { x: player.x + dirX * checkDistance, y: player.y + dirY * checkDistance }, // Direkt vor dem Spieler
-    { x: player.x + dirX * checkDistance * 0.7, y: player.y + dirY * checkDistance * 0.7 }, // Etwas näher
-    { x: player.x + dirX * checkDistance * 1.3, y: player.y + dirY * checkDistance * 1.3 }, // Etwas weiter
+    { x: player.x + dirX * checkDistance * 0.8, y: player.y + dirY * checkDistance * 0.8 }, // Etwas näher
   ];
 
   // Zusätzlich prüfe seitlich versetzt (für breitere Tür-Erkennung)
-  const perpDirX = Math.cos(player.direction + Math.PI / 2) * 0.3;
-  const perpDirY = Math.sin(player.direction + Math.PI / 2) * 0.3;
+  const perpDirX = Math.cos(player.direction + Math.PI / 2) * 0.25;
+  const perpDirY = Math.sin(player.direction + Math.PI / 2) * 0.25;
 
   checkPositions.push(
     { x: player.x + dirX * checkDistance + perpDirX, y: player.y + dirY * checkDistance + perpDirY },

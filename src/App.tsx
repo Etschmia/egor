@@ -371,7 +371,7 @@ function App() {
     return textureTypes[textureIndex];
   };
 
-  // Funktion zum Rendern einer Wandtextur
+  // Funktion zum Rendern einer Wandtextur - optimierte Version
   const renderWallTexture = (
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -384,28 +384,17 @@ function App() {
     const texWidth = (texture as HTMLCanvasElement).width;
     const texHeight = (texture as HTMLCanvasElement).height;
 
-    // Berechne Texturkoordinate (0.0 bis 1.0) - verwende genauere Berechnung
+    // Berechne Texturkoordinate (0.0 bis 1.0)
     const texX = Math.floor((wallX * texWidth) % texWidth);
-
-    // Höhe der Textur basierend auf Wandhöhe skalieren
-    const step = texHeight / height;
-    let texY = 0;
 
     ctx.globalAlpha = brightness;
 
-    for (let stripeY = y; stripeY < y + height; stripeY++) {
-      // Nächste Texturzeile
-      const currentTexY = Math.floor(texY);
-      texY += step;
-
-      // Verhindere Überläufe
-      if (currentTexY >= texHeight) break;
-
-      // Rendere die Texturspalte
+    // Optimiert: Verwende stretchBlt statt pixelweiser Operationen für bessere Performance
+    if (height > 0) {
       ctx.drawImage(
         texture as CanvasImageSource,
-        texX, currentTexY, 1, 1,
-        x, stripeY, 1, 1
+        texX, 0, 1, texHeight,  // Quelle: eine Spalte der Textur
+        x, y, 1, height        // Ziel: gestreckt auf Wandhöhe
       );
     }
   };
@@ -605,14 +594,16 @@ function App() {
 
             if (itemTexture && texturesLoaded) {
               const texture = itemTexture as HTMLCanvasElement;
+              // Optimiert: Verwende stretchBlt für gesamtes Sprite statt pixelweise
               const texX = Math.floor(((stripe - drawStartX) / spriteWidth) * texture.width);
 
-              // Skaliere die Textur auf die Sprite-Größe
-              ctx.drawImage(
-                texture,
-                texX, 0, 1, texture.height,
-                stripe, drawStartY, 1, drawEndY - drawStartY
-              );
+              if (texX >= 0 && texX < texture.width) {
+                ctx.drawImage(
+                  texture,
+                  texX, 0, 1, texture.height,
+                  stripe, drawStartY, 1, drawEndY - drawStartY
+                );
+              }
             } else {
               // Fallback: verschiedene Farben für verschiedene Item-Typen
               switch (item.type) {
