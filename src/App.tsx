@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import './App.css';
-import type { GameState } from './types.ts';
-import { Difficulty, WeaponType } from './types.ts';
+import type { GameState, WallPicture } from './types.ts';
+import { Difficulty, WeaponType, WallPictureType } from './types.ts';
 import {
   createInitialGameState,
   movePlayer,
@@ -297,6 +297,18 @@ function App() {
     setGameState(newState);
   }, [keys]);
 
+  // Hilfsfunktion zum Prüfen, ob auf einer Wand ein Bild ist
+  const findWallPicture = (hitX: number, hitY: number, side: number, wallX: number, pictures: WallPicture[]) => {
+    return pictures.find(pic => {
+      if (pic.x !== hitX || pic.y !== hitY || pic.side !== side) {
+        return false;
+      }
+      // Prüfe ob die wallX Position nahe am offset des Bildes ist
+      const tolerance = 0.15; // Bildbreite
+      return Math.abs(wallX - pic.offset) < tolerance;
+    });
+  };
+
   // Rendering
   const render = useCallback(() => {
     const gameState = gameStateRef.current;
@@ -341,17 +353,83 @@ function App() {
       const drawStart = Math.max(0, -lineHeight / 2 + height / 2);
       const drawEnd = Math.min(height, lineHeight / 2 + height / 2);
 
+      // Berechne Position auf der Wand (0.0 bis 1.0)
+      let wallX: number;
+      if (result.side === 0) {
+        wallX = player.y + result.distance * rayDirY;
+      } else {
+        wallX = player.x + result.distance * rayDirX;
+      }
+      wallX -= Math.floor(wallX);
+
       // Wandfarbe basierend auf Typ und Seite
       let color = result.wallType === 2 ? '#654321' : '#888';
       if (result.side === 1) {
         color = result.wallType === 2 ? '#543210' : '#666';
       }
 
+      // Prüfe ob ein Bild an dieser Wand ist
+      const picture = findWallPicture(result.hitX, result.hitY, result.side, wallX, gameState.currentMap.wallPictures);
+
       // Schatten basierend auf Entfernung
       const brightness = Math.max(0.3, 1 - result.distance / 20);
-      ctx.fillStyle = color;
-      ctx.globalAlpha = brightness;
-      ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+      
+      if (picture && result.distance < 15) {
+        // Rendere Bild
+        const pictureHeight = lineHeight * 0.5; // Bild nimmt 50% der Wandhöhe ein
+        const pictureWidth = pictureHeight * (picture.type === WallPictureType.LANDSCAPE ? 1.5 : 0.7);
+        
+        const pictureDrawStart = height / 2 - pictureHeight / 2;
+        const pictureDrawEnd = height / 2 + pictureHeight / 2;
+
+        // Prüfe ob wir im Bild-Bereich sind
+        const distFromCenter = Math.abs(wallX - picture.offset);
+        const pictureWidthNormalized = 0.15; // Bildbreite auf der Wand
+        
+        if (distFromCenter < pictureWidthNormalized) {
+          // Zeichne erst die Wand
+          ctx.fillStyle = color;
+          ctx.globalAlpha = brightness;
+          ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+          
+          // Dann das Bild darüber
+          let pictureColor: string;
+          switch (picture.type) {
+            case WallPictureType.PORTRAIT:
+              pictureColor = '#c4a060'; // Goldener Rahmen
+              break;
+            case WallPictureType.LANDSCAPE:
+              pictureColor = '#6090c4'; // Blau
+              break;
+            case WallPictureType.ABSTRACT:
+              pictureColor = '#c46090'; // Pink/Lila
+              break;
+          }
+          
+          ctx.fillStyle = pictureColor;
+          ctx.globalAlpha = brightness * 0.9;
+          ctx.fillRect(x, pictureDrawStart, 1, pictureDrawEnd - pictureDrawStart);
+          
+          // Rahmen
+          if (Math.random() < 0.3) { // Nur bei einigen Stripes für Rahmen-Effekt
+            ctx.fillStyle = '#333';
+            ctx.globalAlpha = brightness;
+            ctx.fillRect(x, pictureDrawStart, 1, 2);
+            ctx.fillRect(x, pictureDrawEnd - 2, 1, 2);
+          }
+        } else {
+          // Normale Wand
+          ctx.fillStyle = color;
+          ctx.globalAlpha = brightness;
+          ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+        }
+      } else {
+        // Normale Wand ohne Bild
+        ctx.fillStyle = color;
+        ctx.globalAlpha = brightness;
+        ctx.fillRect(x, drawStart, 1, drawEnd - drawStart);
+      }
+      
       ctx.globalAlpha = 1;
     }
 
@@ -394,7 +472,7 @@ function App() {
       }
       ctx.globalAlpha = 1;
     });
-  }, []);
+  }, [findWallPicture]);
 
   // Game-Loop und Rendering
   useEffect(() => {

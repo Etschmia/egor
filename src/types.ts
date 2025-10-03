@@ -69,12 +69,28 @@ export enum Difficulty {
   HARD = 'HARD'
 }
 
+export enum WallPictureType {
+  PORTRAIT = 'PORTRAIT',
+  LANDSCAPE = 'LANDSCAPE',
+  ABSTRACT = 'ABSTRACT'
+}
+
+export interface WallPicture {
+  id: string;
+  x: number;      // Wand-Kachel X
+  y: number;      // Wand-Kachel Y
+  side: 0 | 1;    // 0 = Nord/Süd Wand, 1 = Ost/West Wand
+  offset: number; // Position auf der Wand (0.0 - 1.0)
+  type: WallPictureType;
+}
+
 export interface GameMap {
   width: number;
   height: number;
   tiles: number[][];
   enemies: Enemy[];
   items: Item[];
+  wallPictures: WallPicture[];
   playerStartX: number;
   playerStartY: number;
   playerStartDirection: number;
@@ -109,4 +125,3 @@ export interface SaveGame {
   timestamp: number;
   gameState: GameState;
 }
-
