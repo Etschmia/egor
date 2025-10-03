@@ -42,6 +42,7 @@ export interface Enemy {
   damage: number;
   speed: number;
   state: 'alive' | 'dying' | 'dead';
+  isAlive?: boolean;
   timeOfDeath?: number;
   direction: number;
   lastAttackTime: number;

@@ -295,7 +295,7 @@ export function fireWeapon(
   return { player, enemies, hit: false, outOfAmmo: false };
 }
 
-export function collectItem(player: Player, items: Item[], gameState?: GameState): { player: Player; notification?: string } {
+export function collectItem(player: Player, items: Item[]): { player: Player; notification?: string } {
   let notification: string | undefined;
 
   items.forEach((item) => {
