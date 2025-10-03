@@ -45,7 +45,6 @@ export interface Enemy {
   lastAttackTime: number;
   attackCooldown: number;
   texture?: CanvasImageSource;
-  texture?: HTMLImageElement;
 }
 
 export enum ItemType {

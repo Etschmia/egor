@@ -439,7 +439,6 @@ function App() {
       if (picture && result.distance < 15) {
         // Rendere Bild
         const pictureHeight = lineHeight * 0.5; // Bild nimmt 50% der Wandhöhe ein
-        const pictureWidth = pictureHeight * (picture.type === WallPictureType.LANDSCAPE ? 1.5 : 0.7);
         
         const pictureDrawStart = height / 2 - pictureHeight / 2;
         const pictureDrawEnd = height / 2 + pictureHeight / 2;

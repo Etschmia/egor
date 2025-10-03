@@ -1,6 +1,6 @@
 import { EnemyType } from './types.ts';
 
-const textures: Partial<Record<EnemyType, HTMLImageElement>> = {};
+const textures: Partial<Record<EnemyType, CanvasImageSource>> = {};
 
 export function loadTextures(): Promise<void[]> {
   textures[EnemyType.ZOMBIE] = createZombieTexture();
@@ -85,7 +85,8 @@ function createGhostTexture(): HTMLCanvasElement {
   canvas.height = 64;
   const ctx = canvas.getContext('2d')!;
   
-  // Weißer Geist
+  // Weißer Geist mit Transparenz
+  ctx.globalAlpha = 0.8;
   ctx.fillStyle = '#F8F8FF';
   ctx.beginPath();
   ctx.arc(32, 24, 20, 0, Math.PI * 2);
@@ -98,6 +99,7 @@ function createGhostTexture(): HTMLCanvasElement {
   ctx.lineTo(52, 44);
   ctx.closePath();
   ctx.fill();
+  ctx.globalAlpha = 1.0;
   
   // Augen
   ctx.fillStyle = '#000000';
@@ -105,12 +107,6 @@ function createGhostTexture(): HTMLCanvasElement {
   ctx.arc(24, 20, 4, 0, Math.PI * 2);
   ctx.arc(40, 20, 4, 0, Math.PI * 2);
   ctx.fill();
-  
-  // Transparenz-Effekt (auf das gesamte Bild anwenden)
-  ctx.globalAlpha = 0.8;
-  ctx.fillStyle = '#F8F8FF';
-  ctx.fillRect(0, 0, 64, 64);
-  ctx.globalAlpha = 1.0;
   
   return canvas;
 }

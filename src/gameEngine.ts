@@ -139,7 +139,7 @@ export function updateEnemies(
     const dy = player.y - enemy.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    if (distance < 15) {
+    if (distance < 15 && distance > 0.1) {
       const moveX = (dx / distance) * enemy.speed * multiplier * deltaTime;
       const moveY = (dy / distance) * enemy.speed * multiplier * deltaTime;
 
@@ -154,14 +154,14 @@ export function updateEnemies(
       }
 
       enemy.direction = Math.atan2(dy, dx);
+    }
 
-      // Angriff wenn nah genug
-      if (distance < 1.5) {
-        const now = Date.now();
-        if (now - enemy.lastAttackTime > enemy.attackCooldown) {
-          player.health -= enemy.damage * multiplier;
-          enemy.lastAttackTime = now;
-        }
+    // Angriff wenn nah genug
+    if (distance < 1.5 && distance > 0.1) {
+      const now = Date.now();
+      if (now - enemy.lastAttackTime > enemy.attackCooldown) {
+        player.health -= enemy.damage * multiplier;
+        enemy.lastAttackTime = now;
       }
     }
   });
@@ -189,14 +189,14 @@ export function fireWeapon(
   let closestEnemy: Enemy | null = null;
   let closestDistance = weapon.range;
 
-  enemies.forEach((enemy) => {
-    if (!enemy.isAlive) return;
+  for (const enemy of enemies) {
+    if (!enemy.isAlive) continue;
 
     const dx = enemy.x - player.x;
     const dy = enemy.y - player.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    if (distance > weapon.range) return;
+    if (distance > weapon.range || distance < 0.1) continue;
 
     // Prüfe ob Gegner in Schussrichtung
     const enemyDirX = dx / distance;
@@ -208,7 +208,7 @@ export function fireWeapon(
       closestEnemy = enemy;
       closestDistance = distance;
     }
-  });
+  }
 
   if (closestEnemy) {
     closestEnemy.health -= weapon.damage;
