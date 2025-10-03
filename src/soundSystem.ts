@@ -85,6 +85,11 @@ class SoundSystem {
     setTimeout(() => this.playTone(350, 0.2, 'sine', 0.2), 100);
   }
 
+  playError() {
+    this.playTone(150, 0.2, 'sawtooth', 0.3);
+    setTimeout(() => this.playTone(100, 0.15, 'sawtooth', 0.25), 150);
+  }
+
   setEnabled(enabled: boolean) {
     this.enabled = enabled;
   }

@@ -285,7 +285,9 @@ function App() {
         lastFireTimeRef.current = now;
 
         // Sound abspielen
-        if (weapon.type === WeaponType.KNIFE) {
+        if (result.outOfAmmo) {
+          soundSystem.playError();
+        } else if (weapon.type === WeaponType.KNIFE) {
           soundSystem.playKnifeAttack();
         } else if (weapon.type === WeaponType.CHAINSAW) {
           soundSystem.playChainsawAttack();

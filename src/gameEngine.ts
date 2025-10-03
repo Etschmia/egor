@@ -174,11 +174,11 @@ export function fireWeapon(
   enemies: Enemy[],
   playerDirX: number,
   playerDirY: number
-): { player: Player; enemies: Enemy[]; hit: boolean; enemyHit?: Enemy } {
+): { player: Player; enemies: Enemy[]; hit: boolean; enemyHit?: Enemy; outOfAmmo?: boolean } {
   const weapon = WEAPONS[player.currentWeapon];
 
   if (weapon.needsAmmo && player.ammo[player.currentWeapon] <= 0) {
-    return { player, enemies, hit: false };
+    return { player, enemies, hit: false, outOfAmmo: true };
   }
 
   if (weapon.needsAmmo) {
@@ -218,10 +218,10 @@ export function fireWeapon(
       // Statistiken aktualisieren
       player.killedEnemies[closestEnemy.type]++;
     }
-    return { player, enemies, hit: true, enemyHit: closestEnemy };
+    return { player, enemies, hit: true, enemyHit: closestEnemy, outOfAmmo: false };
   }
 
-  return { player, enemies, hit: false };
+  return { player, enemies, hit: false, outOfAmmo: false };
 }
 
 export function collectItem(player: Player, items: Item[], gameState?: GameState): { player: Player; notification?: string } {
@@ -315,6 +315,9 @@ export function openDoor(player: Player, tiles: number[][], enemies: Enemy[]): {
   const dirX = Math.cos(player.direction);
   const dirY = Math.sin(player.direction);
 
+  // Erstelle eine tiefe Kopie der tiles-Array für sichere Modifikation
+  const tilesCopy = tiles.map(row => [...row]);
+
   // Prüfe mehrere Positionen vor dem Spieler für bessere Tür-Erkennung
   const checkDistance = 1.8; // Optimaler Abstand für Tür-Erkennung
   const checkPositions = [
@@ -336,28 +339,28 @@ export function openDoor(player: Player, tiles: number[][], enemies: Enemy[]): {
     const mapY = Math.floor(pos.y);
 
     // Debug-Ausgabe für Tür-Erkennung (kann später entfernt werden)
-    console.log(`Tür-Prüfung bei (${mapX}, ${mapY}): Wert = ${tiles[mapY]?.[mapX] || 'undefined'}`);
+    console.log(`Tür-Prüfung bei (${mapX}, ${mapY}): Wert = ${tilesCopy[mapY]?.[mapX] || 'undefined'}`);
 
     // Prüfe ob es eine normale Tür ist (Wert 2)
     if (
       mapX >= 0 &&
-      mapX < tiles[0].length &&
+      mapX < tilesCopy[0].length &&
       mapY >= 0 &&
-      mapY < tiles.length &&
-      tiles[mapY][mapX] === 2
+      mapY < tilesCopy.length &&
+      tilesCopy[mapY][mapX] === 2
     ) {
       // Öffne die Tür (setze auf 0)
-      tiles[mapY][mapX] = 0;
-      return { tiles, doorOpened: true };
+      tilesCopy[mapY][mapX] = 0;
+      return { tiles: tilesCopy, doorOpened: true };
     }
 
     // Prüfe ob es eine Exit-Tür ist (Wert 3)
     if (
       mapX >= 0 &&
-      mapX < tiles[0].length &&
+      mapX < tilesCopy[0].length &&
       mapY >= 0 &&
-      mapY < tiles.length &&
-      tiles[mapY][mapX] === 3
+      mapY < tilesCopy.length &&
+      tilesCopy[mapY][mapX] === 3
     ) {
       // Prüfe ob alle Gegner tot sind
       const allEnemiesDead = enemies.every(enemy => !enemy.isAlive);
@@ -370,14 +373,15 @@ export function openDoor(player: Player, tiles: number[][], enemies: Enemy[]): {
       if (allEnemiesDead) {
         console.log('Exit-Tür wird geöffnet!');
         // Exit-Tür öffnen (setze auf 0)
-        tiles[mapY][mapX] = 0;
-        return { tiles, doorOpened: true, isExitDoor: true };
+        tilesCopy[mapY][mapX] = 0;
+        return { tiles: tilesCopy, doorOpened: true, isExitDoor: true };
       } else {
         console.log('Exit-Tür kann nicht geöffnet werden - Gegner leben noch');
-        return { tiles, doorOpened: false };
+        // Bei Exit-Türen: Wenn nicht alle Gegner tot sind, Tür NICHT öffnen aber auch nicht verschwinden lassen
+        return { tiles: tiles, doorOpened: false };
       }
     }
   }
 
-  return { tiles, doorOpened: false };
+  return { tiles: tiles, doorOpened: false };
 }
