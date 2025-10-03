@@ -368,19 +368,21 @@ export function loadNextLevel(gameState: GameState): GameState {
   gameState.currentLevel = nextLevel;
   gameState.currentMap = level;
   gameState.enemies = JSON.parse(JSON.stringify(level.enemies));
-  gameState.enemies.forEach((enemy: Enemy) => {
-    enemy.texture = getTexture(enemy.type);
-  });
-  gameState.items = JSON.parse(JSON.stringify(level.items));
-  gameState.player.x = level.playerStartX;
-  gameState.player.y = level.playerStartY;
-  gameState.player.direction = level.playerStartDirection;
 
   // Füge einen Hund hinzu
   const dog = createDog(gameState.currentMap.tiles);
   if (dog) {
     gameState.enemies.push(dog);
   }
+
+  gameState.enemies.forEach((enemy: Enemy) => {
+    enemy.texture = getTexture(enemy.type);
+    enemy.state = 'alive';
+  });
+  gameState.items = JSON.parse(JSON.stringify(level.items));
+  gameState.player.x = level.playerStartX;
+  gameState.player.y = level.playerStartY;
+  gameState.player.direction = level.playerStartDirection;
 
   // Benachrichtigung zurücksetzen
   delete gameState.lastItemNotification;
