@@ -1,4 +1,4 @@
-# EGOR - Wolfenstein 3D Klon
+# Hundefelsen
 
 Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
 

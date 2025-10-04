@@ -124,17 +124,21 @@ function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       setKeys((prev) => ({ ...prev, [e.key.toLowerCase()]: true }));
 
-      // Spezielle Tasten
-      if (e.key.toLowerCase() === 'h') {
+      // Prüfe ob der Benutzer gerade in einem Input-Feld tippt
+      const activeElement = document.activeElement;
+      const isTypingInInput = activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA');
+
+      // Spezielle Tasten (nur wenn nicht in einem Input-Feld getippt wird)
+      if (!isTypingInInput && e.key.toLowerCase() === 'h') {
         setGameMode((prev) => (prev === 'help' ? 'playing' : 'help'));
         soundSystem.playMenuSelect();
-      } else if (e.key.toLowerCase() === 'm') {
+      } else if (!isTypingInInput && e.key.toLowerCase() === 'm') {
         setGameMode((prev) => prev === 'playing' ? 'save' : prev);
         soundSystem.playMenuSelect();
-      } else if (e.key.toLowerCase() === 'l') {
+      } else if (!isTypingInInput && e.key.toLowerCase() === 'l') {
         setGameMode((prev) => prev === 'playing' ? 'load' : prev);
         soundSystem.playMenuSelect();
-      } else if (e.key.toLowerCase() === 'p') {
+      } else if (!isTypingInInput && e.key.toLowerCase() === 'p') {
         setGameMode((prev) => {
           if (prev === 'playing') {
             setGameState((state) => state ? { ...state, isPaused: !state.isPaused } : state);
@@ -143,7 +147,7 @@ function App() {
         });
       } else if (e.key === 'Escape') {
         setGameMode((prev) => prev !== 'menu' ? 'playing' : prev);
-      } else if (e.key.toLowerCase() === 'e') {
+      } else if (!isTypingInInput && e.key.toLowerCase() === 'e') {
         // Tür öffnen
         setGameState((prev) => {
           if (prev && gameMode === 'playing' && !prev.isPaused) {
@@ -173,11 +177,11 @@ function App() {
           }
           return prev;
         });
-      } else if (e.key.toLowerCase() === 't') {
+      } else if (!isTypingInInput && e.key.toLowerCase() === 't') {
         // Statistiken-Panel togglen
         setShowStats(prev => !prev);
         soundSystem.playMenuSelect();
-      } else if (e.key.toLowerCase() === 'g') {
+      } else if (!isTypingInInput && e.key.toLowerCase() === 'g') {
         // Debug: Zeige lebende Gegner
         setGameState((prev) => {
           if (prev && gameMode === 'playing' && !prev.isPaused) {
@@ -192,10 +196,11 @@ function App() {
         });
       }
 
-      // Waffen wechseln (1-6)
-      const weaponKeys = ['1', '2', '3', '4', '5', '6'];
-      const keyIndex = weaponKeys.indexOf(e.key);
-      if (keyIndex >= 0) {
+      // Waffen wechseln (1-6) (nur wenn nicht in einem Input-Feld getippt wird)
+      if (!isTypingInInput) {
+        const weaponKeys = ['1', '2', '3', '4', '5', '6'];
+        const keyIndex = weaponKeys.indexOf(e.key);
+        if (keyIndex >= 0) {
         const weaponTypes = [
           WeaponType.KNIFE,
           WeaponType.PISTOL,
@@ -211,6 +216,7 @@ function App() {
           }
           return prev;
         });
+        }
       }
     };
 
