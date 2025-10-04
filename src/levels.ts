@@ -1,4 +1,8 @@
 import { type GameMap, EnemyType, ItemType, WeaponType, WallPictureType, DecorativeObjectType } from './types.ts';
+import {
+  LEVEL_2_VARIANT_1, LEVEL_2_VARIANT_2, LEVEL_2_VARIANT_3, LEVEL_2_VARIANT_4, LEVEL_2_VARIANT_5,
+  LEVEL_3_VARIANT_1, LEVEL_3_VARIANT_2, LEVEL_3_VARIANT_3, LEVEL_3_VARIANT_4, LEVEL_3_VARIANT_5
+} from './levels/index.ts';
 
 // 1 = Wand, 0 = freier Raum, 2 = normale Tür, 3 = Exit-Tür (öffnet sich nur wenn alle Gegner tot sind)
 // Map-Größe: 20x20
@@ -1699,9 +1703,8 @@ export const LEVEL_7: GameMap = {
 // Nested array structure for map variants: LEVELS_WITH_VARIANTS[levelIndex][variantIndex]
 export const LEVELS_WITH_VARIANTS: GameMap[][] = [
   [LEVEL_1_VARIANT_1, LEVEL_1_VARIANT_2, LEVEL_1_VARIANT_3, LEVEL_1_VARIANT_4, LEVEL_1_VARIANT_5],
-  // Levels 2-7 will have variants added in future tasks, for now use single variant
-  [LEVEL_2],
-  [LEVEL_3],
+  [LEVEL_2_VARIANT_1, LEVEL_2_VARIANT_2, LEVEL_2_VARIANT_3, LEVEL_2_VARIANT_4, LEVEL_2_VARIANT_5],
+  [LEVEL_3_VARIANT_1, LEVEL_3_VARIANT_2, LEVEL_3_VARIANT_3, LEVEL_3_VARIANT_4, LEVEL_3_VARIANT_5],
   [LEVEL_4],
   [LEVEL_5],
   [LEVEL_6],

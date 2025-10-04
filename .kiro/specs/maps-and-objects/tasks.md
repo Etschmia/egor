@@ -88,7 +88,7 @@
     - Erweitere `updateEnemies()` um Kollisionsprüfung für Gegner
     - _Requirements: 7.2, 7.3, 7.5_
 
-- [ ] 8. Erstelle Map-Varianten für Level 2-3
+- [x] 8. Erstelle Map-Varianten für Level 2-3
   - Erstelle 5 Varianten für Level 2 (20x20)
   - Erstelle 5 Varianten für Level 3 (20x20)
   - Füge zu LEVELS_WITH_VARIANTS hinzu
