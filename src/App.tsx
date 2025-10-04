@@ -660,9 +660,10 @@ function App() {
             let adjustedSpriteHeight = spriteHeight;
             
             if (decorativeObj.type === DecorativeObjectType.CEILING_LIGHT) {
-              // Leuchten erscheinen an der Decke (oberer Bildschirmbereich)
+              // Leuchten erscheinen an der Decke - relativ zur Perspektive
               adjustedSpriteHeight = spriteHeight * 0.6; // Kleinere Größe
-              adjustedDrawStartY = height * 0.15; // Oberer Bereich
+              // Berechne Position relativ zur Sprite-Höhe, damit sie mit der Entfernung skaliert
+              adjustedDrawStartY = -spriteHeight / 2 + height / 2 - spriteHeight * 0.8; // An der Decke fixiert
             } else if (decorativeObj.type === DecorativeObjectType.SKELETON) {
               // Gerippe liegen auf dem Boden (unterer Bildschirmbereich)
               adjustedSpriteHeight = spriteHeight * 0.4; // Flacher
