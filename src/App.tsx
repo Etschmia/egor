@@ -12,7 +12,9 @@ import {
   collectItem,
   checkLevelComplete,
   loadNextLevel,
-  openDoor
+  openDoor,
+  startJump,
+  updateJump
 } from './gameEngine.ts';
 import { castRay, getSpritesToRender } from './raycasting.ts';
 import { WEAPONS } from './weapons.ts';
@@ -194,6 +196,15 @@ function App() {
           }
           return prev;
         });
+      } else if (!isTypingInInput && e.key.toLowerCase() === 'f') {
+        // Springen
+        setGameState((prev) => {
+          if (prev && gameMode === 'playing' && !prev.isPaused) {
+            soundSystem.playPickup(); // Sound-Feedback für Sprung
+            return { ...prev, player: startJump(prev.player) };
+          }
+          return prev;
+        });
       }
 
       // Waffen wechseln (1-6) (nur wenn nicht in einem Input-Feld getippt wird)
@@ -247,6 +258,9 @@ function App() {
     lastTimeRef.current = now;
 
     let newState = { ...gameState };
+
+    // Update Jump-Status
+    newState.player = updateJump(newState.player);
 
     // Bewegung
     const moveSpeed = 0.05 * deltaTime;
@@ -453,13 +467,22 @@ function App() {
     const width = canvas.width;
     const height = canvas.height;
 
-    // Himmel und Boden
-    ctx.fillStyle = '#333';
-    ctx.fillRect(0, 0, width, height / 2);
-    ctx.fillStyle = '#111';
-    ctx.fillRect(0, height / 2, width, height / 2);
-
     const player = gameState.player;
+    
+    // Berechne Jump-Offset für visuelle Darstellung
+    let jumpOffset = 0;
+    if (player.isJumping && player.jumpStartTime && player.jumpDuration) {
+      const elapsed = Date.now() - player.jumpStartTime;
+      const progress = elapsed / player.jumpDuration;
+      // Parabelförmige Bewegung: hoch und wieder runter
+      jumpOffset = Math.sin(progress * Math.PI) * 80; // Max 80 Pixel nach oben
+    }
+
+    // Himmel und Boden (mit Jump-Offset)
+    ctx.fillStyle = '#333';
+    ctx.fillRect(0, 0, width, height / 2 + jumpOffset);
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, height / 2 + jumpOffset, width, height / 2 - jumpOffset);
     const dirX = Math.cos(player.direction);
     const dirY = Math.sin(player.direction);
     const planeX = Math.cos(player.direction + Math.PI / 2) * 0.66;
@@ -478,8 +501,8 @@ function App() {
       zBuffer[x] = result.distance;
 
       const lineHeight = height / result.distance;
-      const drawStart = Math.max(0, -lineHeight / 2 + height / 2);
-      const drawEnd = Math.min(height, lineHeight / 2 + height / 2);
+      const drawStart = Math.max(0, -lineHeight / 2 + height / 2 + jumpOffset);
+      const drawEnd = Math.min(height, lineHeight / 2 + height / 2 + jumpOffset);
 
       // Berechne Position auf der Wand (0.0 bis 1.0)
       let wallX: number;
@@ -592,7 +615,7 @@ function App() {
       const spriteScreenX = ((width / 2) * (1 + sprite.x / sprite.y));
       let spriteHeight = Math.abs(height / sprite.y);
       let spriteWidth = spriteHeight;
-      let drawStartY = -spriteHeight / 2 + height / 2;
+      let drawStartY = -spriteHeight / 2 + height / 2 + jumpOffset;
 
       const enemy = sprite.type === 'enemy' ? sprite.object as Enemy : null;
 
@@ -663,20 +686,20 @@ function App() {
               // Leuchten erscheinen an der Decke - relativ zur Perspektive
               adjustedSpriteHeight = spriteHeight * 0.6; // Kleinere Größe
               // Berechne Position relativ zur Sprite-Höhe, damit sie mit der Entfernung skaliert
-              adjustedDrawStartY = -spriteHeight / 2 + height / 2 - spriteHeight * 0.8; // An der Decke fixiert
+              adjustedDrawStartY = -spriteHeight / 2 + height / 2 + jumpOffset - spriteHeight * 0.8; // An der Decke fixiert
             } else if (decorativeObj.type === DecorativeObjectType.SKELETON) {
               // Gerippe liegen auf dem Boden (unterer Bildschirmbereich)
               adjustedSpriteHeight = spriteHeight * 0.4; // Flacher
-              adjustedDrawStartY = height / 2 + spriteHeight * 0.3; // Nach unten verschoben
+              adjustedDrawStartY = height / 2 + jumpOffset + spriteHeight * 0.3; // Nach unten verschoben
             } else if (decorativeObj.type === DecorativeObjectType.TABLE ||
               decorativeObj.type === DecorativeObjectType.CHAIR ||
               decorativeObj.type === DecorativeObjectType.BENCH) {
               // Tische, Stühle und Bänke stehen auf dem Boden (wie Skelette)
-              adjustedDrawStartY = height / 2 + spriteHeight * 0.3;
+              adjustedDrawStartY = height / 2 + jumpOffset + spriteHeight * 0.3;
             } else if (decorativeObj.renderHeight !== undefined) {
               // Verwende spezifische Render-Höhe wenn angegeben (z.B. Weinflaschen auf Tischen)
               // Starte von der Bodenposition und hebe das Objekt basierend auf renderHeight an
-              adjustedDrawStartY = height / 2 + spriteHeight * 0.3 - (decorativeObj.renderHeight * spriteHeight);
+              adjustedDrawStartY = height / 2 + jumpOffset + spriteHeight * 0.3 - (decorativeObj.renderHeight * spriteHeight);
             }
 
             const adjustedDrawEndY = adjustedDrawStartY + adjustedSpriteHeight;
@@ -860,6 +883,10 @@ function App() {
                 <div className="help-key">
                   <span className="help-key-button">← →</span>
                   <span>Umschauen</span>
+                </div>
+                <div className="help-key">
+                  <span className="help-key-button">F</span>
+                  <span>Springen (über Hindernisse)</span>
                 </div>
               </div>
 

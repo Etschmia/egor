@@ -136,6 +136,9 @@ export interface Player {
   score: number;
   collectedItems: Record<ItemType, number>;
   killedEnemies: Record<EnemyType, number>;
+  isJumping?: boolean;
+  jumpStartTime?: number;
+  jumpDuration?: number;
 }
 
 export interface GameState {

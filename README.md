@@ -24,6 +24,7 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
   - **Geister** (weiß): Schnelle, schwer zu treffende Gegner mit geringerer Gesundheit
   - **Hunde** (braun): Schnelle, aggressive Gegner die bellen können
 - **Dekorative Objekte**: Vasen, Kisten, Bänke, Tische, Stühle, Weinflaschen, Skelette und Deckenleuchten
+- **Sprung-Mechanik**: Springe mit **F** über Hindernisse wie Tische und Stühle, um an schwer erreichbare Items zu gelangen - mit visueller Kamera-Bewegung!
 - **Wandbilder**: Portraits, Landschaften und abstrakte Kunst zur Dekoration
 - **Items**: Gesundheitspakete, Munition, Schätze und Waffen mit Benachrichtigungen beim Sammeln
 - **Statistiken**: Übersicht über gesammelte Items und besiegte Gegner (Taste **T**)
@@ -45,9 +46,10 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
 ### Bewegung
 - **W** / **↑**: Vorwärts
 - **S** / **↓**: Rückwärts
-- **A**: Links bewegen (Strafe)
-- **D**: Rechts bewegen (Strafe)
+- **A**: Links bewegen (seitwärts)
+- **D**: Rechts bewegen (seitwärts)
 - **←** / **→**: Umschauen
+- **F**: Springen (über Hindernisse wie Tische und Stühle)
 
 ### Interaktion
 - **E**: Tür öffnen (wenn man davor steht)

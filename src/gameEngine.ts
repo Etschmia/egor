@@ -209,29 +209,63 @@ export function movePlayer(
   const newY = player.y + moveY;
 
   const collisionMargin = 0.2;
+  
+  // Während des Sprungs ignoriere Kollisionen mit dekorativen Objekten
+  const ignoreDecorativeCollisions = player.isJumping || false;
 
-  if (!checkCollision(newX, player.y, tiles) && !checkDecorativeObjectCollision(newX, player.y, decorativeObjects)) {
+  if (!checkCollision(newX, player.y, tiles) && (ignoreDecorativeCollisions || !checkDecorativeObjectCollision(newX, player.y, decorativeObjects))) {
     if (
       !checkCollision(newX, player.y + collisionMargin, tiles) &&
       !checkCollision(newX, player.y - collisionMargin, tiles) &&
-      !checkDecorativeObjectCollision(newX, player.y + collisionMargin, decorativeObjects) &&
-      !checkDecorativeObjectCollision(newX, player.y - collisionMargin, decorativeObjects)
+      (ignoreDecorativeCollisions || (!checkDecorativeObjectCollision(newX, player.y + collisionMargin, decorativeObjects) &&
+      !checkDecorativeObjectCollision(newX, player.y - collisionMargin, decorativeObjects)))
     ) {
       player.x = newX;
     }
   }
 
-  if (!checkCollision(player.x, newY, tiles) && !checkDecorativeObjectCollision(player.x, newY, decorativeObjects)) {
+  if (!checkCollision(player.x, newY, tiles) && (ignoreDecorativeCollisions || !checkDecorativeObjectCollision(player.x, newY, decorativeObjects))) {
     if (
       !checkCollision(player.x + collisionMargin, newY, tiles) &&
       !checkCollision(player.x - collisionMargin, newY, tiles) &&
-      !checkDecorativeObjectCollision(player.x + collisionMargin, newY, decorativeObjects) &&
-      !checkDecorativeObjectCollision(player.x - collisionMargin, newY, decorativeObjects)
+      (ignoreDecorativeCollisions || (!checkDecorativeObjectCollision(player.x + collisionMargin, newY, decorativeObjects) &&
+      !checkDecorativeObjectCollision(player.x - collisionMargin, newY, decorativeObjects)))
     ) {
       player.y = newY;
     }
   }
 
+  return player;
+}
+
+// Sprung-Funktion
+export function startJump(player: Player): Player {
+  // Nur springen wenn nicht bereits am Springen
+  if (!player.isJumping) {
+    return {
+      ...player,
+      isJumping: true,
+      jumpStartTime: Date.now(),
+      jumpDuration: 400 // 400ms Sprungdauer
+    };
+  }
+  return player;
+}
+
+// Update Jump-Status
+export function updateJump(player: Player): Player {
+  if (player.isJumping && player.jumpStartTime && player.jumpDuration) {
+    const elapsed = Date.now() - player.jumpStartTime;
+    if (elapsed >= player.jumpDuration) {
+      // Sprung beendet
+      return {
+        ...player,
+        isJumping: false,
+        jumpStartTime: undefined,
+        jumpDuration: undefined
+      };
+    }
+  }
   return player;
 }
 
