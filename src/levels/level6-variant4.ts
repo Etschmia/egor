@@ -79,7 +79,7 @@ export const LEVEL_6_VARIANT_4: GameMap = {
     { id: 'do19', type: DecorativeObjectType.TABLE, x: 14.5, y: 8.5, colorVariant: 0.5, collisionRadius: 0.45 },
     { id: 'do20', type: DecorativeObjectType.CHAIR, x: 14.5, y: 9.5, colorVariant: 0.5, collisionRadius: 0.3 },
     { id: 'do21', type: DecorativeObjectType.TABLE, x: 10.5, y: 15.5, colorVariant: 0.5, collisionRadius: 0.45 },
-    { id: 'do22', type: DecorativeObjectType.WINE_BOTTLE, x: 10.5, y: 15.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.8, parentId: 'do21' },
+    { id: 'do22', type: DecorativeObjectType.WINE_BOTTLE, x: 10.5, y: 15.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.5, parentId: 'do21' },
     { id: 'do23', type: DecorativeObjectType.TABLE, x: 14.5, y: 15.5, colorVariant: 0.5, collisionRadius: 0.45 },
     { id: 'do24', type: DecorativeObjectType.CHAIR, x: 14.5, y: 14.5, colorVariant: 0.5, collisionRadius: 0.3 },
     // Skeletons

@@ -76,7 +76,7 @@ export const LEVEL_7_VARIANT_1: GameMap = {
     { id: 'do17', type: DecorativeObjectType.TABLE, x: 9.5, y: 7.5, colorVariant: 0.5, collisionRadius: 0.45 },
     { id: 'do18', type: DecorativeObjectType.CHAIR, x: 9.5, y: 8.5, colorVariant: 0.5, collisionRadius: 0.3 },
     { id: 'do19', type: DecorativeObjectType.TABLE, x: 15.5, y: 7.5, colorVariant: 0.5, collisionRadius: 0.45 },
-    { id: 'do20', type: DecorativeObjectType.WINE_BOTTLE, x: 15.5, y: 7.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.8, parentId: 'do19' },
+    { id: 'do20', type: DecorativeObjectType.WINE_BOTTLE, x: 15.5, y: 7.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.5, parentId: 'do19' },
     { id: 'do21', type: DecorativeObjectType.CHAIR, x: 15.5, y: 8.5, colorVariant: 0.5, collisionRadius: 0.3 },
     { id: 'do22', type: DecorativeObjectType.TABLE, x: 11.5, y: 11.5, colorVariant: 0.5, collisionRadius: 0.45 },
     { id: 'do23', type: DecorativeObjectType.TABLE, x: 13.5, y: 11.5, colorVariant: 0.5, collisionRadius: 0.45 },

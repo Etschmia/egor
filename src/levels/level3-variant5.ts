@@ -71,7 +71,7 @@ export const LEVEL_3_VARIANT_5: GameMap = {
     { id: 'do18', type: DecorativeObjectType.CHAIR, x: 11.5, y: 4.5, colorVariant: 0.5, collisionRadius: 0.3 },
     // Room furniture (left rooms)
     { id: 'do19', type: DecorativeObjectType.TABLE, x: 4.5, y: 7.5, colorVariant: 0.5, collisionRadius: 0.45 },
-    { id: 'do20', type: DecorativeObjectType.WINE_BOTTLE, x: 4.5, y: 7.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.8, parentId: 'do19' },
+    { id: 'do20', type: DecorativeObjectType.WINE_BOTTLE, x: 4.5, y: 7.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.5, parentId: 'do19' },
     { id: 'do21', type: DecorativeObjectType.TABLE, x: 4.5, y: 12.5, colorVariant: 0.5, collisionRadius: 0.45 },
     // Room furniture (right rooms)
     { id: 'do22', type: DecorativeObjectType.TABLE, x: 15.5, y: 7.5, colorVariant: 0.5, collisionRadius: 0.45 },

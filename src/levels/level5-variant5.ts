@@ -72,7 +72,7 @@ export const LEVEL_5_VARIANT_5: GameMap = {
     { id: 'do16', type: DecorativeObjectType.TABLE, x: 10.5, y: 9.5, colorVariant: 0.5, collisionRadius: 0.45 },
     { id: 'do17', type: DecorativeObjectType.CHAIR, x: 10.5, y: 10.5, colorVariant: 0.5, collisionRadius: 0.3 },
     { id: 'do18', type: DecorativeObjectType.TABLE, x: 11.5, y: 12.5, colorVariant: 0.5, collisionRadius: 0.45 },
-    { id: 'do19', type: DecorativeObjectType.WINE_BOTTLE, x: 11.5, y: 12.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.8, parentId: 'do18' },
+    { id: 'do19', type: DecorativeObjectType.WINE_BOTTLE, x: 11.5, y: 12.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.5, parentId: 'do18' },
     { id: 'do20', type: DecorativeObjectType.CHAIR, x: 11.5, y: 13.5, colorVariant: 0.5, collisionRadius: 0.3 },
     // Skeletons
     { id: 'do21', type: DecorativeObjectType.SKELETON, x: 11.5, y: 6.5, colorVariant: 0.5, collisionRadius: 0.2 },
