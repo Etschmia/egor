@@ -768,14 +768,54 @@ function createHealthSmallTexture(): HTMLCanvasElement {
   canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
-  // Weißes Kreuz auf rotem Hintergrund
-  ctx.fillStyle = '#FF0000';
+  // --- Verbessertes kleines Medi-Pack mit 3D-Effekt ---
+
+  // Dunkler Rand für bessere Definition
+  ctx.fillStyle = '#8B0000'; // Dunkelrot
   ctx.fillRect(0, 0, 32, 32);
 
-  // Weißes Kreuz
+  // 3D-Box-Effekt mit Schattierungen - Hauptkörper
+  const boxGradient = ctx.createLinearGradient(2, 2, 30, 30);
+  boxGradient.addColorStop(0, '#FF4444'); // Hellrot (Highlight)
+  boxGradient.addColorStop(0.5, '#FF0000'); // Rot
+  boxGradient.addColorStop(1, '#CC0000'); // Dunkelrot (Schatten)
+  ctx.fillStyle = boxGradient;
+  ctx.fillRect(2, 2, 28, 28);
+
+  // Schatten für 3D-Effekt (unten und rechts)
+  ctx.fillStyle = '#8B0000';
+  ctx.fillRect(2, 29, 28, 1); // Unten
+  ctx.fillRect(29, 2, 1, 28); // Rechts
+
+  // Zusätzliche Schattierung für mehr Tiefe
+  ctx.fillStyle = 'rgba(139, 0, 0, 0.5)';
+  ctx.fillRect(3, 28, 26, 1);
+  ctx.fillRect(28, 3, 1, 26);
+
+  // Weiße Highlights für Plastik-Glanz-Effekt (oben und links)
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(12, 6, 8, 20);  // Vertikaler Balken
-  ctx.fillRect(6, 12, 20, 8);  // Horizontaler Balken
+  ctx.fillRect(2, 2, 26, 1); // Oben
+  ctx.fillRect(2, 2, 1, 26); // Links
+
+  // Zusätzliche Highlights für mehr Glanz
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.fillRect(3, 3, 24, 1);
+  ctx.fillRect(3, 3, 1, 24);
+
+  // Deutliches weißes Kreuz auf rotem Hintergrund
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(13, 7, 6, 18);  // Vertikaler Balken
+  ctx.fillRect(7, 13, 18, 6);  // Horizontaler Balken
+
+  // Schatten am Kreuz für 3D-Effekt
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+  ctx.fillRect(13, 24, 6, 1); // Schatten unten am vertikalen Balken
+  ctx.fillRect(24, 13, 1, 6); // Schatten rechts am horizontalen Balken
+
+  // Highlights am Kreuz für Plastik-Effekt
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.fillRect(13, 7, 6, 1); // Highlight oben am vertikalen Balken
+  ctx.fillRect(7, 13, 1, 6); // Highlight links am horizontalen Balken
 
   return canvas;
 }
@@ -786,16 +826,87 @@ function createHealthLargeTexture(): HTMLCanvasElement {
   canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
-  // Roter Hintergrund mit weißem Rand
-  ctx.fillStyle = '#CC0000';
+  // --- Verbessertes großes Medi-Pack mit 3D-Effekt und visuellen Größenunterschieden ---
+
+  // Dunkler Rand für bessere Definition (dicker als beim kleinen Pack)
+  ctx.fillStyle = '#5A0000'; // Sehr dunkelrot
   ctx.fillRect(0, 0, 32, 32);
-  ctx.fillStyle = '#FF4444';
+
+  // Zweiter Rand für mehr Tiefe
+  ctx.fillStyle = '#8B0000'; // Dunkelrot
+  ctx.fillRect(1, 1, 30, 30);
+
+  // 3D-Box-Effekt mit Schattierungen - Hauptkörper
+  const boxGradient = ctx.createLinearGradient(2, 2, 30, 30);
+  boxGradient.addColorStop(0, '#FF4444'); // Hellrot (Highlight)
+  boxGradient.addColorStop(0.3, '#FF0000'); // Rot
+  boxGradient.addColorStop(0.7, '#CC0000'); // Dunkelrot
+  boxGradient.addColorStop(1, '#8B0000'); // Sehr dunkelrot (Schatten)
+  ctx.fillStyle = boxGradient;
   ctx.fillRect(2, 2, 28, 28);
 
-  // Weißes Kreuz (größer als kleines)
+  // Stärkere Schatten für 3D-Effekt (unten und rechts)
+  ctx.fillStyle = '#5A0000';
+  ctx.fillRect(2, 29, 28, 1); // Unten
+  ctx.fillRect(29, 2, 1, 28); // Rechts
+  ctx.fillRect(3, 28, 26, 1); // Zusätzlicher Schatten unten
+  ctx.fillRect(28, 3, 1, 26); // Zusätzlicher Schatten rechts
+
+  // Noch mehr Schattierung für Tiefe
+  ctx.fillStyle = 'rgba(90, 0, 0, 0.6)';
+  ctx.fillRect(4, 27, 24, 1);
+  ctx.fillRect(27, 4, 1, 24);
+
+  // Weiße Highlights für Plastik-Glanz-Effekt (oben und links)
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(10, 4, 12, 24);  // Vertikaler Balken
-  ctx.fillRect(4, 10, 24, 12);  // Horizontaler Balken
+  ctx.fillRect(2, 2, 26, 2); // Oben (dicker)
+  ctx.fillRect(2, 2, 2, 26); // Links (dicker)
+
+  // Zusätzliche Highlights für mehr Glanz
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+  ctx.fillRect(4, 4, 22, 1);
+  ctx.fillRect(4, 4, 1, 22);
+
+  // Sekundäre Highlights für starken Plastik-Effekt
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  ctx.fillRect(5, 5, 20, 1);
+  ctx.fillRect(5, 5, 1, 20);
+
+  // Deutliches weißes Kreuz (dickere Balken als beim kleinen Pack)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(11, 5, 10, 22);  // Vertikaler Balken (dicker)
+  ctx.fillRect(5, 11, 22, 10);  // Horizontaler Balken (dicker)
+
+  // Schatten am Kreuz für 3D-Effekt
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillRect(11, 26, 10, 1); // Schatten unten am vertikalen Balken
+  ctx.fillRect(26, 11, 1, 10); // Schatten rechts am horizontalen Balken
+  ctx.fillRect(12, 25, 8, 1); // Zusätzlicher Schatten
+  ctx.fillRect(25, 12, 1, 8); // Zusätzlicher Schatten
+
+  // Starke Highlights am Kreuz für Plastik-Effekt
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.fillRect(11, 5, 10, 2); // Highlight oben am vertikalen Balken (dicker)
+  ctx.fillRect(5, 11, 2, 10); // Highlight links am horizontalen Balken (dicker)
+
+  // Sekundäre Highlights am Kreuz
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+  ctx.fillRect(12, 7, 8, 1);
+  ctx.fillRect(7, 12, 1, 8);
+
+  // Zusätzliche Details für "großes" Pack - Metallverschlüsse
+  ctx.fillStyle = '#C0C0C0'; // Silber
+  ctx.fillRect(6, 6, 2, 2); // Oben links
+  ctx.fillRect(24, 6, 2, 2); // Oben rechts
+  ctx.fillRect(6, 24, 2, 2); // Unten links
+  ctx.fillRect(24, 24, 2, 2); // Unten rechts
+
+  // Glanzpunkte auf Metallverschlüssen
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(6, 6, 1, 1);
+  ctx.fillRect(24, 6, 1, 1);
+  ctx.fillRect(6, 24, 1, 1);
+  ctx.fillRect(24, 24, 1, 1);
 
   return canvas;
 }
@@ -806,58 +917,164 @@ function createTreasureTexture(): HTMLCanvasElement {
   canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
-  // --- Detaillierterer Schatz (Kelch) ---
+  // --- Detaillierter Kelch mit organischen Kurven und 3D-Effekt ---
 
-  // Farbverlauf für goldenen Effekt
-  const gradient = ctx.createLinearGradient(0, 0, 32, 32);
-  gradient.addColorStop(0, '#FFD700'); // Gold
-  gradient.addColorStop(0.3, '#FFFFE0'); // Hellgelb (Glanz)
-  gradient.addColorStop(0.6, '#B8860B'); // Dunkelgold
-  gradient.addColorStop(1, '#FFD700');
-
-  ctx.fillStyle = gradient;
-  ctx.strokeStyle = '#422A00'; // Dunkelbrauner Rand
-  ctx.lineWidth = 1;
-
-  // Kelchform
+  // Basis des Kelchs mit goldenem Farbverlauf
+  const baseGradient = ctx.createLinearGradient(10, 26, 22, 30);
+  baseGradient.addColorStop(0, '#FFD700'); // Gold
+  baseGradient.addColorStop(0.5, '#FFA500'); // Orange
+  baseGradient.addColorStop(1, '#B8860B'); // Dunkelgold
+  ctx.fillStyle = baseGradient;
+  
   ctx.beginPath();
-  ctx.moveTo(6, 28);
-  ctx.lineTo(26, 28); // Basis
-  ctx.lineTo(24, 24);
-  ctx.lineTo(8, 24);
+  ctx.moveTo(10, 28);
+  ctx.bezierCurveTo(10, 30, 22, 30, 22, 28); // Untere Kurve
+  ctx.lineTo(20, 24);
+  ctx.lineTo(12, 24);
   ctx.closePath();
   ctx.fill();
+  
+  // Dunkler Rand für 3D-Effekt an der Basis
+  ctx.strokeStyle = '#6B4A0A';
+  ctx.lineWidth = 1;
   ctx.stroke();
+  
+  // Schatten unter der Basis
+  ctx.fillStyle = 'rgba(107, 74, 10, 0.5)';
+  ctx.beginPath();
+  ctx.ellipse(16, 30, 6, 1.5, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-
-  // Stiel
+  // Stiel mit Farbverlauf und organischer Form
+  const stemGradient = ctx.createLinearGradient(14, 24, 18, 12);
+  stemGradient.addColorStop(0, '#B8860B'); // Dunkelgold
+  stemGradient.addColorStop(0.3, '#FFA500'); // Orange
+  stemGradient.addColorStop(0.7, '#FFD700'); // Gold
+  stemGradient.addColorStop(1, '#FFA500'); // Orange
+  ctx.fillStyle = stemGradient;
+  
   ctx.beginPath();
   ctx.moveTo(14, 24);
-  ctx.lineTo(14, 12);
+  ctx.bezierCurveTo(13, 18, 13, 16, 14, 12); // Linke Seite mit Kurve
   ctx.lineTo(18, 12);
-  ctx.lineTo(18, 24);
+  ctx.bezierCurveTo(19, 16, 19, 18, 18, 24); // Rechte Seite mit Kurve
   ctx.closePath();
   ctx.fill();
+  
+  // Dunkler Rand am Stiel
+  ctx.strokeStyle = '#6B4A0A';
+  ctx.lineWidth = 0.8;
+  ctx.stroke();
+  
+  // Highlight auf dem Stiel (links)
+  ctx.fillStyle = '#FFFFE0';
+  ctx.fillRect(14.5, 14, 1, 8);
+
+  // Knauf am Stiel (dekoratives Element)
+  const knobGradient = ctx.createRadialGradient(16, 18, 1, 16, 18, 3);
+  knobGradient.addColorStop(0, '#FFFFE0'); // Helles Highlight
+  knobGradient.addColorStop(0.5, '#FFD700'); // Gold
+  knobGradient.addColorStop(1, '#B8860B'); // Dunkelgold
+  ctx.fillStyle = knobGradient;
+  ctx.beginPath();
+  ctx.ellipse(16, 18, 3, 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#6B4A0A';
+  ctx.lineWidth = 0.5;
   ctx.stroke();
 
-
-  // Oberteil des Kelchs
+  // Oberteil des Kelchs (Schale) mit organischen Kurven
+  const cupGradient = ctx.createRadialGradient(16, 8, 2, 16, 8, 12);
+  cupGradient.addColorStop(0, '#FFFFE0'); // Helles Zentrum (Highlight)
+  cupGradient.addColorStop(0.3, '#FFD700'); // Gold
+  cupGradient.addColorStop(0.6, '#FFA500'); // Orange
+  cupGradient.addColorStop(1, '#B8860B'); // Dunkelgold (Schatten)
+  ctx.fillStyle = cupGradient;
+  
   ctx.beginPath();
   ctx.moveTo(8, 12);
-  ctx.bezierCurveTo(4, 0, 28, 0, 24, 12);
+  // Linke Seite mit eleganter Kurve
+  ctx.bezierCurveTo(6, 10, 5, 6, 8, 4);
+  ctx.bezierCurveTo(10, 2, 12, 2, 16, 3);
+  // Rechte Seite mit eleganter Kurve
+  ctx.bezierCurveTo(20, 2, 22, 2, 24, 4);
+  ctx.bezierCurveTo(27, 6, 26, 10, 24, 12);
   ctx.closePath();
   ctx.fill();
+  
+  // Dunkler Rand für 3D-Effekt
+  ctx.strokeStyle = '#6B4A0A';
+  ctx.lineWidth = 1;
   ctx.stroke();
-
-
-  // Edelstein
-  ctx.fillStyle = '#FF0000'; // Rot
-  ctx.strokeStyle = '#8B0000'; // Dunkelrot
+  
+  // Innere Schattierung für Tiefe
+  ctx.fillStyle = 'rgba(184, 134, 11, 0.4)';
   ctx.beginPath();
-  ctx.arc(16, 18, 3, 0, Math.PI * 2);
+  ctx.moveTo(10, 12);
+  ctx.bezierCurveTo(10, 10, 12, 8, 16, 8);
+  ctx.bezierCurveTo(20, 8, 22, 10, 22, 12);
+  ctx.closePath();
   ctx.fill();
-  ctx.stroke();
 
+  // Glanzlichter auf der Schale (mehrere für metallischen Effekt)
+  ctx.fillStyle = '#FFFFE0';
+  // Hauptglanzlicht links
+  ctx.beginPath();
+  ctx.ellipse(11, 6, 2, 3, -0.3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Kleineres Glanzlicht rechts
+  ctx.beginPath();
+  ctx.ellipse(20, 7, 1.5, 2, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Sehr helles Highlight (Spitzlicht)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.arc(10, 5, 1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Edelstein (roter Rubin) auf dem Knauf
+  const gemGradient = ctx.createRadialGradient(16, 18, 0.5, 16, 18, 2);
+  gemGradient.addColorStop(0, '#FF6B6B'); // Helles Rot (Glanz)
+  gemGradient.addColorStop(0.5, '#FF0000'); // Rot
+  gemGradient.addColorStop(1, '#8B0000'); // Dunkelrot
+  ctx.fillStyle = gemGradient;
+  ctx.beginPath();
+  ctx.arc(16, 18, 2, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Dunkler Rand am Edelstein
+  ctx.strokeStyle = '#5A0000';
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+  
+  // Glanzpunkt auf dem Edelstein
+  ctx.fillStyle = '#FFB6C1';
+  ctx.beginPath();
+  ctx.arc(15.5, 17.5, 0.8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Zusätzlicher blauer Edelstein auf der Schale (Akzent)
+  const blueGemGradient = ctx.createRadialGradient(16, 6, 0.3, 16, 6, 1.5);
+  blueGemGradient.addColorStop(0, '#87CEEB'); // Hellblau (Glanz)
+  blueGemGradient.addColorStop(0.5, '#0000FF'); // Blau
+  blueGemGradient.addColorStop(1, '#00008B'); // Dunkelblau
+  ctx.fillStyle = blueGemGradient;
+  ctx.beginPath();
+  ctx.arc(16, 6, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Dunkler Rand am blauen Edelstein
+  ctx.strokeStyle = '#000080';
+  ctx.lineWidth = 0.4;
+  ctx.stroke();
+  
+  // Glanzpunkt auf dem blauen Edelstein
+  ctx.fillStyle = '#ADD8E6';
+  ctx.beginPath();
+  ctx.arc(15.7, 5.7, 0.5, 0, Math.PI * 2);
+  ctx.fill();
 
   return canvas;
 }
@@ -868,29 +1085,146 @@ function createAmmoTexture(): HTMLCanvasElement {
   canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
-  // --- Detailliertere Munitionskiste ---
+  // --- Militärische Munitionskiste mit detailliertem 3D-Effekt ---
 
-  // Box-Körper mit Farbverlauf für 3D-Effekt
-  const gradient = ctx.createLinearGradient(0, 0, 32, 32);
-  gradient.addColorStop(0, '#556B2F'); // Dunkelolivgrün
-  gradient.addColorStop(1, '#8FBC8F'); // Helles Seegrün
-  ctx.fillStyle = gradient;
-  ctx.fillRect(4, 8, 24, 20);
+  // Hauptkörper der Kiste mit Farbverlauf für 3D-Effekt
+  const boxGradient = ctx.createLinearGradient(4, 10, 28, 28);
+  boxGradient.addColorStop(0, '#6B8E23'); // Olivgrün (Highlight)
+  boxGradient.addColorStop(0.5, '#556B2F'); // Dunkelolivgrün
+  boxGradient.addColorStop(1, '#3A4A1F'); // Sehr dunkel (Schatten)
+  ctx.fillStyle = boxGradient;
+  ctx.fillRect(4, 10, 24, 18);
 
-  // Deckel der Box
-  ctx.fillStyle = '#3A4A1F';
+  // Schattierungen für Tiefenwirkung - rechte Seite
+  ctx.fillStyle = '#2A3A0F';
+  ctx.fillRect(27, 11, 1, 17); // Rechter Rand
+  ctx.fillRect(26, 12, 1, 15); // Zusätzlicher Schatten
+
+  // Schattierungen für Tiefenwirkung - untere Seite
+  ctx.fillStyle = '#2A3A0F';
+  ctx.fillRect(5, 27, 22, 1); // Unterer Rand
+  ctx.fillRect(6, 26, 20, 1); // Zusätzlicher Schatten
+
+  // Highlights für 3D-Effekt - obere und linke Seite
+  ctx.fillStyle = '#7A9E33';
+  ctx.fillRect(4, 10, 23, 1); // Oberer Rand
+  ctx.fillRect(4, 11, 1, 16); // Linker Rand
+
+  // Deckel mit dunklerer Farbe
+  const lidGradient = ctx.createLinearGradient(2, 6, 30, 10);
+  lidGradient.addColorStop(0, '#4A5A2F'); // Mittleres Olivgrün
+  lidGradient.addColorStop(0.5, '#3A4A1F'); // Dunkel
+  lidGradient.addColorStop(1, '#2A3A0F'); // Sehr dunkel
+  ctx.fillStyle = lidGradient;
   ctx.fillRect(2, 6, 28, 4);
 
-  // Riemen
-  ctx.fillStyle = '#000000';
-  ctx.fillRect(14, 6, 4, 24);
+  // Deckel-Schattierung
+  ctx.fillStyle = '#1A2A0F';
+  ctx.fillRect(2, 9, 28, 1); // Schatten unter dem Deckel
 
-  // Label
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(6, 12, 8, 8);
+  // Deckel-Highlight
+  ctx.fillStyle = '#5A6A3F';
+  ctx.fillRect(2, 6, 28, 1); // Highlight oben
+
+  // Schwarze Riemen über die Kiste (2 Riemen)
   ctx.fillStyle = '#000000';
-  ctx.font = 'bold 6px Arial';
-  ctx.fillText('AMMO', 7, 18);
+  ctx.fillRect(10, 6, 3, 22); // Linker Riemen
+  ctx.fillRect(19, 6, 3, 22); // Rechter Riemen
+
+  // Riemen-Highlights für Leder-Effekt
+  ctx.fillStyle = 'rgba(50, 50, 50, 0.8)';
+  ctx.fillRect(10, 6, 1, 22); // Linker Riemen Highlight
+  ctx.fillRect(19, 6, 1, 22); // Rechter Riemen Highlight
+
+  // Metallschnallen an den Riemen
+  ctx.fillStyle = '#696969'; // Dunkelgrau
+  ctx.fillRect(10, 14, 3, 4); // Linke Schnalle
+  ctx.fillRect(19, 14, 3, 4); // Rechte Schnalle
+
+  // Schnallen-Highlights
+  ctx.fillStyle = '#A0A0A0';
+  ctx.fillRect(10, 14, 3, 1); // Linke Schnalle Highlight
+  ctx.fillRect(19, 14, 3, 1); // Rechte Schnalle Highlight
+
+  // Weißes Label für "AMMO" Beschriftung
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(13, 16, 6, 6);
+
+  // Label-Rand
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 0.5;
+  ctx.strokeRect(13, 16, 6, 6);
+
+  // "AMMO" Beschriftung
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 4px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('AMMO', 16, 19);
+
+  // Sichtbare Patronenspitzen in Gold (3-4 Stück)
+  const bulletGradient = ctx.createRadialGradient(8, 24, 0, 8, 24, 2);
+  bulletGradient.addColorStop(0, '#FFD700'); // Gold
+  bulletGradient.addColorStop(0.7, '#DAA520'); // Goldenrod
+  bulletGradient.addColorStop(1, '#B8860B'); // Dunkelgold
+  
+  // Patrone 1 (links)
+  ctx.fillStyle = bulletGradient;
+  ctx.beginPath();
+  ctx.arc(6, 24, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Patronenhülse
+  ctx.fillStyle = '#B8860B';
+  ctx.fillRect(5, 25, 2, 2);
+
+  // Patrone 2
+  const bulletGradient2 = ctx.createRadialGradient(14, 24, 0, 14, 24, 2);
+  bulletGradient2.addColorStop(0, '#FFD700');
+  bulletGradient2.addColorStop(0.7, '#DAA520');
+  bulletGradient2.addColorStop(1, '#B8860B');
+  ctx.fillStyle = bulletGradient2;
+  ctx.beginPath();
+  ctx.arc(14, 24, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.fillStyle = '#B8860B';
+  ctx.fillRect(13, 25, 2, 2);
+
+  // Patrone 3
+  const bulletGradient3 = ctx.createRadialGradient(18, 24, 0, 18, 24, 2);
+  bulletGradient3.addColorStop(0, '#FFD700');
+  bulletGradient3.addColorStop(0.7, '#DAA520');
+  bulletGradient3.addColorStop(1, '#B8860B');
+  ctx.fillStyle = bulletGradient3;
+  ctx.beginPath();
+  ctx.arc(18, 24, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.fillStyle = '#B8860B';
+  ctx.fillRect(17, 25, 2, 2);
+
+  // Patrone 4 (rechts)
+  const bulletGradient4 = ctx.createRadialGradient(26, 24, 0, 26, 24, 2);
+  bulletGradient4.addColorStop(0, '#FFD700');
+  bulletGradient4.addColorStop(0.7, '#DAA520');
+  bulletGradient4.addColorStop(1, '#B8860B');
+  ctx.fillStyle = bulletGradient4;
+  ctx.beginPath();
+  ctx.arc(26, 24, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.fillStyle = '#B8860B';
+  ctx.fillRect(25, 25, 2, 2);
+
+  // Highlights auf Patronenspitzen für metallischen Glanz
+  ctx.fillStyle = '#FFFFE0';
+  ctx.beginPath();
+  ctx.arc(5.5, 23.5, 0.5, 0, Math.PI * 2);
+  ctx.arc(13.5, 23.5, 0.5, 0, Math.PI * 2);
+  ctx.arc(17.5, 23.5, 0.5, 0, Math.PI * 2);
+  ctx.arc(25.5, 23.5, 0.5, 0, Math.PI * 2);
+  ctx.fill();
 
 
   // Sichtbare Patronenspitzen
@@ -1210,52 +1544,203 @@ function createDogTexture(): HTMLCanvasElement {
   canvas.height = 64;
   const ctx = canvas.getContext('2d')!;
 
-  // --- Aggressiver Hund ---
-  // Da der Hund kleiner ist, zentrieren wir ihn etwas tiefer
-  const yOffset = 16;
+  // --- Detaillierter aggressiver Kampfhund ---
+  const yOffset = 12;
 
-  // Beine
-  ctx.fillStyle = '#4A2A0A'; // Dunkelbraun
-  ctx.fillRect(16, 32 + yOffset, 6, 12); // Vorne links
-  ctx.fillRect(42, 32 + yOffset, 6, 12); // Vorne rechts
-  ctx.fillRect(18, 30 + yOffset, 6, 10); // Hinten links
-  ctx.fillRect(40, 30 + yOffset, 6, 10); // Hinten rechts
+  // Hintere Beine (weiter hinten für Tiefenwirkung)
+  const legGradient1 = ctx.createLinearGradient(0, 32 + yOffset, 0, 48 + yOffset);
+  legGradient1.addColorStop(0, '#5A3A1A'); // Mittelbraun
+  legGradient1.addColorStop(0.5, '#3A1A0A'); // Dunkelbraun
+  legGradient1.addColorStop(1, '#2A0A0A'); // Sehr dunkelbraun
+  ctx.fillStyle = legGradient1;
+  ctx.fillRect(18, 32 + yOffset, 7, 16); // Hinten links
+  ctx.fillRect(39, 32 + yOffset, 7, 16); // Hinten rechts
+  
+  // Pfoten hinten mit Krallen
+  ctx.fillStyle = '#3A1A0A';
+  ctx.fillRect(17, 46 + yOffset, 9, 5); // Linke Hinterpfote
+  ctx.fillRect(38, 46 + yOffset, 9, 5); // Rechte Hinterpfote
+  
+  // Krallen hinten
+  ctx.fillStyle = '#E0E0E0';
+  ctx.fillRect(16, 50 + yOffset, 2, 3); // Kralle 1 links
+  ctx.fillRect(19, 50 + yOffset, 2, 3); // Kralle 2 links
+  ctx.fillRect(22, 50 + yOffset, 2, 3); // Kralle 3 links
+  ctx.fillRect(37, 50 + yOffset, 2, 3); // Kralle 1 rechts
+  ctx.fillRect(40, 50 + yOffset, 2, 3); // Kralle 2 rechts
+  ctx.fillRect(43, 50 + yOffset, 2, 3); // Kralle 3 rechts
 
-  // Körper
-  const bodyGradient = ctx.createLinearGradient(0, 20 + yOffset, 0, 36 + yOffset);
-  bodyGradient.addColorStop(0, '#6B4A2A');
-  bodyGradient.addColorStop(1, '#3A1A0A');
+  // Körper mit Fellstruktur (mehrere Brauntöne)
+  const bodyGradient = ctx.createLinearGradient(0, 20 + yOffset, 0, 40 + yOffset);
+  bodyGradient.addColorStop(0, '#6B4A2A'); // Hellbraun (Rücken)
+  bodyGradient.addColorStop(0.4, '#5A3A1A'); // Mittelbraun
+  bodyGradient.addColorStop(0.7, '#3A1A0A'); // Dunkelbraun
+  bodyGradient.addColorStop(1, '#2A0A0A'); // Sehr dunkelbraun (Bauch)
   ctx.fillStyle = bodyGradient;
-  ctx.fillRect(16, 20 + yOffset, 32, 16);
-
-  // Kopf
+  ctx.fillRect(14, 20 + yOffset, 36, 20);
+  
+  // Fellstruktur durch Schattierungen
+  ctx.fillStyle = '#3A1A0A';
+  ctx.fillRect(16, 22 + yOffset, 32, 1); // Rückenlinie
+  ctx.fillRect(16, 26 + yOffset, 32, 1); // Mittellinie
   ctx.fillStyle = '#5A3A1A';
-  ctx.fillRect(24, 12 + yOffset, 16, 12);
+  ctx.fillRect(16, 38 + yOffset, 32, 1); // Bauchlinie
 
-  // Ohren
+  // Vordere Beine (aggressive Angriffsstellung - leicht nach vorne)
+  const legGradient2 = ctx.createLinearGradient(0, 32 + yOffset, 0, 50 + yOffset);
+  legGradient2.addColorStop(0, '#5A3A1A');
+  legGradient2.addColorStop(0.5, '#3A1A0A');
+  legGradient2.addColorStop(1, '#2A0A0A');
+  ctx.fillStyle = legGradient2;
+  ctx.fillRect(14, 34 + yOffset, 8, 16); // Vorne links
+  ctx.fillRect(42, 34 + yOffset, 8, 16); // Vorne rechts
+  
+  // Pfoten vorne mit Krallen
+  ctx.fillStyle = '#3A1A0A';
+  ctx.fillRect(12, 48 + yOffset, 10, 6); // Linke Vorderpfote
+  ctx.fillRect(41, 48 + yOffset, 10, 6); // Rechte Vorderpfote
+  
+  // Krallen vorne (länger für aggressive Haltung)
+  ctx.fillStyle = '#E0E0E0';
+  ctx.fillRect(11, 53 + yOffset, 2, 4); // Kralle 1 links
+  ctx.fillRect(14, 53 + yOffset, 2, 5); // Kralle 2 links
+  ctx.fillRect(17, 53 + yOffset, 2, 4); // Kralle 3 links
+  ctx.fillRect(20, 53 + yOffset, 2, 3); // Kralle 4 links
+  ctx.fillRect(40, 53 + yOffset, 2, 4); // Kralle 1 rechts
+  ctx.fillRect(43, 53 + yOffset, 2, 5); // Kralle 2 rechts
+  ctx.fillRect(46, 53 + yOffset, 2, 4); // Kralle 3 rechts
+  ctx.fillRect(49, 53 + yOffset, 2, 3); // Kralle 4 rechts
+
+  // Kopf mit detaillierter Fellstruktur
+  const headGradient = ctx.createLinearGradient(0, 8 + yOffset, 0, 24 + yOffset);
+  headGradient.addColorStop(0, '#6B4A2A'); // Hellbraun (Stirn)
+  headGradient.addColorStop(0.5, '#5A3A1A'); // Mittelbraun
+  headGradient.addColorStop(1, '#3A1A0A'); // Dunkelbraun (Schnauze)
+  ctx.fillStyle = headGradient;
+  ctx.fillRect(22, 8 + yOffset, 20, 16);
+  
+  // Fellschattierungen am Kopf
+  ctx.fillStyle = '#3A1A0A';
+  ctx.fillRect(24, 10 + yOffset, 16, 1);
+  ctx.fillRect(24, 14 + yOffset, 16, 1);
+
+  // Angelegte Ohren (aggressive Haltung)
   ctx.fillStyle = '#3A1A0A';
   ctx.beginPath();
-  ctx.moveTo(24, 12 + yOffset);
-  ctx.lineTo(20, 6 + yOffset);
-  ctx.lineTo(28, 12 + yOffset);
+  ctx.moveTo(24, 10 + yOffset);
+  ctx.lineTo(18, 12 + yOffset);
+  ctx.lineTo(22, 16 + yOffset);
+  ctx.closePath();
   ctx.fill();
+  
   ctx.beginPath();
-  ctx.moveTo(40, 12 + yOffset);
-  ctx.lineTo(44, 6 + yOffset);
-  ctx.lineTo(36, 12 + yOffset);
+  ctx.moveTo(40, 10 + yOffset);
+  ctx.lineTo(46, 12 + yOffset);
+  ctx.lineTo(42, 16 + yOffset);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Innere Ohrdetails
+  ctx.fillStyle = '#5A3A1A';
+  ctx.beginPath();
+  ctx.moveTo(24, 11 + yOffset);
+  ctx.lineTo(20, 12 + yOffset);
+  ctx.lineTo(23, 14 + yOffset);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(40, 11 + yOffset);
+  ctx.lineTo(44, 12 + yOffset);
+  ctx.lineTo(41, 14 + yOffset);
+  ctx.closePath();
   ctx.fill();
 
-  // Augen (rot leuchtend)
+  // Leuchtend rote Augen mit Glüheffekt
+  // Äußerer Glüheffekt
+  const eyeGlow1 = ctx.createRadialGradient(27, 14 + yOffset, 1, 27, 14 + yOffset, 5);
+  eyeGlow1.addColorStop(0, 'rgba(255, 0, 0, 0.9)');
+  eyeGlow1.addColorStop(0.5, 'rgba(255, 0, 0, 0.5)');
+  eyeGlow1.addColorStop(1, 'rgba(255, 0, 0, 0)');
+  ctx.fillStyle = eyeGlow1;
+  ctx.beginPath();
+  ctx.arc(27, 14 + yOffset, 5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  const eyeGlow2 = ctx.createRadialGradient(37, 14 + yOffset, 1, 37, 14 + yOffset, 5);
+  eyeGlow2.addColorStop(0, 'rgba(255, 0, 0, 0.9)');
+  eyeGlow2.addColorStop(0.5, 'rgba(255, 0, 0, 0.5)');
+  eyeGlow2.addColorStop(1, 'rgba(255, 0, 0, 0)');
+  ctx.fillStyle = eyeGlow2;
+  ctx.beginPath();
+  ctx.arc(37, 14 + yOffset, 5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Hauptaugen
   ctx.fillStyle = '#FF0000';
-  ctx.fillRect(28, 16 + yOffset, 4, 4);
-  ctx.fillRect(36, 16 + yOffset, 4, 4);
+  ctx.beginPath();
+  ctx.arc(27, 14 + yOffset, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(37, 14 + yOffset, 3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Pupillen
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.arc(27, 14 + yOffset, 1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(37, 14 + yOffset, 1, 0, Math.PI * 2);
+  ctx.fill();
 
-  // Schnauze und Zähne
-  ctx.fillStyle = '#3A1A0A';
-  ctx.fillRect(28, 20 + yOffset, 8, 4);
+  // Detaillierte Schnauze
+  ctx.fillStyle = '#2A0A0A';
+  ctx.fillRect(26, 18 + yOffset, 12, 6);
+  
+  // Nase
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(30, 18 + yOffset, 4, 3);
+
+  // Geblecktes Maul mit mindestens 4 Zähnen
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(26, 22 + yOffset, 12, 4); // Geöffnetes Maul
+  
+  // Obere Zähne (Reißzähne)
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(30, 22 + yOffset, 2, 2);
-  ctx.fillRect(34, 22 + yOffset, 2, 2);
+  ctx.beginPath();
+  ctx.moveTo(27, 22 + yOffset);
+  ctx.lineTo(28, 25 + yOffset);
+  ctx.lineTo(29, 22 + yOffset);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(30, 22 + yOffset);
+  ctx.lineTo(31, 25 + yOffset);
+  ctx.lineTo(32, 22 + yOffset);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(33, 22 + yOffset);
+  ctx.lineTo(34, 25 + yOffset);
+  ctx.lineTo(35, 22 + yOffset);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(36, 22 + yOffset);
+  ctx.lineTo(37, 25 + yOffset);
+  ctx.lineTo(38, 22 + yOffset);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Untere Zähne
+  ctx.fillStyle = '#E0E0E0';
+  ctx.fillRect(28, 24 + yOffset, 2, 2);
+  ctx.fillRect(31, 24 + yOffset, 2, 2);
+  ctx.fillRect(34, 24 + yOffset, 2, 2);
 
   return canvas;
 }
@@ -1266,22 +1751,118 @@ function createDogCorpseTexture(): HTMLCanvasElement {
   canvas.height = 64;
   const ctx = canvas.getContext('2d')!;
 
-  // Liegender Hund
-  ctx.fillStyle = '#3A1A0A'; // Dunkles Braun
+  // --- Detaillierter liegender Hund mit Blutlache ---
+
+  // Große Blutlache mit Farbverlauf
+  const bloodGradient = ctx.createRadialGradient(32, 56, 5, 32, 56, 30);
+  bloodGradient.addColorStop(0, '#8B0000'); // Dunkelrot (Zentrum)
+  bloodGradient.addColorStop(0.4, '#5A0000'); // Sehr dunkelrot
+  bloodGradient.addColorStop(0.7, 'rgba(90, 0, 0, 0.6)'); // Transparent werdend
+  bloodGradient.addColorStop(1, 'rgba(90, 0, 0, 0)'); // Vollständig transparent
+  ctx.fillStyle = bloodGradient;
   ctx.beginPath();
-  ctx.ellipse(32, 54, 22, 8, 0, 0, Math.PI * 2);
+  ctx.ellipse(32, 56, 30, 14, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Blutlache
-  ctx.fillStyle = 'rgba(139, 0, 0, 0.7)';
-  ctx.beginPath();
-  ctx.ellipse(32, 56, 28, 10, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Ohren
+  // Hintere Beine (ausgestreckt)
+  ctx.fillStyle = '#3A1A0A';
+  ctx.fillRect(12, 52, 6, 10); // Hinten links
+  ctx.fillRect(46, 52, 6, 10); // Hinten rechts
+  
+  // Hinterpfoten
   ctx.fillStyle = '#2A0A0A';
-  ctx.fillRect(18, 48, 6, 4);
-  ctx.fillRect(40, 48, 6, 4);
+  ctx.fillRect(10, 58, 8, 4);
+  ctx.fillRect(46, 58, 8, 4);
+
+  // Hauptkörper (liegend, seitlich) mit Fellstruktur
+  const bodyGradient = ctx.createLinearGradient(0, 48, 0, 56);
+  bodyGradient.addColorStop(0, '#5A3A1A'); // Mittelbraun (Rücken)
+  bodyGradient.addColorStop(0.5, '#3A1A0A'); // Dunkelbraun
+  bodyGradient.addColorStop(1, '#2A0A0A'); // Sehr dunkelbraun (Bauch)
+  ctx.fillStyle = bodyGradient;
+  ctx.beginPath();
+  ctx.ellipse(32, 52, 24, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Fellschattierungen
+  ctx.fillStyle = '#2A0A0A';
+  ctx.beginPath();
+  ctx.ellipse(32, 50, 22, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Vordere Beine (ausgestreckt nach vorne)
+  ctx.fillStyle = '#3A1A0A';
+  ctx.fillRect(20, 54, 6, 8); // Vorne links
+  ctx.fillRect(38, 54, 6, 8); // Vorne rechts
+  
+  // Vorderpfoten
+  ctx.fillStyle = '#2A0A0A';
+  ctx.fillRect(18, 58, 8, 4);
+  ctx.fillRect(38, 58, 8, 4);
+  
+  // Krallen sichtbar
+  ctx.fillStyle = '#E0E0E0';
+  ctx.fillRect(17, 60, 1, 2);
+  ctx.fillRect(20, 60, 1, 2);
+  ctx.fillRect(23, 60, 1, 2);
+  ctx.fillRect(38, 60, 1, 2);
+  ctx.fillRect(41, 60, 1, 2);
+  ctx.fillRect(44, 60, 1, 2);
+
+  // Kopf (seitlich liegend)
+  const headGradient = ctx.createLinearGradient(0, 44, 0, 52);
+  headGradient.addColorStop(0, '#5A3A1A');
+  headGradient.addColorStop(1, '#3A1A0A');
+  ctx.fillStyle = headGradient;
+  ctx.fillRect(24, 44, 16, 10);
+  
+  // Schnauze
+  ctx.fillStyle = '#2A0A0A';
+  ctx.fillRect(22, 48, 8, 4);
+  
+  // Nase
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(22, 49, 3, 2);
+
+  // Ohr (sichtbar, da seitlich liegend)
+  ctx.fillStyle = '#2A0A0A';
+  ctx.beginPath();
+  ctx.moveTo(36, 44);
+  ctx.lineTo(42, 42);
+  ctx.lineTo(38, 48);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Inneres Ohr
+  ctx.fillStyle = '#3A1A0A';
+  ctx.beginPath();
+  ctx.moveTo(37, 45);
+  ctx.lineTo(40, 44);
+  ctx.lineTo(38, 47);
+  ctx.closePath();
+  ctx.fill();
+
+  // Geschlossenes Auge
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(32, 48, 4, 1);
+
+  // Blutflecken auf dem Fell
+  ctx.fillStyle = 'rgba(139, 0, 0, 0.8)';
+  ctx.beginPath();
+  ctx.arc(28, 50, 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(36, 52, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(42, 54, 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Schwanz (ausgestreckt)
+  ctx.fillStyle = '#3A1A0A';
+  ctx.fillRect(52, 54, 8, 3);
+  ctx.fillStyle = '#2A0A0A';
+  ctx.fillRect(58, 55, 4, 2);
 
   return canvas;
 }
