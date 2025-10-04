@@ -130,7 +130,7 @@
   - Füge dekorative Objekte zu allen Level 7 Varianten hinzu
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7_
 
-- [ ] 15. Teste und validiere Abwärtskompatibilität
+- [x] 15. Teste und validiere Abwärtskompatibilität
   - Teste Laden von alten Savegames
   - Validiere dass LEVELS-Array weiterhin funktioniert
   - Teste Map-Historie-Persistenz über Sessions
