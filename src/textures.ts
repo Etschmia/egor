@@ -256,11 +256,11 @@ function createBrickTexture(): HTMLCanvasElement {
   const ctx = canvas.getContext('2d')!;
 
   // Hintergrund - Mörtel
-  ctx.fillStyle = '#D3D3D3';
+  ctx.fillStyle = '#8B4513'; // D3D3D3' A98961FF
   ctx.fillRect(0, 0, 32, 32);
 
   // Backstein-Muster
-  ctx.fillStyle = '#8B4513';
+  ctx.fillStyle = '#D3D3D3';
 
   // Horizontale Backsteinreihen
   for (let y = 0; y < 32; y += 8) {
