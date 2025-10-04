@@ -94,13 +94,13 @@
   - Füge zu LEVELS_WITH_VARIANTS hinzu
   - _Requirements: 3.1, 3.2, 3.3, 3.5_
 
-- [ ] 9. Erstelle Map-Varianten für Level 4-5
+- [x] 9. Erstelle Map-Varianten für Level 4-5
   - Erstelle 5 Varianten für Level 4 (22x22)
   - Erstelle 5 Varianten für Level 5 (22x22)
   - Füge zu LEVELS_WITH_VARIANTS hinzu
   - _Requirements: 3.1, 3.2, 3.3, 3.5_
 
-- [ ] 10. Erstelle Map-Varianten für Level 6-7
+- [x] 10. Erstelle Map-Varianten für Level 6-7
   - Erstelle 5 Varianten für Level 6 (24x24)
   - Erstelle 5 Varianten für Level 7 (24x24)
   - Füge zu LEVELS_WITH_VARIANTS hinzu
