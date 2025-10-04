@@ -169,13 +169,113 @@ export function rotatePlayer(player: Player, rotation: number): Player {
   return player;
 }
 
+// Hilfsfunktion für Gegner-Türinteraktion
+function tryOpenDoorForEnemy(enemy: Enemy, tiles: number[][], targetX: number, targetY: number): { tiles: number[][]; doorOpened: boolean } {
+  const mapX = Math.floor(targetX);
+  const mapY = Math.floor(targetY);
+
+  // Prüfe ob es eine normale Tür ist (Wert 2)
+  if (
+    mapX >= 0 &&
+    mapX < tiles[0].length &&
+    mapY >= 0 &&
+    mapY < tiles.length &&
+    tiles[mapY][mapX] === 2
+  ) {
+    // Hunde können keine Türen öffnen
+    if (enemy.type === EnemyType.DOG) {
+      return { tiles, doorOpened: false };
+    }
+
+    // Erstelle eine tiefe Kopie der tiles-Array
+    const tilesCopy = tiles.map(row => [...row]);
+    
+    // Öffne die Tür (setze auf 0)
+    tilesCopy[mapY][mapX] = 0;
+    
+    // Spiele Türöffnungsgeräusch ab (3D-positioniert)
+    soundSystem.play3dSound(
+      { x: enemy.x, y: enemy.y },
+      { x: targetX, y: targetY },
+      () => soundSystem.playDoorOpen()
+    );
+    
+    return { tiles: tilesCopy, doorOpened: true };
+  }
+
+  // Exit-Türen (Wert 3) können von Gegnern nicht geöffnet werden
+  return { tiles, doorOpened: false };
+}
+
+// Verbesserte Pathfinding-Funktion für Gegner
+function findPathToPlayer(enemy: Enemy, player: Player, tiles: number[][]): { moveX: number; moveY: number; tilesUpdated?: number[][] } {
+  const dx = player.x - enemy.x;
+  const dy = player.y - enemy.y;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  if (distance < 0.1) {
+    return { moveX: 0, moveY: 0 };
+  }
+
+  // Normalisierte Bewegungsrichtung
+  const dirX = dx / distance;
+  const dirY = dy / distance;
+  
+  const speed = enemy.speed;
+  let moveX = dirX * speed;
+  let moveY = dirY * speed;
+
+  // Teste Bewegung in X-Richtung
+  const newX = enemy.x + moveX;
+  if (checkCollision(newX, enemy.y, tiles)) {
+    // Prüfe ob es eine Tür ist, die geöffnet werden kann
+    const doorResult = tryOpenDoorForEnemy(enemy, tiles, newX, enemy.y);
+    if (doorResult.doorOpened) {
+      return { moveX, moveY: 0, tilesUpdated: doorResult.tiles };
+    }
+    moveX = 0; // Blockiert, keine Bewegung in X
+  }
+
+  // Teste Bewegung in Y-Richtung
+  const newY = enemy.y + moveY;
+  if (checkCollision(enemy.x, newY, tiles)) {
+    // Prüfe ob es eine Tür ist, die geöffnet werden kann
+    const doorResult = tryOpenDoorForEnemy(enemy, tiles, enemy.x, newY);
+    if (doorResult.doorOpened) {
+      return { moveX: 0, moveY, tilesUpdated: doorResult.tiles };
+    }
+    moveY = 0; // Blockiert, keine Bewegung in Y
+  }
+
+  // Falls beide Richtungen blockiert sind, versuche Ausweichmanöver
+  if (moveX === 0 && moveY === 0) {
+    // Versuche seitliche Bewegung
+    const sideX = -dirY * speed * 0.5; // Senkrecht zur Hauptrichtung
+    const sideY = dirX * speed * 0.5;
+    
+    if (!checkCollision(enemy.x + sideX, enemy.y, tiles)) {
+      moveX = sideX;
+    } else if (!checkCollision(enemy.x - sideX, enemy.y, tiles)) {
+      moveX = -sideX;
+    }
+    
+    if (!checkCollision(enemy.x, enemy.y + sideY, tiles)) {
+      moveY = sideY;
+    } else if (!checkCollision(enemy.x, enemy.y - sideY, tiles)) {
+      moveY = -sideY;
+    }
+  }
+
+  return { moveX, moveY };
+}
+
 export function updateEnemies(
   enemies: Enemy[],
   player: Player,
   tiles: number[][],
   deltaTime: number,
   difficulty: Difficulty
-): { enemies: Enemy[]; player: Player } {
+): { enemies: Enemy[]; player: Player; tilesUpdated?: number[][] } {
   const difficultyMultiplier = {
     [Difficulty.EASY]: 0.7,
     [Difficulty.NORMAL]: 1.0,
@@ -183,6 +283,7 @@ export function updateEnemies(
   };
 
   const multiplier = difficultyMultiplier[difficulty];
+  let updatedTiles = tiles;
 
   enemies.forEach((enemy) => {
     // Animation vom Sterben zum toten Zustand
@@ -210,17 +311,23 @@ export function updateEnemies(
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     if (distance < 15 && distance > 0.1) {
-      const moveX = (dx / distance) * enemy.speed * multiplier * deltaTime;
-      const moveY = (dy / distance) * enemy.speed * multiplier * deltaTime;
-
-      const newX = enemy.x + moveX;
-      const newY = enemy.y + moveY;
-
-      if (!checkCollision(newX, enemy.y, tiles)) {
-        enemy.x = newX;
+      // Verwende verbesserte Pathfinding
+      const pathResult = findPathToPlayer(enemy, player, updatedTiles);
+      
+      // Wenn eine Tür geöffnet wurde, aktualisiere die Karte
+      if (pathResult.tilesUpdated) {
+        updatedTiles = pathResult.tilesUpdated;
       }
-      if (!checkCollision(enemy.x, newY, tiles)) {
-        enemy.y = newY;
+      
+      // Bewege den Gegner
+      const moveX = pathResult.moveX * multiplier * deltaTime;
+      const moveY = pathResult.moveY * multiplier * deltaTime;
+
+      if (moveX !== 0 && !checkCollision(enemy.x + moveX, enemy.y, updatedTiles)) {
+        enemy.x += moveX;
+      }
+      if (moveY !== 0 && !checkCollision(enemy.x, enemy.y + moveY, updatedTiles)) {
+        enemy.y += moveY;
       }
 
       enemy.direction = Math.atan2(dy, dx);
@@ -236,7 +343,7 @@ export function updateEnemies(
     }
   });
 
-  return { enemies, player };
+  return { enemies, player, tilesUpdated: updatedTiles !== tiles ? updatedTiles : undefined };
 }
 
 export function fireWeapon(

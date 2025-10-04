@@ -342,6 +342,14 @@ function App() {
       soundSystem.playPlayerHit();
     }
     newState.player = enemyUpdate.player;
+    
+    // Wenn Gegner Türen geöffnet haben, aktualisiere die Karte
+    if (enemyUpdate.tilesUpdated) {
+      newState.currentMap = {
+        ...newState.currentMap,
+        tiles: enemyUpdate.tilesUpdated
+      };
+    }
 
     // Items sammeln
     const itemCollection = collectItem(newState.player, newState.items);
