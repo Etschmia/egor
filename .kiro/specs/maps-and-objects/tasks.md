@@ -106,7 +106,7 @@
   - Füge zu LEVELS_WITH_VARIANTS hinzu
   - _Requirements: 3.1, 3.2, 3.3, 3.5_
 
-- [ ] 11. Platziere dekorative Objekte in Level 1 Varianten
+- [x] 11. Platziere dekorative Objekte in Level 1 Varianten
   - Füge Leuchten zu allen 5 Varianten hinzu (alle 4-6 Felder)
   - Füge Vasen, Kisten, Bänke in Fluren hinzu
   - Füge Tische und Stühle in Räumen hinzu
