@@ -39,65 +39,132 @@ function createZombieTexture(): HTMLCanvasElement {
   canvas.height = 64;
   const ctx = canvas.getContext('2d')!;
 
-  // --- Detaillierterer Zombie ---
+  // --- Detaillierter Zombie mit Gesichtszügen, Wunden und erkennbaren Händen ---
 
   // Beine (Hose)
   ctx.fillStyle = '#4B3A26'; // Dunkelbraun
   ctx.fillRect(20, 52, 8, 12);
   ctx.fillRect(36, 52, 8, 12);
+  
   // Schuhe
   ctx.fillStyle = '#1A1A1A'; // Fast schwarz
   ctx.fillRect(18, 60, 10, 4);
   ctx.fillRect(34, 60, 10, 4);
 
-  // Körper (zerissenes Hemd)
-  ctx.fillStyle = '#8B0000'; // Dunkelrot
+  // Körper (zerrissenes Hemd) mit Farbverlauf
+  const shirtGradient = ctx.createLinearGradient(16, 28, 48, 52);
+  shirtGradient.addColorStop(0, '#8B0000'); // Dunkelrot
+  shirtGradient.addColorStop(0.5, '#A52A2A'); // Braun-Rot
+  shirtGradient.addColorStop(1, '#5A0000'); // Sehr dunkelrot
+  ctx.fillStyle = shirtGradient;
   ctx.fillRect(16, 28, 32, 24);
-  // Fetzen
+  
+  // Zerrissene Fetzen
   ctx.fillStyle = '#5A0000';
   ctx.fillRect(16, 50, 5, 5);
   ctx.fillRect(25, 48, 8, 8);
   ctx.fillRect(40, 50, 6, 6);
+  
+  // Blutflecken auf der Kleidung
+  ctx.fillStyle = 'rgba(90, 0, 0, 0.8)';
+  ctx.beginPath();
+  ctx.arc(22, 35, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(38, 42, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(28, 48, 2, 0, Math.PI * 2);
+  ctx.fill();
 
-
-  // Arme
-  const skinGradient = ctx.createLinearGradient(0, 28, 0, 44);
-  skinGradient.addColorStop(0, '#556B2F'); // Dunkles Olivgrün
-  skinGradient.addColorStop(1, '#8FBC8F'); // Helles Seegrün
-  ctx.fillStyle = skinGradient;
+  // Arme mit mehreren Grüntönen
+  const armGradient = ctx.createLinearGradient(0, 28, 0, 44);
+  armGradient.addColorStop(0, '#2E8B57'); // Seegrün
+  armGradient.addColorStop(0.5, '#3CB371'); // Mittelseegrün
+  armGradient.addColorStop(1, '#90EE90'); // Hellgrün
+  ctx.fillStyle = armGradient;
   ctx.fillRect(8, 28, 8, 16);
   ctx.fillRect(48, 28, 8, 16);
 
-  // Kopf
-  const headGradient = ctx.createRadialGradient(32, 16, 4, 32, 16, 16);
+  // Linke Hand mit 5 erkennbaren Fingern
+  ctx.fillStyle = '#3CB371';
+  ctx.fillRect(6, 44, 10, 6); // Handfläche
+  // Finger
+  ctx.fillStyle = '#2E8B57';
+  ctx.fillRect(6, 50, 1.5, 4);   // Daumen
+  ctx.fillRect(8, 50, 1.5, 5);   // Zeigefinger
+  ctx.fillRect(10, 50, 1.5, 5);  // Mittelfinger
+  ctx.fillRect(12, 50, 1.5, 4);  // Ringfinger
+  ctx.fillRect(14, 50, 1.5, 3);  // Kleiner Finger
+
+  // Rechte Hand mit 5 erkennbaren Fingern
+  ctx.fillStyle = '#3CB371';
+  ctx.fillRect(48, 44, 10, 6); // Handfläche
+  // Finger
+  ctx.fillStyle = '#2E8B57';
+  ctx.fillRect(48, 50, 1.5, 4);  // Daumen
+  ctx.fillRect(50, 50, 1.5, 5);  // Zeigefinger
+  ctx.fillRect(52, 50, 1.5, 5);  // Mittelfinger
+  ctx.fillRect(54, 50, 1.5, 4);  // Ringfinger
+  ctx.fillRect(56, 50, 1.5, 3);  // Kleiner Finger
+
+  // Kopf mit mehreren Grüntönen
+  const headGradient = ctx.createRadialGradient(32, 16, 2, 32, 16, 10);
   headGradient.addColorStop(0, '#90EE90'); // Hellgrün
+  headGradient.addColorStop(0.5, '#3CB371'); // Mittelseegrün
   headGradient.addColorStop(1, '#2E8B57'); // Seegrün
   ctx.fillStyle = headGradient;
   ctx.fillRect(24, 8, 16, 16);
-  // Wunde
+  
+  // Wunden und Verfärbungen
   ctx.fillStyle = '#5A0000';
-  ctx.fillRect(35, 9, 4, 6);
+  ctx.fillRect(35, 9, 4, 6);  // Große Wunde rechts
+  ctx.fillRect(26, 11, 3, 3); // Kleine Wunde links
+  ctx.fillStyle = 'rgba(139, 0, 0, 0.5)';
+  ctx.fillRect(30, 22, 4, 2); // Verfärbung am Kinn
 
+  // Nase
+  ctx.fillStyle = '#2E8B57';
+  ctx.fillRect(31, 16, 2, 3);
 
-  // Augen (glühend)
-  const eyeGradient = ctx.createRadialGradient(30, 14, 1, 30, 14, 4);
+  // Leuchtende gelbe Augen mit radialen Gradienten
+  const eyeGradient = ctx.createRadialGradient(28, 14, 0.5, 28, 14, 3);
   eyeGradient.addColorStop(0, '#FFFF00'); // Gelb
-  eyeGradient.addColorStop(1, '#FF4500'); // Orangerot
+  eyeGradient.addColorStop(0.6, '#FFD700'); // Gold
+  eyeGradient.addColorStop(1, '#FF8C00'); // Dunkelorange
   ctx.fillStyle = eyeGradient;
-  ctx.fillRect(28, 12, 4, 4);
-  const eyeGradient2 = ctx.createRadialGradient(38, 14, 1, 38, 14, 4);
+  ctx.beginPath();
+  ctx.arc(28, 14, 3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  const eyeGradient2 = ctx.createRadialGradient(36, 14, 0.5, 36, 14, 3);
   eyeGradient2.addColorStop(0, '#FFFF00');
-  eyeGradient2.addColorStop(1, '#FF4500');
+  eyeGradient2.addColorStop(0.6, '#FFD700');
+  eyeGradient2.addColorStop(1, '#FF8C00');
   ctx.fillStyle = eyeGradient2;
-  ctx.fillRect(36, 12, 4, 4);
-
-  // Mund
+  ctx.beginPath();
+  ctx.arc(36, 14, 3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Pupillen
   ctx.fillStyle = '#000000';
-  ctx.fillRect(30, 20, 8, 2);
-  // Zahn
-  ctx.fillStyle = '#E0E0E0';
-  ctx.fillRect(31, 20, 2, 2);
+  ctx.beginPath();
+  ctx.arc(28, 14, 1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(36, 14, 1, 0, Math.PI * 2);
+  ctx.fill();
 
+  // Mund mit sichtbaren Zähnen
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(28, 20, 8, 3); // Mund geöffnet
+  
+  // Zähne
+  ctx.fillStyle = '#E0E0E0';
+  ctx.fillRect(28, 20, 1.5, 2);  // Zahn 1
+  ctx.fillRect(30, 20, 1.5, 2);  // Zahn 2
+  ctx.fillRect(32, 20, 1.5, 2);  // Zahn 3
+  ctx.fillRect(34, 20, 1.5, 2);  // Zahn 4
 
   return canvas;
 }
@@ -108,75 +175,257 @@ function createMonsterTexture(): HTMLCanvasElement {
   canvas.height = 64;
   const ctx = canvas.getContext('2d')!;
 
-  // --- Detaillierteres Monster ---
+  // --- Detailliertes Monster mit muskulöser Struktur ---
 
-  // Beine
-  ctx.fillStyle = '#6B2A00';
-  ctx.fillRect(16, 54, 12, 10);
-  ctx.fillRect(36, 54, 12, 10);
+  // Beine mit Muskelstruktur
+  const legGradient = ctx.createLinearGradient(16, 54, 28, 64);
+  legGradient.addColorStop(0, '#DC143C'); // Crimson
+  legGradient.addColorStop(0.5, '#8B0000'); // Dunkelrot
+  legGradient.addColorStop(1, '#5A0000'); // Sehr dunkelrot
+  ctx.fillStyle = legGradient;
+  ctx.fillRect(18, 54, 10, 10);
+  ctx.fillRect(36, 54, 10, 10);
+  
+  // Muskelschattierungen an Beinen
+  ctx.fillStyle = '#5A0000';
+  ctx.fillRect(20, 56, 2, 8); // Schatten links
+  ctx.fillRect(38, 56, 2, 8); // Schatten rechts
+  
+  // Klauen an Füßen
+  ctx.fillStyle = '#E0E0E0';
+  ctx.fillRect(16, 62, 2, 3); // Linker Fuß - Kralle 1
+  ctx.fillRect(19, 62, 2, 3); // Linker Fuß - Kralle 2
+  ctx.fillRect(22, 62, 2, 3); // Linker Fuß - Kralle 3
+  ctx.fillRect(34, 62, 2, 3); // Rechter Fuß - Kralle 1
+  ctx.fillRect(37, 62, 2, 3); // Rechter Fuß - Kralle 2
+  ctx.fillRect(40, 62, 2, 3); // Rechter Fuß - Kralle 3
 
-  // Körper
-  const bodyGradient = ctx.createRadialGradient(32, 40, 5, 32, 40, 30);
-  bodyGradient.addColorStop(0, '#FF4500'); // Orangerot
-  bodyGradient.addColorStop(1, '#8B0000'); // Dunkelrot
+  // Muskulöser Körper mit mehreren Rottönen
+  const bodyGradient = ctx.createRadialGradient(32, 38, 5, 32, 38, 22);
+  bodyGradient.addColorStop(0, '#FF4500'); // Orangerot (Highlight)
+  bodyGradient.addColorStop(0.4, '#DC143C'); // Crimson
+  bodyGradient.addColorStop(0.7, '#8B0000'); // Dunkelrot
+  bodyGradient.addColorStop(1, '#5A0000'); // Sehr dunkelrot (Schatten)
   ctx.fillStyle = bodyGradient;
-  ctx.fillRect(12, 20, 40, 36);
+  ctx.fillRect(14, 24, 36, 30);
+  
+  // Sichtbare Muskelstruktur durch Schattierungen
+  ctx.fillStyle = '#5A0000';
+  // Brustmuskeln
+  ctx.fillRect(22, 28, 8, 2);
+  ctx.fillRect(34, 28, 8, 2);
+  // Bauchmuskeln
+  ctx.fillRect(28, 36, 8, 2);
+  ctx.fillRect(28, 42, 8, 2);
+  ctx.fillRect(28, 48, 8, 2);
+  // Seitliche Muskeln
+  ctx.fillStyle = '#DC143C';
+  ctx.fillRect(14, 30, 2, 20);
+  ctx.fillRect(48, 30, 2, 20);
 
-  // Kopf
-  ctx.fillStyle = '#D2691E'; // Schokoladenbraun
-  ctx.fillRect(20, 4, 24, 20);
+  // Arme mit Muskelstruktur
+  const armGradient = ctx.createLinearGradient(0, 28, 0, 48);
+  armGradient.addColorStop(0, '#DC143C');
+  armGradient.addColorStop(0.5, '#8B0000');
+  armGradient.addColorStop(1, '#5A0000');
+  ctx.fillStyle = armGradient;
+  ctx.fillRect(4, 28, 10, 20);
+  ctx.fillRect(50, 28, 10, 20);
+  
+  // Muskelschattierungen an Armen
+  ctx.fillStyle = '#5A0000';
+  ctx.fillRect(6, 32, 2, 12);
+  ctx.fillRect(52, 32, 2, 12);
 
-  // Hörner
-  ctx.fillStyle = '#C0C0C0'; // Silber
+  // Detaillierte Hände mit einzelnen Krallen
+  ctx.fillStyle = '#8B0000';
+  ctx.fillRect(2, 48, 10, 6); // Linke Hand
+  ctx.fillRect(52, 48, 10, 6); // Rechte Hand
+  
+  // Linke Hand - 4 Krallen
+  ctx.fillStyle = '#E0E0E0';
+  ctx.fillRect(2, 54, 2, 5);   // Kralle 1
+  ctx.fillRect(5, 54, 2, 6);   // Kralle 2
+  ctx.fillRect(8, 54, 2, 5);   // Kralle 3
+  ctx.fillRect(11, 54, 2, 4);  // Kralle 4
+  
+  // Rechte Hand - 4 Krallen
+  ctx.fillRect(52, 54, 2, 5);  // Kralle 1
+  ctx.fillRect(55, 54, 2, 6);  // Kralle 2
+  ctx.fillRect(58, 54, 2, 5);  // Kralle 3
+  ctx.fillRect(61, 54, 2, 4);  // Kralle 4
+
+  // Kopf mit Muskelstruktur
+  const headGradient = ctx.createRadialGradient(32, 14, 3, 32, 14, 12);
+  headGradient.addColorStop(0, '#DC143C');
+  headGradient.addColorStop(0.6, '#8B0000');
+  headGradient.addColorStop(1, '#5A0000');
+  ctx.fillStyle = headGradient;
+  ctx.fillRect(20, 6, 24, 18);
+  
+  // Kiefermuskulatur
+  ctx.fillStyle = '#5A0000';
+  ctx.fillRect(20, 18, 4, 6);
+  ctx.fillRect(40, 18, 4, 6);
+
+  // Detaillierte 3D-Hörner mit Glanzeffekten
+  // Linkes Horn
+  const hornGradient1 = ctx.createLinearGradient(18, 0, 22, 6);
+  hornGradient1.addColorStop(0, '#C0C0C0'); // Silber (Glanz)
+  hornGradient1.addColorStop(0.3, '#E8E8E8'); // Helles Silber (Highlight)
+  hornGradient1.addColorStop(0.7, '#A0A0A0'); // Mittelgrau
+  hornGradient1.addColorStop(1, '#696969'); // Dunkelgrau (Schatten)
+  ctx.fillStyle = hornGradient1;
   ctx.beginPath();
-  ctx.moveTo(20, 4);
-  ctx.lineTo(16, -4);
-  ctx.lineTo(24, 4);
+  ctx.moveTo(22, 6);
+  ctx.lineTo(18, -2);
+  ctx.lineTo(20, -2);
+  ctx.lineTo(24, 6);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Glanzlicht auf linkem Horn
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(21, 1, 1, 3);
+  
+  // Rechtes Horn
+  const hornGradient2 = ctx.createLinearGradient(42, 0, 46, 6);
+  hornGradient2.addColorStop(0, '#C0C0C0');
+  hornGradient2.addColorStop(0.3, '#E8E8E8');
+  hornGradient2.addColorStop(0.7, '#A0A0A0');
+  hornGradient2.addColorStop(1, '#696969');
+  ctx.fillStyle = hornGradient2;
+  ctx.beginPath();
+  ctx.moveTo(42, 6);
+  ctx.lineTo(46, -2);
+  ctx.lineTo(44, -2);
+  ctx.lineTo(40, 6);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Glanzlicht auf rechtem Horn
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(43, 1, 1, 3);
+
+  // Leuchtende rot-gelbe Augen mit mehreren Schichten
+  // Äußere Glühschicht
+  const eyeGlow1 = ctx.createRadialGradient(26, 12, 1, 26, 12, 6);
+  eyeGlow1.addColorStop(0, 'rgba(255, 255, 0, 0.8)'); // Gelb
+  eyeGlow1.addColorStop(0.5, 'rgba(255, 69, 0, 0.5)'); // Orangerot
+  eyeGlow1.addColorStop(1, 'rgba(255, 0, 0, 0)'); // Transparent rot
+  ctx.fillStyle = eyeGlow1;
+  ctx.beginPath();
+  ctx.arc(26, 12, 6, 0, Math.PI * 2);
+  ctx.fill();
+  
+  const eyeGlow2 = ctx.createRadialGradient(38, 12, 1, 38, 12, 6);
+  eyeGlow2.addColorStop(0, 'rgba(255, 255, 0, 0.8)');
+  eyeGlow2.addColorStop(0.5, 'rgba(255, 69, 0, 0.5)');
+  eyeGlow2.addColorStop(1, 'rgba(255, 0, 0, 0)');
+  ctx.fillStyle = eyeGlow2;
+  ctx.beginPath();
+  ctx.arc(38, 12, 6, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Mittlere Schicht - Rot
+  ctx.fillStyle = '#FF0000';
+  ctx.beginPath();
+  ctx.arc(26, 12, 4, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.moveTo(44, 4);
-  ctx.lineTo(48, -4);
-  ctx.lineTo(40, 4);
+  ctx.arc(38, 12, 4, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Innere Schicht - Gelb
+  const eyeCore1 = ctx.createRadialGradient(26, 12, 0, 26, 12, 3);
+  eyeCore1.addColorStop(0, '#FFFF00'); // Helles Gelb
+  eyeCore1.addColorStop(0.6, '#FFD700'); // Gold
+  eyeCore1.addColorStop(1, '#FF8C00'); // Dunkelorange
+  ctx.fillStyle = eyeCore1;
+  ctx.beginPath();
+  ctx.arc(26, 12, 3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  const eyeCore2 = ctx.createRadialGradient(38, 12, 0, 38, 12, 3);
+  eyeCore2.addColorStop(0, '#FFFF00');
+  eyeCore2.addColorStop(0.6, '#FFD700');
+  eyeCore2.addColorStop(1, '#FF8C00');
+  ctx.fillStyle = eyeCore2;
+  ctx.beginPath();
+  ctx.arc(38, 12, 3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Pupillen
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.arc(26, 12, 1, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(38, 12, 1, 0, Math.PI * 2);
   ctx.fill();
 
-
-  // Augen
-  const eyeGradient = ctx.createRadialGradient(27, 11, 1, 27, 11, 5);
-  eyeGradient.addColorStop(0, '#FFFF00'); // Gelb
-  eyeGradient.addColorStop(1, 'transparent');
-  ctx.fillStyle = '#FF0000'; // Roter Augenhintergrund
-  ctx.fillRect(24, 8, 6, 6);
-  ctx.fillRect(34, 8, 6, 6);
-  ctx.fillStyle = eyeGradient;
-  ctx.fillRect(24, 8, 6, 6);
-  const eyeGradient2 = ctx.createRadialGradient(37, 11, 1, 37, 11, 5);
-  eyeGradient2.addColorStop(0, '#FFFF00');
-  eyeGradient2.addColorStop(1, 'transparent');
-  ctx.fillStyle = eyeGradient2;
-  ctx.fillRect(34, 8, 6, 6);
-
-
-  // Zähne
+  // Geöffnetes Maul mit 6-8 sichtbaren Reißzähnen
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(24, 18, 16, 6); // Geöffnetes Maul
+  
+  // Obere Reißzähne (4 Stück)
   ctx.fillStyle = '#FFFFFF';
-  for (let i = 0; i < 5; i++) {
-    ctx.beginPath();
-    ctx.moveTo(22 + i * 4, 20);
-    ctx.lineTo(24 + i * 4, 24);
-    ctx.lineTo(26 + i * 4, 20);
-    ctx.fill();
-  }
-
-  // Klauen / Arme
-  ctx.fillStyle = '#4A4A4A'; // Dunkelgrau
-  ctx.fillRect(4, 28, 8, 12);
-  ctx.fillRect(52, 28, 8, 12);
-  // Krallen
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(4, 40, 2, 4);
-  ctx.fillRect(8, 40, 2, 4);
-  ctx.fillRect(54, 40, 2, 4);
-  ctx.fillRect(58, 40, 2, 4);
-
+  ctx.beginPath();
+  ctx.moveTo(25, 18);
+  ctx.lineTo(26, 21);
+  ctx.lineTo(27, 18);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(29, 18);
+  ctx.lineTo(30, 22);
+  ctx.lineTo(31, 18);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(33, 18);
+  ctx.lineTo(34, 22);
+  ctx.lineTo(35, 18);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(37, 18);
+  ctx.lineTo(38, 21);
+  ctx.lineTo(39, 18);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Untere Reißzähne (4 Stück)
+  ctx.beginPath();
+  ctx.moveTo(26, 24);
+  ctx.lineTo(27, 21);
+  ctx.lineTo(28, 24);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(30, 24);
+  ctx.lineTo(31, 20);
+  ctx.lineTo(32, 24);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(34, 24);
+  ctx.lineTo(35, 20);
+  ctx.lineTo(36, 24);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.moveTo(38, 24);
+  ctx.lineTo(39, 21);
+  ctx.lineTo(40, 24);
+  ctx.closePath();
+  ctx.fill();
 
   return canvas;
 }
@@ -187,19 +436,36 @@ function createGhostTexture(): HTMLCanvasElement {
   canvas.height = 64;
   const ctx = canvas.getContext('2d')!;
 
-  // --- Detaillierterer Geist ---
+  // --- Detaillierter ätherischer Geist mit mehreren Transparenzebenen ---
 
-  ctx.globalAlpha = 0.85;
+  // Äußere nebelige Schicht (70% Transparenz)
+  ctx.globalAlpha = 0.7;
+  const outerMist = ctx.createRadialGradient(32, 36, 10, 32, 36, 35);
+  outerMist.addColorStop(0, 'rgba(224, 255, 255, 0.8)'); // #E0FFFF - Hellcyan
+  outerMist.addColorStop(0.5, 'rgba(176, 224, 230, 0.5)'); // #B0E0E6 - Puderblau
+  outerMist.addColorStop(1, 'rgba(135, 206, 235, 0)'); // #87CEEB - Himmelblau (transparent)
+  ctx.fillStyle = outerMist;
+  
+  // Wispy, nebelige Ränder mit fließender Form
+  ctx.beginPath();
+  ctx.moveTo(10, 60);
+  ctx.bezierCurveTo(-2, 45, 5, 15, 32, 8);
+  ctx.bezierCurveTo(59, 15, 66, 45, 54, 60);
+  ctx.bezierCurveTo(48, 52, 40, 58, 32, 62);
+  ctx.bezierCurveTo(24, 58, 16, 52, 10, 60);
+  ctx.closePath();
+  ctx.fill();
 
-  // Körper mit Farbverlauf für ätherisches Aussehen
-  const gradient = ctx.createRadialGradient(32, 32, 5, 32, 32, 30);
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-  gradient.addColorStop(0.5, 'rgba(200, 220, 255, 0.7)');
-  gradient.addColorStop(1, 'rgba(150, 200, 255, 0)');
-
-  ctx.fillStyle = gradient;
-
-  // Geisterform
+  // Mittlere ätherische Schicht (80% Transparenz)
+  ctx.globalAlpha = 0.8;
+  const middleLayer = ctx.createRadialGradient(32, 34, 8, 32, 34, 28);
+  middleLayer.addColorStop(0, 'rgba(255, 255, 255, 0.95)'); // #FFFFFF - Weiß
+  middleLayer.addColorStop(0.4, 'rgba(224, 255, 255, 0.8)'); // #E0FFFF - Hellcyan
+  middleLayer.addColorStop(0.7, 'rgba(176, 224, 230, 0.6)'); // #B0E0E6 - Puderblau
+  middleLayer.addColorStop(1, 'rgba(135, 206, 235, 0)'); // #87CEEB - Himmelblau (transparent)
+  ctx.fillStyle = middleLayer;
+  
+  // Hauptkörper mit fließender, ätherischer Form
   ctx.beginPath();
   ctx.moveTo(12, 60);
   ctx.bezierCurveTo(0, 40, 10, 10, 32, 10);
@@ -209,30 +475,123 @@ function createGhostTexture(): HTMLCanvasElement {
   ctx.closePath();
   ctx.fill();
 
+  // Innere Leuchtschicht (85% Transparenz)
+  ctx.globalAlpha = 0.85;
+  const innerGlow = ctx.createRadialGradient(32, 30, 2, 32, 30, 20);
+  innerGlow.addColorStop(0, 'rgba(255, 255, 255, 1)'); // Helles Zentrum
+  innerGlow.addColorStop(0.3, 'rgba(240, 255, 255, 0.9)'); // Fast weiß
+  innerGlow.addColorStop(0.6, 'rgba(224, 255, 255, 0.7)'); // #E0FFFF
+  innerGlow.addColorStop(1, 'rgba(176, 224, 230, 0)'); // #B0E0E6 (transparent)
+  ctx.fillStyle = innerGlow;
+  ctx.beginPath();
+  ctx.ellipse(32, 30, 18, 22, 0, 0, Math.PI * 2);
+  ctx.fill();
 
+  // Zusätzliche innere Leuchteffekte (Energie-Wirbel)
+  ctx.globalAlpha = 0.75;
+  const energyGlow1 = ctx.createRadialGradient(28, 25, 1, 28, 25, 8);
+  energyGlow1.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+  energyGlow1.addColorStop(0.5, 'rgba(224, 255, 255, 0.6)');
+  energyGlow1.addColorStop(1, 'rgba(176, 224, 230, 0)');
+  ctx.fillStyle = energyGlow1;
+  ctx.beginPath();
+  ctx.arc(28, 25, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  const energyGlow2 = ctx.createRadialGradient(36, 25, 1, 36, 25, 8);
+  energyGlow2.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+  energyGlow2.addColorStop(0.5, 'rgba(224, 255, 255, 0.6)');
+  energyGlow2.addColorStop(1, 'rgba(176, 224, 230, 0)');
+  ctx.fillStyle = energyGlow2;
+  ctx.beginPath();
+  ctx.arc(36, 25, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Zentrale Leuchtenergie
+  ctx.globalAlpha = 0.8;
+  const coreGlow = ctx.createRadialGradient(32, 35, 1, 32, 35, 12);
+  coreGlow.addColorStop(0, 'rgba(255, 255, 255, 1)');
+  coreGlow.addColorStop(0.4, 'rgba(240, 255, 255, 0.8)');
+  coreGlow.addColorStop(1, 'rgba(224, 255, 255, 0)');
+  ctx.fillStyle = coreGlow;
+  ctx.beginPath();
+  ctx.arc(32, 35, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Zurücksetzen für Gesichtszüge
   ctx.globalAlpha = 1.0;
 
-  // Augen
+  // Hohle, leuchtende Augen mit mehreren Schichten
+  // Äußerer Glüheffekt
+  const eyeGlow1 = ctx.createRadialGradient(26, 28, 1, 26, 28, 8);
+  eyeGlow1.addColorStop(0, 'rgba(135, 206, 235, 0.8)'); // #87CEEB - Himmelblau
+  eyeGlow1.addColorStop(0.5, 'rgba(176, 224, 230, 0.5)'); // #B0E0E6
+  eyeGlow1.addColorStop(1, 'rgba(135, 206, 235, 0)');
+  ctx.fillStyle = eyeGlow1;
+  ctx.beginPath();
+  ctx.arc(26, 28, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  const eyeGlow2 = ctx.createRadialGradient(40, 28, 1, 40, 28, 8);
+  eyeGlow2.addColorStop(0, 'rgba(135, 206, 235, 0.8)');
+  eyeGlow2.addColorStop(0.5, 'rgba(176, 224, 230, 0.5)');
+  eyeGlow2.addColorStop(1, 'rgba(135, 206, 235, 0)');
+  ctx.fillStyle = eyeGlow2;
+  ctx.beginPath();
+  ctx.arc(40, 28, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Hohle schwarze Augen
   ctx.fillStyle = '#000000';
   ctx.beginPath();
   ctx.arc(26, 28, 5, 0, Math.PI * 2);
   ctx.arc(40, 28, 5, 0, Math.PI * 2);
   ctx.fill();
 
-  // Glanzpunkt in den Augen
-  ctx.fillStyle = '#FFFFFF';
+  // Innerer Leuchteffekt in den Augen
+  const eyeInnerGlow1 = ctx.createRadialGradient(26, 28, 0, 26, 28, 4);
+  eyeInnerGlow1.addColorStop(0, 'rgba(224, 255, 255, 0.9)'); // #E0FFFF
+  eyeInnerGlow1.addColorStop(0.6, 'rgba(176, 224, 230, 0.6)'); // #B0E0E6
+  eyeInnerGlow1.addColorStop(1, 'rgba(135, 206, 235, 0.3)'); // #87CEEB
+  ctx.fillStyle = eyeInnerGlow1;
   ctx.beginPath();
-  ctx.arc(25, 27, 1.5, 0, Math.PI * 2);
-  ctx.arc(39, 27, 1.5, 0, Math.PI * 2);
+  ctx.arc(26, 28, 4, 0, Math.PI * 2);
   ctx.fill();
 
-  // Mund (gequält)
-  ctx.strokeStyle = '#000000';
-  ctx.lineWidth = 1.5;
+  const eyeInnerGlow2 = ctx.createRadialGradient(40, 28, 0, 40, 28, 4);
+  eyeInnerGlow2.addColorStop(0, 'rgba(224, 255, 255, 0.9)');
+  eyeInnerGlow2.addColorStop(0.6, 'rgba(176, 224, 230, 0.6)');
+  eyeInnerGlow2.addColorStop(1, 'rgba(135, 206, 235, 0.3)');
+  ctx.fillStyle = eyeInnerGlow2;
+  ctx.beginPath();
+  ctx.arc(40, 28, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Glanzpunkte in den Augen (heller)
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.arc(24, 26, 2, 0, Math.PI * 2);
+  ctx.arc(38, 26, 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Kleinere Glanzpunkte
+  ctx.beginPath();
+  ctx.arc(27, 29, 1, 0, Math.PI * 2);
+  ctx.arc(41, 29, 1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Gequälter Gesichtsausdruck mit gebogenem Mund
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.arc(33, 40, 8, 0.2 * Math.PI, 0.8 * Math.PI);
   ctx.stroke();
 
+  // Zusätzliche Munddetails für gequälten Ausdruck
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(33, 41, 6, 0.25 * Math.PI, 0.75 * Math.PI);
+  ctx.stroke();
 
   return canvas;
 }
@@ -597,18 +956,63 @@ function createZombieCorpseTexture(): HTMLCanvasElement {
   canvas.height = 64;
   const ctx = canvas.getContext('2d')!;
 
-  // Dunklere, flachere Version des Zombies
-  ctx.fillStyle = '#3A4A1F'; // Dunkles Grün
-  ctx.fillRect(12, 48, 40, 12); // Körper
-
-  ctx.fillStyle = '#5A0000'; // Dunkelrot (Blutlache)
+  // Blutlache (größer und realistischer)
+  const bloodGradient = ctx.createRadialGradient(32, 54, 5, 32, 54, 28);
+  bloodGradient.addColorStop(0, '#8B0000'); // Dunkelrot
+  bloodGradient.addColorStop(0.5, '#5A0000'); // Sehr dunkelrot
+  bloodGradient.addColorStop(1, 'rgba(90, 0, 0, 0.3)'); // Transparent
+  ctx.fillStyle = bloodGradient;
   ctx.beginPath();
-  ctx.ellipse(32, 54, 25, 8, 0, 0, Math.PI * 2);
+  ctx.ellipse(32, 54, 28, 12, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#222'; // Dunkle Gliedmaßen
-  ctx.fillRect(8, 46, 8, 8);
-  ctx.fillRect(48, 46, 8, 8);
+  // Liegender Körper (zerrissenes Hemd)
+  ctx.fillStyle = '#5A0000'; // Dunkelrotes Hemd
+  ctx.fillRect(14, 48, 36, 10); // Hauptkörper
+  
+  // Körper-Schattierung
+  ctx.fillStyle = '#3A0000';
+  ctx.fillRect(14, 48, 36, 2); // Oberer Schatten
+
+  // Linker Arm ausgestreckt
+  ctx.fillStyle = '#2E8B57'; // Grüne Haut
+  ctx.fillRect(6, 50, 10, 6);
+  // Linke Hand
+  ctx.fillStyle = '#3CB371';
+  ctx.fillRect(4, 52, 4, 4);
+  // Finger angedeutet
+  ctx.fillStyle = '#2E8B57';
+  ctx.fillRect(2, 53, 2, 1);
+  ctx.fillRect(2, 55, 2, 1);
+
+  // Rechter Arm ausgestreckt
+  ctx.fillStyle = '#2E8B57';
+  ctx.fillRect(48, 50, 10, 6);
+  // Rechte Hand
+  ctx.fillStyle = '#3CB371';
+  ctx.fillRect(56, 52, 4, 4);
+  // Finger angedeutet
+  ctx.fillStyle = '#2E8B57';
+  ctx.fillRect(60, 53, 2, 1);
+  ctx.fillRect(60, 55, 2, 1);
+
+  // Kopf (seitlich liegend)
+  ctx.fillStyle = '#3CB371'; // Grüne Haut
+  ctx.fillRect(26, 44, 12, 8);
+  
+  // Wunde am Kopf
+  ctx.fillStyle = '#5A0000';
+  ctx.fillRect(32, 45, 4, 3);
+
+  // Beine (angewinkelt)
+  ctx.fillStyle = '#4B3A26'; // Braune Hose
+  ctx.fillRect(18, 56, 8, 6);
+  ctx.fillRect(38, 56, 8, 6);
+  
+  // Schuhe
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(16, 58, 6, 4);
+  ctx.fillRect(40, 58, 6, 4);
 
   return canvas;
 }
@@ -619,15 +1023,91 @@ function createMonsterCorpseTexture(): HTMLCanvasElement {
   canvas.height = 64;
   const ctx = canvas.getContext('2d')!;
 
-  // Dunklere, flachere Version des Monsters
-  ctx.fillStyle = '#5A0000';
+  // --- Zusammengesunkener Monster-Leichnam ---
+
+  // Blutlache
+  const bloodGradient = ctx.createRadialGradient(32, 54, 5, 32, 54, 30);
+  bloodGradient.addColorStop(0, '#8B0000'); // Dunkelrot
+  bloodGradient.addColorStop(0.5, '#5A0000'); // Sehr dunkelrot
+  bloodGradient.addColorStop(1, 'rgba(90, 0, 0, 0.2)'); // Transparent
+  ctx.fillStyle = bloodGradient;
   ctx.beginPath();
-  ctx.ellipse(32, 52, 28, 10, 0, 0, Math.PI * 2);
+  ctx.ellipse(32, 56, 32, 14, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#D2691E'; // Horn-Farbe
-  ctx.fillRect(10, 50, 8, 4);
-  ctx.fillRect(46, 50, 8, 4);
+  // Zusammengesunkener Körper (flach)
+  const corpseGradient = ctx.createRadialGradient(32, 52, 5, 32, 52, 24);
+  corpseGradient.addColorStop(0, '#5A0000'); // Sehr dunkelrot
+  corpseGradient.addColorStop(0.5, '#3A0000'); // Fast schwarz-rot
+  corpseGradient.addColorStop(1, '#2A0000'); // Sehr dunkel
+  ctx.fillStyle = corpseGradient;
+  ctx.beginPath();
+  ctx.ellipse(32, 52, 26, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Muskelstruktur noch sichtbar (Schattierungen)
+  ctx.fillStyle = '#1A0000';
+  ctx.fillRect(28, 48, 8, 2);
+  ctx.fillRect(28, 52, 8, 2);
+  ctx.fillRect(28, 56, 8, 2);
+
+  // Ausgestreckte Arme
+  ctx.fillStyle = '#3A0000';
+  ctx.beginPath();
+  ctx.ellipse(12, 52, 8, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(52, 52, 8, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Klauen noch sichtbar
+  ctx.fillStyle = '#808080';
+  ctx.fillRect(6, 52, 2, 3);
+  ctx.fillRect(9, 52, 2, 3);
+  ctx.fillRect(56, 52, 2, 3);
+  ctx.fillRect(59, 52, 2, 3);
+
+  // Beine zusammengesunken
+  ctx.fillStyle = '#3A0000';
+  ctx.beginPath();
+  ctx.ellipse(22, 58, 6, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(42, 58, 6, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Kopf seitlich liegend
+  ctx.fillStyle = '#4A0000';
+  ctx.fillRect(26, 44, 12, 8);
+  
+  // Hörner noch sichtbar (seitlich)
+  const hornGradient = ctx.createLinearGradient(10, 44, 18, 48);
+  hornGradient.addColorStop(0, '#A0A0A0');
+  hornGradient.addColorStop(0.5, '#808080');
+  hornGradient.addColorStop(1, '#505050');
+  ctx.fillStyle = hornGradient;
+  ctx.fillRect(10, 44, 10, 4); // Linkes Horn
+  
+  const hornGradient2 = ctx.createLinearGradient(44, 44, 52, 48);
+  hornGradient2.addColorStop(0, '#A0A0A0');
+  hornGradient2.addColorStop(0.5, '#808080');
+  hornGradient2.addColorStop(1, '#505050');
+  ctx.fillStyle = hornGradient2;
+  ctx.fillRect(44, 44, 10, 4); // Rechtes Horn
+  
+  // Hornspitzen
+  ctx.fillStyle = '#C0C0C0';
+  ctx.fillRect(8, 44, 3, 2);
+  ctx.fillRect(53, 44, 3, 2);
+
+  // Erloschene Augen
+  ctx.fillStyle = '#1A0000';
+  ctx.beginPath();
+  ctx.arc(30, 47, 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(34, 47, 2, 0, Math.PI * 2);
+  ctx.fill();
 
   return canvas;
 }
@@ -638,12 +1118,84 @@ function createGhostCorpseTexture(): HTMLCanvasElement {
   canvas.height = 64;
   const ctx = canvas.getContext('2d')!;
 
-  // Verblassender Geist
-  const gradient = ctx.createRadialGradient(32, 50, 5, 32, 50, 25);
-  gradient.addColorStop(0, 'rgba(200, 220, 255, 0.5)');
-  gradient.addColorStop(1, 'rgba(150, 200, 255, 0)');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 64, 64);
+  // --- Verblassender Geist mit mehreren Transparenzebenen ---
+
+  // Äußerste Schicht - fast vollständig verblasst (30% Transparenz)
+  ctx.globalAlpha = 0.3;
+  const outerFade = ctx.createRadialGradient(32, 52, 8, 32, 52, 32);
+  outerFade.addColorStop(0, 'rgba(176, 224, 230, 0.4)'); // #B0E0E6 - Puderblau
+  outerFade.addColorStop(0.5, 'rgba(135, 206, 235, 0.2)'); // #87CEEB - Himmelblau
+  outerFade.addColorStop(1, 'rgba(135, 206, 235, 0)'); // Vollständig transparent
+  ctx.fillStyle = outerFade;
+  
+  // Verblassende Geisterform (flach am Boden)
+  ctx.beginPath();
+  ctx.ellipse(32, 52, 28, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Mittlere Schicht - stärker sichtbar (45% Transparenz)
+  ctx.globalAlpha = 0.45;
+  const middleFade = ctx.createRadialGradient(32, 50, 5, 32, 50, 22);
+  middleFade.addColorStop(0, 'rgba(200, 220, 255, 0.6)'); // Hellblau
+  middleFade.addColorStop(0.5, 'rgba(176, 224, 230, 0.4)'); // #B0E0E6
+  middleFade.addColorStop(1, 'rgba(135, 206, 235, 0)'); // #87CEEB (transparent)
+  ctx.fillStyle = middleFade;
+  ctx.beginPath();
+  ctx.ellipse(32, 50, 22, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Innere Schicht - noch erkennbar (55% Transparenz)
+  ctx.globalAlpha = 0.55;
+  const innerFade = ctx.createRadialGradient(32, 48, 3, 32, 48, 16);
+  innerFade.addColorStop(0, 'rgba(224, 255, 255, 0.7)'); // #E0FFFF - Hellcyan
+  innerFade.addColorStop(0.5, 'rgba(200, 220, 255, 0.5)');
+  innerFade.addColorStop(1, 'rgba(176, 224, 230, 0)'); // #B0E0E6 (transparent)
+  ctx.fillStyle = innerFade;
+  ctx.beginPath();
+  ctx.ellipse(32, 48, 16, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Kern - letzter Rest der Energie (65% Transparenz)
+  ctx.globalAlpha = 0.65;
+  const coreFade = ctx.createRadialGradient(32, 48, 1, 32, 48, 10);
+  coreFade.addColorStop(0, 'rgba(255, 255, 255, 0.8)'); // Weißer Kern
+  coreFade.addColorStop(0.4, 'rgba(224, 255, 255, 0.6)'); // #E0FFFF
+  coreFade.addColorStop(1, 'rgba(200, 220, 255, 0)'); // Transparent
+  ctx.fillStyle = coreFade;
+  ctx.beginPath();
+  ctx.ellipse(32, 48, 10, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Letzte Energiefunken (sehr schwach, 40% Transparenz)
+  ctx.globalAlpha = 0.4;
+  const spark1 = ctx.createRadialGradient(28, 46, 0, 28, 46, 4);
+  spark1.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
+  spark1.addColorStop(0.5, 'rgba(224, 255, 255, 0.4)');
+  spark1.addColorStop(1, 'rgba(176, 224, 230, 0)');
+  ctx.fillStyle = spark1;
+  ctx.beginPath();
+  ctx.arc(28, 46, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  const spark2 = ctx.createRadialGradient(36, 46, 0, 36, 46, 4);
+  spark2.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
+  spark2.addColorStop(0.5, 'rgba(224, 255, 255, 0.4)');
+  spark2.addColorStop(1, 'rgba(176, 224, 230, 0)');
+  ctx.fillStyle = spark2;
+  ctx.beginPath();
+  ctx.arc(36, 46, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Schwache Augenreste (25% Transparenz)
+  ctx.globalAlpha = 0.25;
+  ctx.fillStyle = 'rgba(135, 206, 235, 0.5)'; // #87CEEB
+  ctx.beginPath();
+  ctx.arc(28, 47, 2, 0, Math.PI * 2);
+  ctx.arc(36, 47, 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Zurücksetzen
+  ctx.globalAlpha = 1.0;
 
   return canvas;
 }
