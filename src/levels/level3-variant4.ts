@@ -1,4 +1,4 @@
-import { type GameMap, EnemyType, ItemType, WeaponType, WallPictureType } from '../types.ts';
+import { type GameMap, EnemyType, ItemType, WeaponType, WallPictureType, DecorativeObjectType } from '../types.ts';
 
 export const LEVEL_3_VARIANT_4: GameMap = {
   width: 20,
@@ -47,7 +47,37 @@ export const LEVEL_3_VARIANT_4: GameMap = {
     { id: 'wp2', x: 16, y: 3, side: 1, offset: 0.5, type: WallPictureType.ABSTRACT },
     { id: 'wp3', x: 9, y: 5, side: 0, offset: 0.5, type: WallPictureType.PORTRAIT }
   ],
-  decorativeObjects: [],
+  decorativeObjects: [
+    // Ceiling lights (every 4-6 tiles)
+    { id: 'do1', type: DecorativeObjectType.CEILING_LIGHT, x: 5.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
+    { id: 'do2', type: DecorativeObjectType.CEILING_LIGHT, x: 10.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
+    { id: 'do3', type: DecorativeObjectType.CEILING_LIGHT, x: 15.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
+    { id: 'do4', type: DecorativeObjectType.CEILING_LIGHT, x: 5.5, y: 10.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
+    { id: 'do5', type: DecorativeObjectType.CEILING_LIGHT, x: 10.5, y: 10.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
+    { id: 'do6', type: DecorativeObjectType.CEILING_LIGHT, x: 15.5, y: 10.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
+    { id: 'do7', type: DecorativeObjectType.CEILING_LIGHT, x: 5.5, y: 15.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
+    { id: 'do8', type: DecorativeObjectType.CEILING_LIGHT, x: 10.5, y: 15.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
+    { id: 'do9', type: DecorativeObjectType.CEILING_LIGHT, x: 15.5, y: 15.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
+    // Hallway decorations
+    { id: 'do10', type: DecorativeObjectType.VASE, x: 2.5, y: 2.5, colorVariant: 0.3, collisionRadius: 0.25 },
+    { id: 'do11', type: DecorativeObjectType.CRATE, x: 17.5, y: 2.5, colorVariant: 0.7, collisionRadius: 0.35 },
+    { id: 'do12', type: DecorativeObjectType.BENCH, x: 2.5, y: 8.5, colorVariant: 0.4, collisionRadius: 0.4 },
+    { id: 'do13', type: DecorativeObjectType.VASE, x: 17.5, y: 8.5, colorVariant: 0.6, collisionRadius: 0.25 },
+    { id: 'do14', type: DecorativeObjectType.CRATE, x: 2.5, y: 15.5, colorVariant: 0.2, collisionRadius: 0.35 },
+    { id: 'do15', type: DecorativeObjectType.BENCH, x: 17.5, y: 15.5, colorVariant: 0.8, collisionRadius: 0.4 },
+    // Room furniture (left rooms)
+    { id: 'do16', type: DecorativeObjectType.TABLE, x: 4.5, y: 4.5, colorVariant: 0.5, collisionRadius: 0.45 },
+    { id: 'do17', type: DecorativeObjectType.CHAIR, x: 4.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0.3 },
+    { id: 'do18', type: DecorativeObjectType.TABLE, x: 4.5, y: 12.5, colorVariant: 0.5, collisionRadius: 0.45 },
+    // Room furniture (right rooms)
+    { id: 'do19', type: DecorativeObjectType.TABLE, x: 15.5, y: 4.5, colorVariant: 0.5, collisionRadius: 0.45 },
+    { id: 'do20', type: DecorativeObjectType.WINE_BOTTLE, x: 15.5, y: 4.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.8, parentId: 'do19' },
+    { id: 'do21', type: DecorativeObjectType.CHAIR, x: 15.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0.3 },
+    { id: 'do22', type: DecorativeObjectType.TABLE, x: 15.5, y: 12.5, colorVariant: 0.5, collisionRadius: 0.45 },
+    // Skeletons
+    { id: 'do23', type: DecorativeObjectType.SKELETON, x: 7.5, y: 7.5, colorVariant: 0.5, collisionRadius: 0.2 },
+    { id: 'do24', type: DecorativeObjectType.SKELETON, x: 12.5, y: 17.5, colorVariant: 0.5, collisionRadius: 0.2 }
+  ],
   playerStartX: 2,
   playerStartY: 2,
   playerStartDirection: 0

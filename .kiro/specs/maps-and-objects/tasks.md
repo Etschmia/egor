@@ -115,7 +115,7 @@
   - Setze zufällige colorVariant-Werte für Kisten, Vasen, Bänke
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7_
 
-- [ ] 12. Platziere dekorative Objekte in Level 2-3 Varianten
+- [x] 12. Platziere dekorative Objekte in Level 2-3 Varianten
   - Füge dekorative Objekte zu allen Level 2 Varianten hinzu
   - Füge dekorative Objekte zu allen Level 3 Varianten hinzu
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7_
