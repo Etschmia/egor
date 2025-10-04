@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backward Compatibility Tests</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .summary {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .summary-card {
+      flex: 1;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .summary-card.passed {
+      background: #d4edda;
+      border: 2px solid #28a745;
+    }
+    
+    .summary-card.failed {
+      background: #f8d7da;
+      border: 2px solid #dc3545;
+    }
+    
+    .summary-card.total {
+      background: #d1ecf1;
+      border: 2px solid #17a2b8;
+    }
+    
+    .summary-number {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    
+    .summary-label {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+    }
+    
+    .test-result {
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+    
+    .test-result.success {
+      background: #d4edda;
+      border-color: #28a745;
+    }
+    
+    .test-result.failure {
+      background: #f8d7da;
+      border-color: #dc3545;
+    }
+    
+    .test-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .test-icon {
+      font-size: 20px;
+    }
+    
+    .test-message {
+      color: #666;
+      font-size: 14px;
+      margin-left: 30px;
+    }
+    
+    .run-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: transform 0.2s;
+    }
+    
+    .run-button:hover {
+      transform: translateY(-2px);
+    }
+    
+    .run-button:active {
+      transform: translateY(0);
+    }
+    
+    .run-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .requirements {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    
+    .requirements h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    .requirements ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    
+    .requirements li {
+      margin: 5px 0;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Backward Compatibility Tests</h1>
+    <p class="subtitle">Testing Requirements 10.1, 10.2, 10.3, 10.4, 10.5</p>
+    
+    <div class="requirements">
+      <h3>Requirements Being Tested:</h3>
+      <ul>
+        <li><strong>10.1:</strong> Old savegames continue to work</li>
+        <li><strong>10.2:</strong> LEVELS array compatibility maintained</li>
+        <li><strong>10.3:</strong> Map history persists across sessions</li>
+        <li><strong>10.4:</strong> Corrupted data is handled gracefully</li>
+        <li><strong>10.5:</strong> Backward compatible map structure</li>
+      </ul>
+    </div>
+    
+    <button class="run-button" id="runTests">Run All Tests</button>
+    
+    <div id="results"></div>
+  </div>
+
+  <script type="module">
+    import { runAllBackwardCompatibilityTests } from './src/backwardCompatibilityTests.ts';
+    
+    const runButton = document.getElementById('runTests');
+    const resultsDiv = document.getElementById('results');
+    
+    runButton.addEventListener('click', async () => {
+      runButton.disabled = true;
+      resultsDiv.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Running tests...</p>
+        </div>
+      `;
+      
+      // Small delay to show loading state
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      try {
+        const testResults = runAllBackwardCompatibilityTests();
+        
+        const summaryHTML = `
+          <div class="summary">
+            <div class="summary-card total">
+              <div class="summary-label">Total Tests</div>
+              <div class="summary-number">${testResults.passed + testResults.failed}</div>
+            </div>
+            <div class="summary-card passed">
+              <div class="summary-label">Passed</div>
+              <div class="summary-number">${testResults.passed}</div>
+            </div>
+            <div class="summary-card failed">
+              <div class="summary-label">Failed</div>
+              <div class="summary-number">${testResults.failed}</div>
+            </div>
+          </div>
+        `;
+        
+        const resultsHTML = testResults.results.map(result => `
+          <div class="test-result ${result.success ? 'success' : 'failure'}">
+            <div class="test-name">
+              <span class="test-icon">${result.success ? '✅' : '❌'}</span>
+              <span>${result.test}</span>
+            </div>
+            <div class="test-message">${result.message}</div>
+          </div>
+        `).join('');
+        
+        resultsDiv.innerHTML = summaryHTML + resultsHTML;
+        
+        // Log results to console for debugging
+        console.log('Test Results:', testResults);
+        
+      } catch (error) {
+        resultsDiv.innerHTML = `
+          <div class="test-result failure">
+            <div class="test-name">
+              <span class="test-icon">❌</span>
+              <span>Test Execution Error</span>
+            </div>
+            <div class="test-message">${error.message}</div>
+          </div>
+        `;
+        console.error('Test execution error:', error);
+      }
+      
+      runButton.disabled = false;
+    });
+    
+    // Auto-run tests on load
+    window.addEventListener('load', () => {
+      setTimeout(() => runButton.click(), 500);
+    });
+  </script>
+</body>
+</html>
