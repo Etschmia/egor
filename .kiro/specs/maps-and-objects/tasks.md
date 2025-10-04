@@ -125,7 +125,7 @@
   - Füge dekorative Objekte zu allen Level 5 Varianten hinzu
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7_
 
-- [-] 14. Platziere dekorative Objekte in Level 6-7 Varianten
+- [x] 14. Platziere dekorative Objekte in Level 6-7 Varianten
   - Füge dekorative Objekte zu allen Level 6 Varianten hinzu
   - Füge dekorative Objekte zu allen Level 7 Varianten hinzu
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7_
