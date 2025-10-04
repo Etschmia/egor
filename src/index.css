@@ -259,8 +259,7 @@ canvas {
 .level-info {
   position: absolute;
   top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 20px;
   font-size: 24px;
   font-weight: bold;
   color: #ff0;
