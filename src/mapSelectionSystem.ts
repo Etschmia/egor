@@ -177,36 +177,38 @@ export function recordMapPlay(
 }
 
 /**
- * Gets a map based on level and variant from LEVELS_WITH_VARIANTS
+ * Gets a map based on level and variant from LEVEL_VARIANTS
  * Falls back to first variant if indices are invalid
  * 
  * @param level - Level number (0-indexed)
  * @param variant - Variant index (0-4)
- * @param levelsWithVariants - The LEVELS_WITH_VARIANTS array
+ * @param levelsWithVariants - The LEVEL_VARIANTS array
  * @returns GameMap
  */
 export function getMap(
   level: number,
   variant: number,
-  levelsWithVariants: GameMap[][]
+  levelsWithVariants: Record<number, GameMap[]>
 ): GameMap {
   try {
-    // Validate indices
-    if (level < 0 || level >= levelsWithVariants.length) {
+    // Validate indices - level is 0-indexed but Record keys are 1-indexed
+    const levelKey = level + 1;
+    
+    if (!levelsWithVariants[levelKey]) {
       console.error(`Invalid level index: ${level}, falling back to level 0`);
-      level = 0;
+      return levelsWithVariants[1][0];
     }
 
-    const variants = levelsWithVariants[level];
+    const variants = levelsWithVariants[levelKey];
     if (!variants || variant < 0 || variant >= variants.length) {
       console.error(`Invalid variant index: ${variant} for level ${level}, falling back to variant 0`);
       variant = 0;
     }
 
-    return levelsWithVariants[level][variant];
+    return levelsWithVariants[levelKey][variant];
   } catch (error) {
     console.error('Error getting map:', error);
     // Return first map as ultimate fallback
-    return levelsWithVariants[0][0];
+    return levelsWithVariants[1][0];
   }
 }

@@ -1,6 +1,6 @@
 import { type GameState, type Player, Difficulty, WeaponType, EnemyType, type Enemy, type Item, ItemType, type DecorativeObject, DecorativeObjectType } from './types.ts';
 import { getTexture } from './textures.ts';
-import { LEVELS_WITH_VARIANTS } from './levels.ts';
+import { LEVEL_VARIANTS } from './levels.ts';
 import { WEAPONS } from './weapons.ts';
 import { soundSystem } from './soundSystem.ts';
 import { loadMapHistory, saveMapHistory, selectMapVariant, recordMapPlay, getMap } from './mapSelectionSystem.ts';
@@ -53,7 +53,7 @@ export function createInitialGameState(difficulty: Difficulty): GameState {
   // Load map history and select variant for level 0
   const history = loadMapHistory();
   const variant = selectMapVariant(0, history);
-  const level = getMap(0, variant, LEVELS_WITH_VARIANTS);
+  const level = getMap(0, variant, LEVEL_VARIANTS);
   
   // Record this map selection in history
   const updatedHistory = recordMapPlay(0, variant, history);
@@ -540,7 +540,8 @@ export function checkLevelComplete(enemies: Enemy[]): boolean {
 }
 
 export function loadNextLevel(gameState: GameState): GameState {
-  if (gameState.currentLevel >= LEVELS_WITH_VARIANTS.length - 1) {
+  const maxLevel = Math.max(...Object.keys(LEVEL_VARIANTS).map(Number));
+  if (gameState.currentLevel >= maxLevel - 1) {
     // Spiel gewonnen!
     return gameState;
   }
@@ -550,7 +551,7 @@ export function loadNextLevel(gameState: GameState): GameState {
   // Load map history and select variant for next level
   const history = loadMapHistory();
   const variant = selectMapVariant(nextLevel, history);
-  const level = getMap(nextLevel, variant, LEVELS_WITH_VARIANTS);
+  const level = getMap(nextLevel, variant, LEVEL_VARIANTS);
   
   // Record this map selection in history
   const updatedHistory = recordMapPlay(nextLevel, variant, history);

@@ -4,7 +4,7 @@
  */
 
 import { loadMapHistory, saveMapHistory, selectMapVariant, getMap } from './mapSelectionSystem';
-import { LEVELS_WITH_VARIANTS } from './levels';
+import { LEVEL_VARIANTS } from './levels';
 import type { SaveGame } from './types';
 import { Difficulty, WeaponType, ItemType, EnemyType } from './types';
 
@@ -18,13 +18,14 @@ const SAVE_KEY_PREFIX = 'egor_save_';
 export function testLevelsArrayCompatibility(): { success: boolean; message: string } {
   try {
     // Test that we can access first variant of each level
-    for (let i = 0; i < LEVELS_WITH_VARIANTS.length; i++) {
-      const firstVariant = LEVELS_WITH_VARIANTS[i][0];
+    const levelNumbers = Object.keys(LEVEL_VARIANTS).map(Number);
+    for (const levelNum of levelNumbers) {
+      const firstVariant = LEVEL_VARIANTS[levelNum][0];
       
       if (!firstVariant) {
         return {
           success: false,
-          message: `Level ${i} has no first variant`
+          message: `Level ${levelNum} has no first variant`
         };
       }
       
@@ -32,21 +33,21 @@ export function testLevelsArrayCompatibility(): { success: boolean; message: str
       if (!firstVariant.tiles || !Array.isArray(firstVariant.tiles)) {
         return {
           success: false,
-          message: `Level ${i} variant 0 has invalid tiles structure`
+          message: `Level ${levelNum} variant 0 has invalid tiles structure`
         };
       }
       
       if (!firstVariant.decorativeObjects || !Array.isArray(firstVariant.decorativeObjects)) {
         return {
           success: false,
-          message: `Level ${i} variant 0 missing decorativeObjects array`
+          message: `Level ${levelNum} variant 0 missing decorativeObjects array`
         };
       }
     }
     
     return {
       success: true,
-      message: `All ${LEVELS_WITH_VARIANTS.length} levels have valid first variants`
+      message: `All ${levelNumbers.length} levels have valid first variants`
     };
   } catch (error) {
     return {
@@ -225,7 +226,7 @@ export function testOldSavegameCompatibility(): { success: boolean; message: str
         isGameOver: false,
         enemies: [],
         items: [],
-        currentMap: LEVELS_WITH_VARIANTS[0][0], // Use first variant
+        currentMap: LEVEL_VARIANTS[1][0], // Use first variant of level 1
         gameStartTime: Date.now()
       }
     };
@@ -254,7 +255,7 @@ export function testOldSavegameCompatibility(): { success: boolean; message: str
     }
     
     // Validate that we can get the map for the current level
-    const map = getMap(gameState.currentLevel, 0, LEVELS_WITH_VARIANTS);
+    const map = getMap(gameState.currentLevel, 0, LEVEL_VARIANTS);
     if (!map || !map.tiles) {
       return {
         success: false,
