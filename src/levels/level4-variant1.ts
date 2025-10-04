@@ -7,13 +7,13 @@ export const LEVEL_4_VARIANT_1: GameMap = {
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,1,1,1,1,0,0,0,2,2,0,0,0,1,1,1,1,0,0,1],
-    [1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1],
-    [1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,1,0,0,1],
-    [1,0,0,1,0,0,1,1,1,1,1,1,1,1,1,1,0,0,1,0,0,1],
+    [1,0,0,1,2,2,1,0,0,0,2,2,0,0,0,1,2,2,1,0,0,1],
+    [1,0,0,2,0,0,2,0,0,0,0,0,0,0,0,2,0,0,2,0,0,1],
+    [1,0,0,2,0,0,2,0,0,0,0,0,0,0,0,2,0,0,2,0,0,1],
+    [1,0,0,2,0,0,1,2,2,2,2,2,2,2,2,1,0,0,2,0,0,1],
     [1,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,1],
-    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
-    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+    [1,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,1],
+    [1,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,1],
     [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
     [1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
     [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
@@ -36,7 +36,7 @@ export const LEVEL_4_VARIANT_1: GameMap = {
     { id: 'e6', type: EnemyType.MONSTER, x: 17, y: 16, health: 250, maxHealth: 250, damage: 18, speed: 0.022, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 700 },
     { id: 'e7', type: EnemyType.ZOMBIE, x: 11, y: 10, health: 150, maxHealth: 150, damage: 15, speed: 0.03, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 800 },
     { id: 'e8', type: EnemyType.ZOMBIE, x: 11, y: 12, health: 150, maxHealth: 150, damage: 15, speed: 0.03, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 800 },
-    { id: 'e9', type: EnemyType.GHOST, x: 3, y: 13, health: 100, maxHealth: 100, damage: 12, speed: 0.04, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 1000 }
+    { id: 'e9', type: EnemyType.GHOST, x: 2.5, y: 13.5, health: 100, maxHealth: 100, damage: 12, speed: 0.04, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 1000 }
   ],
   items: [
     { id: 'i1', type: ItemType.HEALTH_LARGE, x: 2, y: 2, collected: false, value: 50 },
