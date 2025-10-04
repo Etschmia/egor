@@ -724,7 +724,7 @@ function App() {
       case 'menu':
         return (
           <div className="menu-overlay">
-            <div className="menu-title">EGOR</div>
+            <div className="menu-title">HUNDEFELSEN</div>
             <div className="menu-content">
               <button className="menu-button" onClick={() => setGameMode('difficulty')}>
                 Neues Spiel
