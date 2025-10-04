@@ -705,28 +705,125 @@ function createDoorTexture(): HTMLCanvasElement {
   canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
-  // Tür-Grundfarbe - dunkles Holz
-  ctx.fillStyle = '#654321';
+  // --- Verbesserte normale Tür mit detaillierter Holzmaserung und 3D-Effekt ---
+
+  // Tür-Grundfarbe - dunkles Holz mit Farbverlauf
+  const backgroundGradient = ctx.createLinearGradient(0, 0, 32, 32);
+  backgroundGradient.addColorStop(0, '#654321'); // Dunkelbraun
+  backgroundGradient.addColorStop(0.5, '#5A3A1A'); // Mittleres Braun
+  backgroundGradient.addColorStop(1, '#4A2A0A'); // Sehr dunkelbraun
+  ctx.fillStyle = backgroundGradient;
   ctx.fillRect(0, 0, 32, 32);
 
-  // Türfüllungen - vertikale Bretter
-  ctx.fillStyle = '#8B4513';
-  for (let x = 0; x < 32; x += 8) {
-    ctx.fillRect(x, 0, 4, 32);
+  // Schatten an den Rändern für 3D-Wirkung (links und oben)
+  ctx.fillStyle = '#2A1A0A'; // Sehr dunkel
+  ctx.fillRect(0, 0, 1, 32); // Linker Rand
+  ctx.fillRect(0, 0, 32, 1); // Oberer Rand
 
-    // Fugen
-    ctx.fillStyle = '#4A4A4A';
-    ctx.fillRect(x + 4, 0, 1, 32);
-    ctx.fillStyle = '#8B4513';
+  // Highlights für 3D-Wirkung (rechts und unten)
+  ctx.fillStyle = '#8B6A3A'; // Helleres Braun
+  ctx.fillRect(31, 0, 1, 32); // Rechter Rand
+  ctx.fillRect(0, 31, 32, 1); // Unterer Rand
+
+  // Sichtbare Türfüllungen/Paneele mit vertikalen Brettern
+  const woodGradient = ctx.createLinearGradient(0, 0, 32, 0);
+  woodGradient.addColorStop(0, '#8B4513'); // Sattelbraun
+  woodGradient.addColorStop(0.5, '#A0522D'); // Sienna
+  woodGradient.addColorStop(1, '#8B4513'); // Sattelbraun
+  
+  // Vier vertikale Bretter mit Holzmaserung
+  for (let x = 0; x < 32; x += 8) {
+    // Brett mit Farbverlauf
+    const plankGradient = ctx.createLinearGradient(x, 0, x + 7, 0);
+    plankGradient.addColorStop(0, '#6B4A2A'); // Dunkler
+    plankGradient.addColorStop(0.3, '#8B4513'); // Mittel
+    plankGradient.addColorStop(0.7, '#A0522D'); // Hell
+    plankGradient.addColorStop(1, '#6B4A2A'); // Dunkler
+    ctx.fillStyle = plankGradient;
+    ctx.fillRect(x + 1, 2, 6, 28);
+
+    // Holzmaserung - horizontale Linien für Textur
+    ctx.fillStyle = '#5A3A1A';
+    for (let y = 4; y < 30; y += 6) {
+      ctx.fillRect(x + 1, y, 6, 1);
+      // Zusätzliche feine Maserung
+      ctx.fillStyle = 'rgba(90, 58, 26, 0.5)';
+      ctx.fillRect(x + 1, y + 2, 6, 1);
+      ctx.fillStyle = '#5A3A1A';
+    }
+
+    // Schatten auf der linken Seite jedes Bretts für 3D-Effekt
+    ctx.fillStyle = 'rgba(42, 26, 10, 0.6)';
+    ctx.fillRect(x + 1, 2, 1, 28);
+
+    // Highlight auf der rechten Seite jedes Bretts
+    ctx.fillStyle = 'rgba(160, 82, 45, 0.4)';
+    ctx.fillRect(x + 6, 2, 1, 28);
+
+    // Fugen zwischen den Brettern
+    ctx.fillStyle = '#4A4A4A'; // Dunkelgrau
+    ctx.fillRect(x + 7, 0, 1, 32);
+    
+    // Schatten in den Fugen für Tiefe
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(x + 7, 1, 1, 30);
   }
 
-  // Türgriff (rechte Seite)
-  ctx.fillStyle = '#FFD700';
+  // Dunkle Metallscharniere (oben und unten, links)
+  ctx.fillStyle = '#2A2A2A'; // Dunkelgrau/Schwarz
+  
+  // Oberes Scharnier
+  ctx.fillRect(2, 6, 6, 3);
+  // Schrauben am oberen Scharnier
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(3, 7, 1, 1);
+  ctx.fillRect(6, 7, 1, 1);
+  
+  // Unteres Scharnier
+  ctx.fillStyle = '#2A2A2A';
+  ctx.fillRect(2, 23, 6, 3);
+  // Schrauben am unteren Scharnier
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(3, 24, 1, 1);
+  ctx.fillRect(6, 24, 1, 1);
+
+  // Highlights auf Scharnieren für Metall-Effekt
+  ctx.fillStyle = '#4A4A4A';
+  ctx.fillRect(2, 6, 6, 1); // Oberes Scharnier
+  ctx.fillRect(2, 23, 6, 1); // Unteres Scharnier
+
+  // Goldener Türgriff auf der rechten Seite mit 3D-Effekt
+  const handleGradient = ctx.createRadialGradient(26, 16, 1, 26, 16, 4);
+  handleGradient.addColorStop(0, '#FFD700'); // Gold
+  handleGradient.addColorStop(0.6, '#FFA500'); // Orange-Gold
+  handleGradient.addColorStop(1, '#B8860B'); // Dunkelgold
+  ctx.fillStyle = handleGradient;
   ctx.fillRect(24, 14, 4, 4);
 
-  // Türklinke
-  ctx.fillStyle = '#B8860B';
+  // Schatten unter dem Türgriff
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.fillRect(24, 17, 4, 1);
+
+  // Highlight auf dem Türgriff für Glanz
+  ctx.fillStyle = '#FFFFE0'; // Helles Gelb
+  ctx.fillRect(24, 14, 3, 1);
+  ctx.fillRect(24, 14, 1, 2);
+
+  // Türklinke mit 3D-Effekt
+  const knobGradient = ctx.createLinearGradient(28, 15, 31, 17);
+  knobGradient.addColorStop(0, '#FFD700'); // Gold
+  knobGradient.addColorStop(0.5, '#FFA500'); // Orange-Gold
+  knobGradient.addColorStop(1, '#B8860B'); // Dunkelgold
+  ctx.fillStyle = knobGradient;
   ctx.fillRect(28, 15, 3, 2);
+
+  // Schatten unter der Klinke
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  ctx.fillRect(28, 16, 3, 1);
+
+  // Highlight auf der Klinke
+  ctx.fillStyle = '#FFFFE0';
+  ctx.fillRect(28, 15, 2, 1);
 
   return canvas;
 }
@@ -737,27 +834,126 @@ function createExitDoorTexture(): HTMLCanvasElement {
   canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
-  // Exit-Tür - grünes Holz
-  ctx.fillStyle = '#228B22';
+  // --- Verbesserte Exit-Tür mit grüner Färbung und ähnlicher Struktur wie normale Tür ---
+
+  // Leuchteffekt - heller Rand für Aufmerksamkeit (äußerer Glüheffekt)
+  ctx.fillStyle = '#90EE90'; // Hellgrün
   ctx.fillRect(0, 0, 32, 32);
 
-  // Türfüllungen
-  ctx.fillStyle = '#32CD32';
-  for (let x = 0; x < 32; x += 8) {
-    ctx.fillRect(x, 0, 4, 32);
+  // Tür-Grundfarbe - grünes Holz mit Farbverlauf
+  const backgroundGradient = ctx.createLinearGradient(0, 0, 32, 32);
+  backgroundGradient.addColorStop(0, '#32CD32'); // Limettengrün (hell)
+  backgroundGradient.addColorStop(0.5, '#228B22'); // Waldgrün (mittel)
+  backgroundGradient.addColorStop(1, '#006400'); // Dunkelgrün
+  ctx.fillStyle = backgroundGradient;
+  ctx.fillRect(1, 1, 30, 30);
 
-    // Fugen
-    ctx.fillStyle = '#006400';
-    ctx.fillRect(x + 4, 0, 1, 32);
-    ctx.fillStyle = '#32CD32';
+  // Schatten an den Rändern für 3D-Wirkung (links und oben)
+  ctx.fillStyle = '#004400'; // Sehr dunkelgrün
+  ctx.fillRect(1, 1, 1, 30); // Linker Rand
+  ctx.fillRect(1, 1, 30, 1); // Oberer Rand
+
+  // Highlights für 3D-Wirkung (rechts und unten)
+  ctx.fillStyle = '#4AE54A'; // Helleres Grün
+  ctx.fillRect(30, 1, 1, 30); // Rechter Rand
+  ctx.fillRect(1, 30, 30, 1); // Unterer Rand
+
+  // Sichtbare Türfüllungen/Paneele mit vertikalen Brettern (ähnlich wie normale Tür)
+  for (let x = 0; x < 32; x += 8) {
+    // Brett mit Farbverlauf
+    const plankGradient = ctx.createLinearGradient(x, 0, x + 7, 0);
+    plankGradient.addColorStop(0, '#1A5A1A'); // Dunkler
+    plankGradient.addColorStop(0.3, '#228B22'); // Mittel
+    plankGradient.addColorStop(0.7, '#32CD32'); // Hell
+    plankGradient.addColorStop(1, '#1A5A1A'); // Dunkler
+    ctx.fillStyle = plankGradient;
+    ctx.fillRect(x + 2, 3, 5, 26);
+
+    // Holzmaserung - horizontale Linien für Textur
+    ctx.fillStyle = '#1A5A1A';
+    for (let y = 5; y < 28; y += 6) {
+      ctx.fillRect(x + 2, y, 5, 1);
+      // Zusätzliche feine Maserung
+      ctx.fillStyle = 'rgba(26, 90, 26, 0.5)';
+      ctx.fillRect(x + 2, y + 2, 5, 1);
+      ctx.fillStyle = '#1A5A1A';
+    }
+
+    // Schatten auf der linken Seite jedes Bretts für 3D-Effekt
+    ctx.fillStyle = 'rgba(0, 68, 0, 0.6)';
+    ctx.fillRect(x + 2, 3, 1, 26);
+
+    // Highlight auf der rechten Seite jedes Bretts
+    ctx.fillStyle = 'rgba(74, 229, 74, 0.4)';
+    ctx.fillRect(x + 6, 3, 1, 26);
+
+    // Fugen zwischen den Brettern
+    ctx.fillStyle = '#004400'; // Dunkelgrün
+    ctx.fillRect(x + 7, 1, 1, 30);
+    
+    // Schatten in den Fugen für Tiefe
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(x + 7, 2, 1, 28);
   }
 
-  // Exit-Symbol (X)
-  ctx.fillStyle = '#FFD700';
-  ctx.font = 'bold 12px Arial';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('X', 16, 16);
+  // Großes, gut sichtbares Exit-Symbol (X) in Gold - zentral positioniert
+  // Äußerer Glüheffekt für das Symbol
+  ctx.shadowColor = '#FFD700';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+
+  // X-Symbol mit dicken Linien für bessere Sichtbarkeit
+  ctx.strokeStyle = '#FFD700'; // Gold
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+
+  // Diagonale von links oben nach rechts unten
+  ctx.beginPath();
+  ctx.moveTo(10, 10);
+  ctx.lineTo(22, 22);
+  ctx.stroke();
+
+  // Diagonale von rechts oben nach links unten
+  ctx.beginPath();
+  ctx.moveTo(22, 10);
+  ctx.lineTo(10, 22);
+  ctx.stroke();
+
+  // Schatten zurücksetzen
+  ctx.shadowBlur = 0;
+
+  // Zusätzliche Highlights auf dem X für mehr Kontrast
+  ctx.strokeStyle = '#FFFFE0'; // Helles Gelb
+  ctx.lineWidth = 2;
+
+  // Highlight-Linien (etwas versetzt für 3D-Effekt)
+  ctx.beginPath();
+  ctx.moveTo(10, 10);
+  ctx.lineTo(21, 21);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(22, 10);
+  ctx.lineTo(11, 21);
+  ctx.stroke();
+
+  // Dunkler Rand um das X für hohen Kontrast
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 5;
+  ctx.globalAlpha = 0.3;
+
+  ctx.beginPath();
+  ctx.moveTo(10, 10);
+  ctx.lineTo(22, 22);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(22, 10);
+  ctx.lineTo(10, 22);
+  ctx.stroke();
+
+  ctx.globalAlpha = 1.0;
 
   return canvas;
 }
@@ -1243,43 +1439,183 @@ function createWeaponTexture(): HTMLCanvasElement {
   canvas.height = 32;
   const ctx = canvas.getContext('2d')!;
 
-  // --- Detaillierteres Sturmgewehr ---
+  // --- Detailliertes Sturmgewehr mit erkennbaren Komponenten ---
 
-  // Hauptkörper der Waffe
-  const bodyGradient = ctx.createLinearGradient(0, 12, 0, 22);
-  bodyGradient.addColorStop(0, '#4A4A4A'); // Dunkelgrau
-  bodyGradient.addColorStop(1, '#2A2A2A'); // Sehr dunkelgrau
+  // Schulterstütze (hinten) mit metallischem Farbverlauf
+  const stockGradient = ctx.createLinearGradient(2, 13, 2, 17);
+  stockGradient.addColorStop(0, '#4A4A4A'); // Hellgrau
+  stockGradient.addColorStop(0.5, '#2A2A2A'); // Mittelgrau
+  stockGradient.addColorStop(1, '#1A1A1A'); // Dunkelgrau
+  ctx.fillStyle = stockGradient;
+  ctx.fillRect(2, 13, 5, 4); // Hauptteil der Stütze
+  
+  // Schulterstütze - Verbindung zum Körper
+  ctx.fillStyle = '#2A2A2A';
+  ctx.fillRect(6, 14, 2, 2);
+  
+  // Highlight auf Schulterstütze für Metall-Glanz
+  ctx.fillStyle = '#696969';
+  ctx.fillRect(2, 13, 5, 1);
+
+  // Hauptkörper der Waffe (Receiver) mit metallischem Farbverlauf
+  const bodyGradient = ctx.createLinearGradient(8, 11, 8, 19);
+  bodyGradient.addColorStop(0, '#4A4A4A'); // Hellgrau (Highlight)
+  bodyGradient.addColorStop(0.3, '#2A2A2A'); // Mittelgrau
+  bodyGradient.addColorStop(0.7, '#1A1A1A'); // Dunkelgrau
+  bodyGradient.addColorStop(1, '#0A0A0A'); // Sehr dunkelgrau (Schatten)
   ctx.fillStyle = bodyGradient;
-  ctx.fillRect(4, 12, 24, 6); // Hauptteil
-
-  // Lauf
+  ctx.fillRect(8, 11, 14, 8); // Hauptkörper
+  
+  // Obere Schiene (Rail) für Visier
   ctx.fillStyle = '#1A1A1A';
-  ctx.fillRect(24, 13, 6, 4);
+  ctx.fillRect(10, 10, 10, 1);
+  
+  // Schatten am Hauptkörper für 3D-Effekt
+  ctx.fillStyle = '#0A0A0A';
+  ctx.fillRect(8, 18, 14, 1); // Unten
+  ctx.fillRect(21, 11, 1, 8); // Rechts
+  
+  // Highlights am Hauptkörper für Metall-Glanz
+  ctx.fillStyle = '#696969';
+  ctx.fillRect(8, 11, 14, 1); // Oben
+  ctx.fillRect(8, 11, 1, 8); // Links
+  
+  // Zusätzliche Highlights für starken Metall-Effekt
+  ctx.fillStyle = '#8A8A8A';
+  ctx.fillRect(9, 12, 12, 1);
+  ctx.fillRect(9, 12, 1, 6);
 
-  // Magazin
-  ctx.fillStyle = '#333333';
-  ctx.fillRect(12, 18, 6, 8);
+  // Lauf mit metallischem Farbverlauf
+  const barrelGradient = ctx.createLinearGradient(22, 12, 22, 18);
+  barrelGradient.addColorStop(0, '#2A2A2A'); // Helleres Grau
+  barrelGradient.addColorStop(0.5, '#1A1A1A'); // Dunkelgrau
+  barrelGradient.addColorStop(1, '#0A0A0A'); // Sehr dunkelgrau
+  ctx.fillStyle = barrelGradient;
+  ctx.fillRect(22, 12, 8, 6); // Lauf
+  
+  // Laufmündung (dunkler)
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(29, 13, 1, 4);
+  
+  // Rillen am Lauf für Details
+  ctx.fillStyle = '#0A0A0A';
+  ctx.fillRect(24, 12, 1, 6);
+  ctx.fillRect(26, 12, 1, 6);
+  ctx.fillRect(28, 12, 1, 6);
+  
+  // Highlights am Lauf
+  ctx.fillStyle = '#4A4A4A';
+  ctx.fillRect(22, 12, 8, 1); // Oben
+  ctx.fillRect(23, 13, 1, 1); // Glanzpunkt
 
-  // Griff
-  ctx.fillStyle = '#222222';
+  // Visier (vorne) mit Details
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(20, 9, 3, 2); // Vorderes Visier
+  ctx.fillRect(21, 8, 1, 1); // Spitze
+  
+  // Visier (hinten)
+  ctx.fillRect(10, 9, 3, 2);
+  ctx.fillRect(11, 8, 1, 1); // Spitze
+  
+  // Highlight auf Visieren
+  ctx.fillStyle = '#4A4A4A';
+  ctx.fillRect(20, 9, 3, 1);
+  ctx.fillRect(10, 9, 3, 1);
+
+  // Magazin unter dem Hauptkörper mit Farbverlauf
+  const magGradient = ctx.createLinearGradient(13, 19, 13, 27);
+  magGradient.addColorStop(0, '#2A2A2A'); // Helleres Grau
+  magGradient.addColorStop(0.5, '#1A1A1A'); // Mittelgrau
+  magGradient.addColorStop(1, '#0A0A0A'); // Dunkelgrau
+  ctx.fillStyle = magGradient;
+  ctx.fillRect(13, 19, 6, 8); // Magazin
+  
+  // Magazin - gebogene Form (unten breiter)
+  ctx.fillRect(12, 25, 8, 2);
+  
+  // Schatten am Magazin
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(18, 19, 1, 8); // Rechts
+  ctx.fillRect(13, 26, 6, 1); // Unten
+  
+  // Highlights am Magazin
+  ctx.fillStyle = '#4A4A4A';
+  ctx.fillRect(13, 19, 6, 1); // Oben
+  ctx.fillRect(13, 19, 1, 8); // Links
+  
+  // Rillen am Magazin für Grip-Textur
+  ctx.fillStyle = '#0A0A0A';
+  ctx.fillRect(14, 21, 4, 1);
+  ctx.fillRect(14, 23, 4, 1);
+  ctx.fillRect(14, 25, 4, 1);
+
+  // Griff (Pistol Grip) mit ergonomischer Form
+  ctx.fillStyle = '#1A1A1A';
   ctx.beginPath();
-  ctx.moveTo(8, 18);
-  ctx.lineTo(6, 26);
-  ctx.lineTo(10, 26);
-  ctx.lineTo(12, 18);
+  ctx.moveTo(10, 19);
+  ctx.lineTo(8, 27);
+  ctx.lineTo(11, 27);
+  ctx.lineTo(13, 19);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Griff - Textur für besseren Halt
+  ctx.fillStyle = '#0A0A0A';
+  ctx.fillRect(9, 21, 3, 1);
+  ctx.fillRect(9, 23, 3, 1);
+  ctx.fillRect(9, 25, 3, 1);
+  
+  // Highlight am Griff
+  ctx.fillStyle = '#2A2A2A';
+  ctx.beginPath();
+  ctx.moveTo(10, 19);
+  ctx.lineTo(10, 20);
+  ctx.lineTo(11, 19);
   ctx.closePath();
   ctx.fill();
 
-  // Visier
-  ctx.fillStyle = '#111111';
-  ctx.fillRect(6, 10, 4, 2);
-  ctx.fillRect(20, 10, 4, 2);
+  // Abzug (Trigger)
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(11, 17, 2, 3);
+  
+  // Abzugsbügel (Trigger Guard)
+  ctx.strokeStyle = '#2A2A2A';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(12, 18, 2, 0, Math.PI);
+  ctx.stroke();
+  
+  // Highlight am Abzug
+  ctx.fillStyle = '#4A4A4A';
+  ctx.fillRect(11, 17, 2, 1);
 
-  // Schulterstütze
-  ctx.fillStyle = '#2A2A2A';
-  ctx.fillRect(2, 14, 4, 2);
-  ctx.fillRect(2, 14, 2, 8);
+  // Schrauben und kleine Details für Realismus
+  ctx.fillStyle = '#0A0A0A';
+  // Schrauben am Hauptkörper
+  ctx.fillRect(9, 13, 1, 1);
+  ctx.fillRect(9, 16, 1, 1);
+  ctx.fillRect(15, 13, 1, 1);
+  ctx.fillRect(20, 13, 1, 1);
+  
+  // Highlights auf Schrauben (Metall-Glanz)
+  ctx.fillStyle = '#696969';
+  ctx.fillRect(9, 13, 1, 0.5);
+  ctx.fillRect(15, 13, 1, 0.5);
+  ctx.fillRect(20, 13, 1, 0.5);
 
+  // Auswurfschacht (Ejection Port) - Detail
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(16, 12, 3, 2);
+  
+  // Highlight am Auswurfschacht
+  ctx.fillStyle = '#1A1A1A';
+  ctx.fillRect(16, 12, 3, 1);
+
+  // Zusätzliche Glanzlichter für starken Metall-Effekt
+  ctx.fillStyle = 'rgba(138, 138, 138, 0.6)';
+  ctx.fillRect(10, 12, 1, 1); // Glanzpunkt 1
+  ctx.fillRect(17, 13, 1, 1); // Glanzpunkt 2
+  ctx.fillRect(24, 13, 1, 1); // Glanzpunkt 3 am Lauf
 
   return canvas;
 }
