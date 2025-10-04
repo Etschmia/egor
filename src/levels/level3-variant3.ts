@@ -40,7 +40,8 @@ export const LEVEL_3_VARIANT_3: GameMap = {
     { id: 'i3', type: ItemType.AMMO, x: 6, y: 8, collected: false, value: 40 },
     { id: 'i4', type: ItemType.AMMO, x: 14, y: 8, collected: false, value: 40 },
     { id: 'i5', type: ItemType.WEAPON, x: 10, y: 10, collected: false, weaponType: WeaponType.CHAINSAW },
-    { id: 'i6', type: ItemType.TREASURE, x: 10, y: 17, collected: false, value: 200 }
+    { id: 'i6', type: ItemType.WEAPON, x: 14, y: 5, collected: false, weaponType: WeaponType.MACHINE_PISTOL },
+    { id: 'i7', type: ItemType.TREASURE, x: 10, y: 17, collected: false, value: 200 }
   ],
   wallPictures: [
     { id: 'wp1', x: 4, y: 3, side: 1, offset: 0.5, type: WallPictureType.ABSTRACT },

@@ -12,12 +12,13 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
   - Normale Türen (braune Wände)
   - Spezielle "Nächste Ebene" Tür (grüne Wand) - öffnet sich nur wenn alle Gegner besiegt sind
 - **6 verschiedene Waffen**:
-  - Messer
-  - Pistole
-  - Maschinenpistole
-  - Kettensäge
-  - Sturmgewehr
-  - Schweres Maschinengewehr
+  - Messer (Start)
+  - Pistole (Start)
+  - Maschinenpistole (Level 2-3)
+  - Kettensäge (Level 3)
+  - Sturmgewehr (Level 4-6)
+  - Schweres Maschinengewehr (Level 5-7)
+- **Backup-Waffen**: Falls du eine Waffe in einem früheren Level verpasst hast, findest du sie als Backup in späteren Levels
 - **Gegner**: Vier verschiedene Gegner-Typen mit KI
   - **Zombies** (grün): Grundlegende Gegner mit mäßiger Geschwindigkeit
   - **Monster** (rot): Starke, gefährliche Gegner mit hoher Gesundheit

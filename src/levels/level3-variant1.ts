@@ -175,6 +175,14 @@ export const LEVEL_3_VARIANT_1: GameMap = {
     },
     {
       id: 'i6',
+      type: ItemType.WEAPON,
+      x: 5,
+      y: 5,
+      collected: false,
+      weaponType: WeaponType.MACHINE_PISTOL
+    },
+    {
+      id: 'i7',
       type: ItemType.TREASURE,
       x: 10,
       y: 18,

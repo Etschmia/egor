@@ -47,8 +47,9 @@ export const LEVEL_6_VARIANT_1: GameMap = {
     { id: 'i3', type: ItemType.AMMO, x: 6, y: 9, collected: false, value: 70 },
     { id: 'i4', type: ItemType.AMMO, x: 18, y: 9, collected: false, value: 70 },
     { id: 'i5', type: ItemType.WEAPON, x: 12, y: 12, collected: false, weaponType: WeaponType.HEAVY_MG },
-    { id: 'i6', type: ItemType.TREASURE, x: 2, y: 22, collected: false, value: 350 },
-    { id: 'i7', type: ItemType.TREASURE, x: 22, y: 22, collected: false, value: 350 }
+    { id: 'i6', type: ItemType.WEAPON, x: 6, y: 6, collected: false, weaponType: WeaponType.ASSAULT_RIFLE },
+    { id: 'i7', type: ItemType.TREASURE, x: 2, y: 22, collected: false, value: 350 },
+    { id: 'i8', type: ItemType.TREASURE, x: 22, y: 22, collected: false, value: 350 }
   ],
   wallPictures: [
     { id: 'wp1', x: 11, y: 1, side: 0, offset: 0.5, type: WallPictureType.LANDSCAPE },
