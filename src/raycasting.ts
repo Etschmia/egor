@@ -1,4 +1,4 @@
-import type { GameMap, Enemy, Item } from './types.ts';
+import type { GameMap, Enemy, Item, DecorativeObject } from './types.ts';
 
 export interface RaycastResult {
   distance: number;
@@ -12,8 +12,8 @@ export interface SpriteRender {
   x: number;
   y: number;
   distance: number;
-  type: 'enemy' | 'item';
-  object: Enemy | Item;
+  type: 'enemy' | 'item' | 'decorative';
+  object: Enemy | Item | DecorativeObject;
 }
 
 export function castRay(
@@ -110,7 +110,8 @@ export function getSpritesToRender(
   planeX: number,
   planeY: number,
   enemies: Enemy[],
-  items: Item[]
+  items: Item[],
+  decorativeObjects: DecorativeObject[] = []
 ): SpriteRender[] {
   const sprites: SpriteRender[] = [];
 
@@ -177,6 +178,26 @@ export function getSpritesToRender(
           object: item
         });
       }
+    }
+  });
+
+  // Dekorative Objekte hinzufügen
+  decorativeObjects.forEach((obj) => {
+    const spriteX = obj.x - posX;
+    const spriteY = obj.y - posY;
+
+    const invDet = 1.0 / (planeX * dirY - dirX * planeY);
+    const transformX = invDet * (dirY * spriteX - dirX * spriteY);
+    const transformY = invDet * (-planeY * spriteX + planeX * spriteY);
+
+    if (transformY > 0) {
+      sprites.push({
+        x: transformX,
+        y: transformY,
+        distance: transformY,
+        type: 'decorative',
+        object: obj
+      });
     }
   });
 

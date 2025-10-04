@@ -1,9 +1,10 @@
-import { type GameMap, EnemyType, ItemType, WeaponType, WallPictureType } from './types.ts';
+import { type GameMap, EnemyType, ItemType, WeaponType, WallPictureType, DecorativeObjectType } from './types.ts';
 
 // 1 = Wand, 0 = freier Raum, 2 = normale Tür, 3 = Exit-Tür (öffnet sich nur wenn alle Gegner tot sind)
 // Map-Größe: 20x20
 
-export const LEVEL_1: GameMap = {
+// Level 1 Variants
+export const LEVEL_1_VARIANT_1: GameMap = {
   width: 20,
   height: 20,
   tiles: [
@@ -107,10 +108,460 @@ export const LEVEL_1: GameMap = {
     { id: 'wp3', x: 8, y: 6, side: 0, offset: 0.5, type: WallPictureType.ABSTRACT },
     { id: 'wp4', x: 11, y: 6, side: 0, offset: 0.5, type: WallPictureType.PORTRAIT }
   ],
+  decorativeObjects: [
+    // Test objects for rendering verification
+    { id: 'do1', type: DecorativeObjectType.CEILING_LIGHT, x: 5.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
+    { id: 'do2', type: DecorativeObjectType.VASE, x: 6.5, y: 4.5, colorVariant: 0.3, collisionRadius: 0.25 },
+    { id: 'do3', type: DecorativeObjectType.CRATE, x: 8.5, y: 4.5, colorVariant: 0.7, collisionRadius: 0.35 },
+    { id: 'do4', type: DecorativeObjectType.TABLE, x: 5.5, y: 8.5, colorVariant: 0.5, collisionRadius: 0.45 },
+    { id: 'do5', type: DecorativeObjectType.WINE_BOTTLE, x: 5.5, y: 8.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.8, parentId: 'do4' },
+    { id: 'do6', type: DecorativeObjectType.SKELETON, x: 15.5, y: 15.5, colorVariant: 0.5, collisionRadius: 0.2 },
+    { id: 'do7', type: DecorativeObjectType.BENCH, x: 12.5, y: 4.5, colorVariant: 0.4, collisionRadius: 0.4 },
+    { id: 'do8', type: DecorativeObjectType.CHAIR, x: 6.5, y: 8.5, colorVariant: 0.5, collisionRadius: 0.3 }
+  ],
   playerStartX: 2,
   playerStartY: 2,
   playerStartDirection: 0
 };
+
+export const LEVEL_1_VARIANT_2: GameMap = {
+  width: 20,
+  height: 20,
+  tiles: [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,0,1],
+    [1,0,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1],
+    [1,0,0,0,2,0,0,0,2,0,0,2,0,0,0,2,0,0,0,1],
+    [1,0,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1],
+    [1,0,0,0,1,1,1,1,1,0,0,1,1,1,1,1,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ],
+  enemies: [
+    {
+      id: 'e1',
+      type: EnemyType.ZOMBIE,
+      x: 6,
+      y: 5,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    },
+    {
+      id: 'e2',
+      type: EnemyType.ZOMBIE,
+      x: 13,
+      y: 9,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    },
+    {
+      id: 'e3',
+      type: EnemyType.ZOMBIE,
+      x: 10,
+      y: 16,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    }
+  ],
+  items: [
+    {
+      id: 'i1',
+      type: ItemType.HEALTH_SMALL,
+      x: 6,
+      y: 9,
+      collected: false,
+      value: 25
+    },
+    {
+      id: 'i2',
+      type: ItemType.AMMO,
+      x: 13,
+      y: 5,
+      collected: false,
+      value: 30
+    },
+    {
+      id: 'i3',
+      type: ItemType.TREASURE,
+      x: 10,
+      y: 12,
+      collected: false,
+      value: 100
+    }
+  ],
+  wallPictures: [
+    { id: 'wp1', x: 4, y: 3, side: 1, offset: 0.5, type: WallPictureType.PORTRAIT },
+    { id: 'wp2', x: 15, y: 3, side: 1, offset: 0.5, type: WallPictureType.LANDSCAPE },
+    { id: 'wp3', x: 8, y: 7, side: 0, offset: 0.5, type: WallPictureType.ABSTRACT }
+  ],
+  decorativeObjects: [],
+  playerStartX: 2,
+  playerStartY: 2,
+  playerStartDirection: 0
+};
+
+export const LEVEL_1_VARIANT_3: GameMap = {
+  width: 20,
+  height: 20,
+  tiles: [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,1],
+    [1,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0,1],
+    [1,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0,1],
+    [1,0,0,1,0,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1],
+    [1,0,0,2,0,0,2,0,0,1,1,0,0,2,0,0,2,0,0,1],
+    [1,0,0,1,0,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1],
+    [1,0,0,1,0,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1],
+    [1,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0,1],
+    [1,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1],
+    [1,3,0,0,0,0,0,0,2,0,0,2,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ],
+  enemies: [
+    {
+      id: 'e1',
+      type: EnemyType.ZOMBIE,
+      x: 5,
+      y: 5,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    },
+    {
+      id: 'e2',
+      type: EnemyType.ZOMBIE,
+      x: 15,
+      y: 9,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    },
+    {
+      id: 'e3',
+      type: EnemyType.ZOMBIE,
+      x: 10,
+      y: 16,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    }
+  ],
+  items: [
+    {
+      id: 'i1',
+      type: ItemType.HEALTH_SMALL,
+      x: 5,
+      y: 9,
+      collected: false,
+      value: 25
+    },
+    {
+      id: 'i2',
+      type: ItemType.AMMO,
+      x: 15,
+      y: 5,
+      collected: false,
+      value: 30
+    },
+    {
+      id: 'i3',
+      type: ItemType.TREASURE,
+      x: 10,
+      y: 8,
+      collected: false,
+      value: 100
+    }
+  ],
+  wallPictures: [
+    { id: 'wp1', x: 3, y: 3, side: 1, offset: 0.5, type: WallPictureType.LANDSCAPE },
+    { id: 'wp2', x: 16, y: 3, side: 1, offset: 0.5, type: WallPictureType.PORTRAIT },
+    { id: 'wp3', x: 9, y: 14, side: 0, offset: 0.5, type: WallPictureType.ABSTRACT }
+  ],
+  decorativeObjects: [],
+  playerStartX: 2,
+  playerStartY: 2,
+  playerStartDirection: 0
+};
+
+export const LEVEL_1_VARIANT_4: GameMap = {
+  width: 20,
+  height: 20,
+  tiles: [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1],
+    [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+    [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+    [1,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,1],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+    [1,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1],
+    [1,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+    [1,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,1],
+    [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+    [1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],
+    [1,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ],
+  enemies: [
+    {
+      id: 'e1',
+      type: EnemyType.ZOMBIE,
+      x: 10,
+      y: 5,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    },
+    {
+      id: 'e2',
+      type: EnemyType.ZOMBIE,
+      x: 5,
+      y: 10,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    },
+    {
+      id: 'e3',
+      type: EnemyType.ZOMBIE,
+      x: 15,
+      y: 10,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    }
+  ],
+  items: [
+    {
+      id: 'i1',
+      type: ItemType.HEALTH_SMALL,
+      x: 10,
+      y: 10,
+      collected: false,
+      value: 25
+    },
+    {
+      id: 'i2',
+      type: ItemType.AMMO,
+      x: 5,
+      y: 8,
+      collected: false,
+      value: 30
+    },
+    {
+      id: 'i3',
+      type: ItemType.TREASURE,
+      x: 10,
+      y: 15,
+      collected: false,
+      value: 100
+    }
+  ],
+  wallPictures: [
+    { id: 'wp1', x: 6, y: 3, side: 1, offset: 0.5, type: WallPictureType.ABSTRACT },
+    { id: 'wp2', x: 13, y: 3, side: 1, offset: 0.5, type: WallPictureType.PORTRAIT },
+    { id: 'wp3', x: 3, y: 6, side: 1, offset: 0.5, type: WallPictureType.LANDSCAPE }
+  ],
+  decorativeObjects: [],
+  playerStartX: 2,
+  playerStartY: 2,
+  playerStartDirection: 0
+};
+
+export const LEVEL_1_VARIANT_5: GameMap = {
+  width: 20,
+  height: 20,
+  tiles: [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,1,1,1,1,1,1,0,0,1,0,0,0,1],
+    [1,0,0,0,2,0,0,1,0,0,0,0,1,0,0,2,0,0,0,1],
+    [1,0,0,0,1,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,1,0,0,0,0,1,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,1,1,1,1,1,1,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+    [1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1],
+    [1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+  ],
+  enemies: [
+    {
+      id: 'e1',
+      type: EnemyType.ZOMBIE,
+      x: 10,
+      y: 9,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    },
+    {
+      id: 'e2',
+      type: EnemyType.ZOMBIE,
+      x: 8,
+      y: 5,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    },
+    {
+      id: 'e3',
+      type: EnemyType.ZOMBIE,
+      x: 12,
+      y: 12,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    }
+  ],
+  items: [
+    {
+      id: 'i1',
+      type: ItemType.HEALTH_SMALL,
+      x: 8,
+      y: 9,
+      collected: false,
+      value: 25
+    },
+    {
+      id: 'i2',
+      type: ItemType.AMMO,
+      x: 12,
+      y: 9,
+      collected: false,
+      value: 30
+    },
+    {
+      id: 'i3',
+      type: ItemType.TREASURE,
+      x: 10,
+      y: 5,
+      collected: false,
+      value: 100
+    }
+  ],
+  wallPictures: [
+    { id: 'wp1', x: 4, y: 3, side: 1, offset: 0.5, type: WallPictureType.PORTRAIT },
+    { id: 'wp2', x: 15, y: 3, side: 1, offset: 0.5, type: WallPictureType.LANDSCAPE },
+    { id: 'wp3', x: 7, y: 6, side: 1, offset: 0.5, type: WallPictureType.ABSTRACT }
+  ],
+  decorativeObjects: [],
+  playerStartX: 2,
+  playerStartY: 2,
+  playerStartDirection: 0
+};
+
+// Keep old LEVEL_1 for backward compatibility
+export const LEVEL_1 = LEVEL_1_VARIANT_1;
 
 export const LEVEL_2: GameMap = {
   width: 20,
@@ -255,6 +706,7 @@ export const LEVEL_2: GameMap = {
     { id: 'wp4', x: 11, y: 3, side: 0, offset: 0.7, type: WallPictureType.PORTRAIT },
     { id: 'wp5', x: 1, y: 6, side: 1, offset: 0.5, type: WallPictureType.LANDSCAPE }
   ],
+  decorativeObjects: [],
   playerStartX: 2,
   playerStartY: 2,
   playerStartDirection: 0
@@ -450,6 +902,7 @@ export const LEVEL_3: GameMap = {
     { id: 'wp5', x: 9, y: 6, side: 0, offset: 0.5, type: WallPictureType.PORTRAIT },
     { id: 'wp6', x: 12, y: 6, side: 0, offset: 0.5, type: WallPictureType.LANDSCAPE }
   ],
+  decorativeObjects: [],
   playerStartX: 2,
   playerStartY: 2,
   playerStartDirection: 0
@@ -684,6 +1137,7 @@ export const LEVEL_4: GameMap = {
     { id: 'wp5', x: 1, y: 9, side: 1, offset: 0.5, type: WallPictureType.LANDSCAPE },
     { id: 'wp6', x: 18, y: 9, side: 1, offset: 0.5, type: WallPictureType.ABSTRACT }
   ],
+  decorativeObjects: [],
   playerStartX: 2,
   playerStartY: 2,
   playerStartDirection: 0
@@ -989,6 +1443,7 @@ export const LEVEL_5: GameMap = {
     { id: 'wp7', x: 13, y: 5, side: 0, offset: 0.3, type: WallPictureType.PORTRAIT },
     { id: 'wp8', x: 13, y: 5, side: 0, offset: 0.7, type: WallPictureType.ABSTRACT }
   ],
+  decorativeObjects: [],
   playerStartX: 2,
   playerStartY: 2,
   playerStartDirection: 0
@@ -1100,6 +1555,7 @@ export const LEVEL_6: GameMap = {
     }
   ],
   wallPictures: [],
+  decorativeObjects: [],
   playerStartX: 2,
   playerStartY: 2,
   playerStartDirection: 0
@@ -1234,9 +1690,23 @@ export const LEVEL_7: GameMap = {
     }
   ],
   wallPictures: [],
+  decorativeObjects: [],
   playerStartX: 2,
   playerStartY: 18,
   playerStartDirection: -Math.PI / 2
 };
 
-export const LEVELS = [LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4, LEVEL_5, LEVEL_6, LEVEL_7];
+// Nested array structure for map variants: LEVELS_WITH_VARIANTS[levelIndex][variantIndex]
+export const LEVELS_WITH_VARIANTS: GameMap[][] = [
+  [LEVEL_1_VARIANT_1, LEVEL_1_VARIANT_2, LEVEL_1_VARIANT_3, LEVEL_1_VARIANT_4, LEVEL_1_VARIANT_5],
+  // Levels 2-7 will have variants added in future tasks, for now use single variant
+  [LEVEL_2],
+  [LEVEL_3],
+  [LEVEL_4],
+  [LEVEL_5],
+  [LEVEL_6],
+  [LEVEL_7]
+];
+
+// Compatibility export: returns first variant of each level
+export const LEVELS: GameMap[] = LEVELS_WITH_VARIANTS.map(variants => variants[0]);

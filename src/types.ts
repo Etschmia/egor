@@ -89,6 +89,28 @@ export interface WallPicture {
   type: WallPictureType;
 }
 
+export enum DecorativeObjectType {
+  CEILING_LIGHT = 'CEILING_LIGHT',
+  VASE = 'VASE',
+  CRATE = 'CRATE',
+  BENCH = 'BENCH',
+  TABLE = 'TABLE',
+  CHAIR = 'CHAIR',
+  WINE_BOTTLE = 'WINE_BOTTLE',
+  SKELETON = 'SKELETON'
+}
+
+export interface DecorativeObject {
+  id: string;
+  type: DecorativeObjectType;
+  x: number;
+  y: number;
+  colorVariant: number;
+  collisionRadius: number;
+  renderHeight?: number;
+  parentId?: string;
+}
+
 export interface GameMap {
   width: number;
   height: number;
@@ -96,6 +118,7 @@ export interface GameMap {
   enemies: Enemy[];
   items: Item[];
   wallPictures: WallPicture[];
+  decorativeObjects: DecorativeObject[];
   playerStartX: number;
   playerStartY: number;
   playerStartDirection: number;
@@ -133,6 +156,12 @@ export interface GameState {
     message: string;
     timestamp: number;
   };
+}
+
+export interface MapHistoryEntry {
+  level: number;
+  variant: number;
+  timestamp: number;
 }
 
 export interface SaveGame {

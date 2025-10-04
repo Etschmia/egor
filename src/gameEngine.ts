@@ -1,8 +1,9 @@
-import { type GameState, type Player, Difficulty, WeaponType, EnemyType, type Enemy, type Item, ItemType } from './types.ts';
+import { type GameState, type Player, Difficulty, WeaponType, EnemyType, type Enemy, type Item, ItemType, type DecorativeObject, DecorativeObjectType } from './types.ts';
 import { getTexture } from './textures.ts';
-import { LEVELS } from './levels.ts';
+import { LEVELS_WITH_VARIANTS } from './levels.ts';
 import { WEAPONS } from './weapons.ts';
 import { soundSystem } from './soundSystem.ts';
+import { loadMapHistory, saveMapHistory, selectMapVariant, recordMapPlay, getMap } from './mapSelectionSystem.ts';
 
 export function createInitialPlayer(difficulty: Difficulty): Player {
   const maxHealthMap = {
@@ -48,7 +49,15 @@ export function createInitialPlayer(difficulty: Difficulty): Player {
 
 export function createInitialGameState(difficulty: Difficulty): GameState {
   const player = createInitialPlayer(difficulty);
-  const level = LEVELS[0];
+  
+  // Load map history and select variant for level 0
+  const history = loadMapHistory();
+  const variant = selectMapVariant(0, history);
+  const level = getMap(0, variant, LEVELS_WITH_VARIANTS);
+  
+  // Record this map selection in history
+  const updatedHistory = recordMapPlay(0, variant, history);
+  saveMapHistory(updatedHistory);
 
   player.x = level.playerStartX;
   player.y = level.playerStartY;
@@ -132,30 +141,72 @@ export function checkCollision(x: number, y: number, tiles: number[][]): boolean
   return tiles[mapY][mapX] !== 0;
 }
 
+// Kollisionsradien für alle dekorativen Objekt-Typen
+const DECORATIVE_OBJECT_COLLISION_RADII: Record<DecorativeObjectType, number> = {
+  [DecorativeObjectType.CEILING_LIGHT]: 0, // Keine Kollision
+  [DecorativeObjectType.VASE]: 0.25,
+  [DecorativeObjectType.CRATE]: 0.35,
+  [DecorativeObjectType.BENCH]: 0.4,
+  [DecorativeObjectType.TABLE]: 0.45,
+  [DecorativeObjectType.CHAIR]: 0.3,
+  [DecorativeObjectType.WINE_BOTTLE]: 0.1,
+  [DecorativeObjectType.SKELETON]: 0.2
+};
+
+export function checkDecorativeObjectCollision(
+  x: number,
+  y: number,
+  decorativeObjects: DecorativeObject[]
+): boolean {
+  for (const obj of decorativeObjects) {
+    // Verwende den Kollisionsradius aus dem Objekt oder den Standard-Radius
+    const collisionRadius = obj.collisionRadius || DECORATIVE_OBJECT_COLLISION_RADII[obj.type];
+    
+    // Überspringe Objekte ohne Kollision
+    if (collisionRadius === 0) {
+      continue;
+    }
+    
+    const dx = x - obj.x;
+    const dy = y - obj.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance < collisionRadius) {
+      return true; // Kollision erkannt
+    }
+  }
+  return false;
+}
+
 export function movePlayer(
   player: Player,
   moveX: number,
   moveY: number,
-  tiles: number[][]
+  tiles: number[][],
+  decorativeObjects: DecorativeObject[] = []
 ): Player {
   const newX = player.x + moveX;
   const newY = player.y + moveY;
 
   const collisionMargin = 0.2;
 
-  if (!checkCollision(newX, player.y, tiles)) {
+  if (!checkCollision(newX, player.y, tiles) && !checkDecorativeObjectCollision(newX, player.y, decorativeObjects)) {
     if (
       !checkCollision(newX, player.y + collisionMargin, tiles) &&
-      !checkCollision(newX, player.y - collisionMargin, tiles)
+      !checkCollision(newX, player.y - collisionMargin, tiles) &&
+      !checkDecorativeObjectCollision(newX, player.y + collisionMargin, decorativeObjects) &&
+      !checkDecorativeObjectCollision(newX, player.y - collisionMargin, decorativeObjects)
     ) {
       player.x = newX;
     }
   }
 
-  if (!checkCollision(player.x, newY, tiles)) {
+  if (!checkCollision(player.x, newY, tiles) && !checkDecorativeObjectCollision(player.x, newY, decorativeObjects)) {
     if (
       !checkCollision(player.x + collisionMargin, newY, tiles) &&
-      !checkCollision(player.x - collisionMargin, newY, tiles)
+      !checkCollision(player.x - collisionMargin, newY, tiles) &&
+      !checkDecorativeObjectCollision(player.x + collisionMargin, newY, decorativeObjects) &&
+      !checkDecorativeObjectCollision(player.x - collisionMargin, newY, decorativeObjects)
     ) {
       player.y = newY;
     }
@@ -208,7 +259,7 @@ function tryOpenDoorForEnemy(enemy: Enemy, tiles: number[][], targetX: number, t
 }
 
 // Verbesserte Pathfinding-Funktion für Gegner
-function findPathToPlayer(enemy: Enemy, player: Player, tiles: number[][]): { moveX: number; moveY: number; tilesUpdated?: number[][] } {
+function findPathToPlayer(enemy: Enemy, player: Player, tiles: number[][], decorativeObjects: DecorativeObject[] = []): { moveX: number; moveY: number; tilesUpdated?: number[][] } {
   const dx = player.x - enemy.x;
   const dy = player.y - enemy.y;
   const distance = Math.sqrt(dx * dx + dy * dy);
@@ -227,22 +278,26 @@ function findPathToPlayer(enemy: Enemy, player: Player, tiles: number[][]): { mo
 
   // Teste Bewegung in X-Richtung
   const newX = enemy.x + moveX;
-  if (checkCollision(newX, enemy.y, tiles)) {
-    // Prüfe ob es eine Tür ist, die geöffnet werden kann
-    const doorResult = tryOpenDoorForEnemy(enemy, tiles, newX, enemy.y);
-    if (doorResult.doorOpened) {
-      return { moveX, moveY: 0, tilesUpdated: doorResult.tiles };
+  if (checkCollision(newX, enemy.y, tiles) || checkDecorativeObjectCollision(newX, enemy.y, decorativeObjects)) {
+    // Prüfe ob es eine Tür ist, die geöffnet werden kann (nur bei Wand-Kollision)
+    if (checkCollision(newX, enemy.y, tiles)) {
+      const doorResult = tryOpenDoorForEnemy(enemy, tiles, newX, enemy.y);
+      if (doorResult.doorOpened) {
+        return { moveX, moveY: 0, tilesUpdated: doorResult.tiles };
+      }
     }
     moveX = 0; // Blockiert, keine Bewegung in X
   }
 
   // Teste Bewegung in Y-Richtung
   const newY = enemy.y + moveY;
-  if (checkCollision(enemy.x, newY, tiles)) {
-    // Prüfe ob es eine Tür ist, die geöffnet werden kann
-    const doorResult = tryOpenDoorForEnemy(enemy, tiles, enemy.x, newY);
-    if (doorResult.doorOpened) {
-      return { moveX: 0, moveY, tilesUpdated: doorResult.tiles };
+  if (checkCollision(enemy.x, newY, tiles) || checkDecorativeObjectCollision(enemy.x, newY, decorativeObjects)) {
+    // Prüfe ob es eine Tür ist, die geöffnet werden kann (nur bei Wand-Kollision)
+    if (checkCollision(enemy.x, newY, tiles)) {
+      const doorResult = tryOpenDoorForEnemy(enemy, tiles, enemy.x, newY);
+      if (doorResult.doorOpened) {
+        return { moveX: 0, moveY, tilesUpdated: doorResult.tiles };
+      }
     }
     moveY = 0; // Blockiert, keine Bewegung in Y
   }
@@ -253,15 +308,15 @@ function findPathToPlayer(enemy: Enemy, player: Player, tiles: number[][]): { mo
     const sideX = -dirY * speed * 0.5; // Senkrecht zur Hauptrichtung
     const sideY = dirX * speed * 0.5;
     
-    if (!checkCollision(enemy.x + sideX, enemy.y, tiles)) {
+    if (!checkCollision(enemy.x + sideX, enemy.y, tiles) && !checkDecorativeObjectCollision(enemy.x + sideX, enemy.y, decorativeObjects)) {
       moveX = sideX;
-    } else if (!checkCollision(enemy.x - sideX, enemy.y, tiles)) {
+    } else if (!checkCollision(enemy.x - sideX, enemy.y, tiles) && !checkDecorativeObjectCollision(enemy.x - sideX, enemy.y, decorativeObjects)) {
       moveX = -sideX;
     }
     
-    if (!checkCollision(enemy.x, enemy.y + sideY, tiles)) {
+    if (!checkCollision(enemy.x, enemy.y + sideY, tiles) && !checkDecorativeObjectCollision(enemy.x, enemy.y + sideY, decorativeObjects)) {
       moveY = sideY;
-    } else if (!checkCollision(enemy.x, enemy.y - sideY, tiles)) {
+    } else if (!checkCollision(enemy.x, enemy.y - sideY, tiles) && !checkDecorativeObjectCollision(enemy.x, enemy.y - sideY, decorativeObjects)) {
       moveY = -sideY;
     }
   }
@@ -274,7 +329,8 @@ export function updateEnemies(
   player: Player,
   tiles: number[][],
   deltaTime: number,
-  difficulty: Difficulty
+  difficulty: Difficulty,
+  decorativeObjects: DecorativeObject[] = []
 ): { enemies: Enemy[]; player: Player; tilesUpdated?: number[][] } {
   const difficultyMultiplier = {
     [Difficulty.EASY]: 0.7,
@@ -311,8 +367,8 @@ export function updateEnemies(
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     if (distance < 15 && distance > 0.1) {
-      // Verwende verbesserte Pathfinding
-      const pathResult = findPathToPlayer(enemy, player, updatedTiles);
+      // Verwende verbesserte Pathfinding mit dekorativen Objekten
+      const pathResult = findPathToPlayer(enemy, player, updatedTiles, decorativeObjects);
       
       // Wenn eine Tür geöffnet wurde, aktualisiere die Karte
       if (pathResult.tilesUpdated) {
@@ -323,10 +379,10 @@ export function updateEnemies(
       const moveX = pathResult.moveX * multiplier * deltaTime;
       const moveY = pathResult.moveY * multiplier * deltaTime;
 
-      if (moveX !== 0 && !checkCollision(enemy.x + moveX, enemy.y, updatedTiles)) {
+      if (moveX !== 0 && !checkCollision(enemy.x + moveX, enemy.y, updatedTiles) && !checkDecorativeObjectCollision(enemy.x + moveX, enemy.y, decorativeObjects)) {
         enemy.x += moveX;
       }
-      if (moveY !== 0 && !checkCollision(enemy.x, enemy.y + moveY, updatedTiles)) {
+      if (moveY !== 0 && !checkCollision(enemy.x, enemy.y + moveY, updatedTiles) && !checkDecorativeObjectCollision(enemy.x, enemy.y + moveY, decorativeObjects)) {
         enemy.y += moveY;
       }
 
@@ -464,13 +520,21 @@ export function checkLevelComplete(enemies: Enemy[]): boolean {
 }
 
 export function loadNextLevel(gameState: GameState): GameState {
-  if (gameState.currentLevel >= LEVELS.length - 1) {
+  if (gameState.currentLevel >= LEVELS_WITH_VARIANTS.length - 1) {
     // Spiel gewonnen!
     return gameState;
   }
 
   const nextLevel = gameState.currentLevel + 1;
-  const level = LEVELS[nextLevel];
+  
+  // Load map history and select variant for next level
+  const history = loadMapHistory();
+  const variant = selectMapVariant(nextLevel, history);
+  const level = getMap(nextLevel, variant, LEVELS_WITH_VARIANTS);
+  
+  // Record this map selection in history
+  const updatedHistory = recordMapPlay(nextLevel, variant, history);
+  saveMapHistory(updatedHistory);
 
   gameState.currentLevel = nextLevel;
   gameState.currentMap = level;

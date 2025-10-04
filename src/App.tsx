@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type { GameState, WallPicture, Enemy, Item } from './types.ts';
-import { Difficulty, WeaponType, WallPictureType, EnemyType, ItemType } from './types.ts';
+import type { GameState, WallPicture, Enemy, Item, DecorativeObject } from './types.ts';
+import { Difficulty, WeaponType, WallPictureType, EnemyType, ItemType, DecorativeObjectType } from './types.ts';
 import { loadTextures } from './textures.ts';
 import './App.css';
 import {
@@ -19,7 +19,7 @@ import { WEAPONS } from './weapons.ts';
 import { LEVELS } from './levels.ts';
 import { saveGame, loadGame, getAllSaveGames, deleteSaveGame } from './saveLoadSystem.ts';
 import { soundSystem } from './soundSystem.ts';
-import { getTexture, getWallTexture, getItemTexture, getCorpseTexture } from './textures.ts';
+import { getTexture, getWallTexture, getItemTexture, getCorpseTexture, getDecorativeTexture } from './textures.ts';
 import MiniMap from './MiniMap.tsx';
 
 type GameMode = 'menu' | 'playing' | 'paused' | 'help' | 'save' | 'load' | 'difficulty' | 'levelComplete';
@@ -262,7 +262,8 @@ function App() {
         newState.player,
         dirX * moveSpeed,
         dirY * moveSpeed,
-        newState.currentMap.tiles
+        newState.currentMap.tiles,
+        newState.currentMap.decorativeObjects
       );
     }
     if (keys['s'] || keys['arrowdown']) {
@@ -270,7 +271,8 @@ function App() {
         newState.player,
         -dirX * moveSpeed,
         -dirY * moveSpeed,
-        newState.currentMap.tiles
+        newState.currentMap.tiles,
+        newState.currentMap.decorativeObjects
       );
     }
     if (keys['a']) {
@@ -278,7 +280,8 @@ function App() {
         newState.player,
         -planeX * moveSpeed,
         -planeY * moveSpeed,
-        newState.currentMap.tiles
+        newState.currentMap.tiles,
+        newState.currentMap.decorativeObjects
       );
     }
     if (keys['d']) {
@@ -286,7 +289,8 @@ function App() {
         newState.player,
         planeX * moveSpeed,
         planeY * moveSpeed,
-        newState.currentMap.tiles
+        newState.currentMap.tiles,
+        newState.currentMap.decorativeObjects
       );
     }
     if (keys['arrowleft']) {
@@ -333,7 +337,8 @@ function App() {
       newState.player,
       newState.currentMap.tiles,
       deltaTime,
-      newState.difficulty
+      newState.difficulty,
+      newState.currentMap.decorativeObjects
     );
     newState.enemies = enemyUpdate.enemies;
     
@@ -565,7 +570,7 @@ function App() {
       ctx.globalAlpha = 1;
     }
 
-    // Sprites (Gegner und Items) rendern
+    // Sprites (Gegner, Items und dekorative Objekte) rendern
     const allSprites = getSpritesToRender(
       player.x,
       player.y,
@@ -574,7 +579,8 @@ function App() {
       planeX,
       planeY,
       gameState.enemies,
-      gameState.items
+      gameState.items,
+      gameState.currentMap.decorativeObjects
     );
 
     // Sprites nach Typ und Zustand für korrekte Render-Reihenfolge sortieren
@@ -642,6 +648,44 @@ function App() {
                   texture,
                   texX, 0, 1, texture.height,
                   stripe, drawStartY, 1, drawEndY - drawStartY
+                );
+              }
+            }
+          } else if (sprite.type === 'decorative') {
+            // Dekorative Objekte rendern
+            const decorativeObj = sprite.object as DecorativeObject;
+            
+            // Berechne spezielle Y-Offsets basierend auf Objekttyp
+            let adjustedDrawStartY = drawStartY;
+            let adjustedSpriteHeight = spriteHeight;
+            
+            if (decorativeObj.type === DecorativeObjectType.CEILING_LIGHT) {
+              // Leuchten erscheinen an der Decke (oberer Bildschirmbereich)
+              adjustedSpriteHeight = spriteHeight * 0.6; // Kleinere Größe
+              adjustedDrawStartY = height * 0.15; // Oberer Bereich
+            } else if (decorativeObj.type === DecorativeObjectType.SKELETON) {
+              // Gerippe liegen auf dem Boden (unterer Bildschirmbereich)
+              adjustedSpriteHeight = spriteHeight * 0.4; // Flacher
+              adjustedDrawStartY = height / 2 + spriteHeight * 0.3; // Nach unten verschoben
+            } else if (decorativeObj.renderHeight !== undefined) {
+              // Verwende spezifische Render-Höhe wenn angegeben
+              adjustedDrawStartY = -adjustedSpriteHeight / 2 + height / 2 - (decorativeObj.renderHeight * spriteHeight * 0.3);
+            }
+            
+            const adjustedDrawEndY = adjustedDrawStartY + adjustedSpriteHeight;
+            
+            // Hole Textur mit Farbmodulation
+            const decorativeTexture = getDecorativeTexture(decorativeObj.type, decorativeObj.colorVariant);
+
+            if (decorativeTexture && texturesLoaded) {
+              const texture = decorativeTexture as HTMLCanvasElement;
+              const texX = Math.floor(((stripe - drawStartX) / spriteWidth) * texture.width);
+
+              if (texX >= 0 && texX < texture.width) {
+                ctx.drawImage(
+                  texture,
+                  texX, 0, 1, texture.height,
+                  stripe, adjustedDrawStartY, 1, adjustedDrawEndY - adjustedDrawStartY
                 );
               }
             }

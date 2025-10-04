@@ -1,9 +1,10 @@
-import { EnemyType } from './types.ts';
+import { EnemyType, DecorativeObjectType } from './types.ts';
 
 const textures: Partial<Record<EnemyType, CanvasImageSource>> = {};
 const corpseTextures: Partial<Record<EnemyType, CanvasImageSource>> = {};
 const wallTextures: Record<string, CanvasImageSource> = {};
 const itemTextures: Record<string, CanvasImageSource> = {};
+const decorativeTextures: Partial<Record<DecorativeObjectType, CanvasImageSource>> = {};
 
 export function loadTextures(): Promise<void[]> {
   textures[EnemyType.ZOMBIE] = createZombieTexture();
@@ -29,6 +30,16 @@ export function loadTextures(): Promise<void[]> {
   itemTextures['TREASURE'] = createTreasureTexture();
   itemTextures['AMMO'] = createAmmoTexture();
   itemTextures['WEAPON'] = createWeaponTexture();
+
+  // Dekorative Objekt-Texturen erstellen
+  decorativeTextures[DecorativeObjectType.CEILING_LIGHT] = createLightTexture();
+  decorativeTextures[DecorativeObjectType.VASE] = createVaseTexture();
+  decorativeTextures[DecorativeObjectType.CRATE] = createCrateTexture();
+  decorativeTextures[DecorativeObjectType.BENCH] = createBenchTexture();
+  decorativeTextures[DecorativeObjectType.TABLE] = createTableTexture();
+  decorativeTextures[DecorativeObjectType.CHAIR] = createChairTexture();
+  decorativeTextures[DecorativeObjectType.WINE_BOTTLE] = createWineBottleTexture();
+  decorativeTextures[DecorativeObjectType.SKELETON] = createSkeletonTexture();
 
   return Promise.resolve([]);
 }
@@ -594,6 +605,379 @@ function createGhostTexture(): HTMLCanvasElement {
   ctx.stroke();
 
   return canvas;
+}
+
+function createLightTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Gelber Kreis mit Glow-Effekt
+  const gradient = ctx.createRadialGradient(32, 32, 5, 32, 32, 30);
+  gradient.addColorStop(0, '#FFFF00'); // Helles Gelb
+  gradient.addColorStop(0.3, '#FFD700'); // Gold
+  gradient.addColorStop(0.6, '#FFA500'); // Orange
+  gradient.addColorStop(1, 'rgba(255, 165, 0, 0)'); // Transparent
+
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(32, 32, 30, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Innerer heller Kern
+  const coreGradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 12);
+  coreGradient.addColorStop(0, '#FFFFFF');
+  coreGradient.addColorStop(0.5, '#FFFF00');
+  coreGradient.addColorStop(1, '#FFD700');
+
+  ctx.fillStyle = coreGradient;
+  ctx.beginPath();
+  ctx.arc(32, 32, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  return canvas;
+}
+
+function createVaseTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Vertikales Rechteck mit Muster
+  const gradient = ctx.createLinearGradient(20, 0, 44, 0);
+  gradient.addColorStop(0, '#8B4513');
+  gradient.addColorStop(0.5, '#A0522D');
+  gradient.addColorStop(1, '#8B4513');
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(20, 10, 24, 44);
+
+  // Vasenform - oben schmaler
+  ctx.fillRect(24, 6, 16, 4);
+  
+  // Muster - horizontale Streifen
+  ctx.fillStyle = '#654321';
+  for (let y = 15; y < 50; y += 8) {
+    ctx.fillRect(20, y, 24, 3);
+  }
+
+  // Highlights für 3D-Effekt
+  ctx.fillStyle = 'rgba(160, 82, 45, 0.5)';
+  ctx.fillRect(20, 10, 2, 44);
+
+  return canvas;
+}
+
+function createCrateTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Braunes Quadrat mit Holzmaserung
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(8, 8, 48, 48);
+
+  // Holzbretter
+  ctx.fillStyle = '#654321';
+  for (let x = 8; x < 56; x += 12) {
+    ctx.fillRect(x, 8, 10, 48);
+  }
+
+  // Holzmaserung - horizontale Linien
+  ctx.fillStyle = '#5D4037';
+  for (let y = 12; y < 56; y += 6) {
+    ctx.fillRect(8, y, 48, 1);
+  }
+
+  // Metallbeschläge an den Ecken
+  ctx.fillStyle = '#2A2A2A';
+  ctx.fillRect(8, 8, 6, 6);
+  ctx.fillRect(50, 8, 6, 6);
+  ctx.fillRect(8, 50, 6, 6);
+  ctx.fillRect(50, 50, 6, 6);
+
+  // Schatten für 3D-Effekt
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillRect(8, 54, 48, 2);
+  ctx.fillRect(54, 8, 2, 48);
+
+  return canvas;
+}
+
+function createBenchTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Horizontales Rechteck mit Beinen
+  const gradient = ctx.createLinearGradient(0, 20, 0, 40);
+  gradient.addColorStop(0, '#8B4513');
+  gradient.addColorStop(0.5, '#A0522D');
+  gradient.addColorStop(1, '#654321');
+
+  // Sitzfläche
+  ctx.fillStyle = gradient;
+  ctx.fillRect(4, 20, 56, 12);
+
+  // Holzmaserung
+  ctx.fillStyle = '#654321';
+  for (let x = 8; x < 60; x += 8) {
+    ctx.fillRect(x, 20, 1, 12);
+  }
+
+  // Beine
+  ctx.fillStyle = '#654321';
+  ctx.fillRect(8, 32, 6, 20);
+  ctx.fillRect(50, 32, 6, 20);
+
+  // Schatten unter der Bank
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillRect(4, 50, 56, 2);
+
+  return canvas;
+}
+
+function createTableTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Tischplatte
+  const gradient = ctx.createRadialGradient(32, 24, 5, 32, 24, 28);
+  gradient.addColorStop(0, '#A0522D');
+  gradient.addColorStop(0.7, '#8B4513');
+  gradient.addColorStop(1, '#654321');
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(8, 16, 48, 16);
+
+  // Holzmaserung
+  ctx.fillStyle = '#654321';
+  for (let y = 18; y < 32; y += 4) {
+    ctx.fillRect(8, y, 48, 1);
+  }
+
+  // Tischbeine
+  ctx.fillStyle = '#654321';
+  ctx.fillRect(12, 32, 6, 20);
+  ctx.fillRect(46, 32, 6, 20);
+
+  // Schatten
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillRect(8, 30, 48, 2);
+
+  return canvas;
+}
+
+function createChairTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Rückenlehne
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(20, 8, 24, 20);
+
+  // Sitzfläche
+  const gradient = ctx.createLinearGradient(0, 28, 0, 40);
+  gradient.addColorStop(0, '#A0522D');
+  gradient.addColorStop(1, '#8B4513');
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(16, 28, 32, 12);
+
+  // Beine
+  ctx.fillStyle = '#654321';
+  ctx.fillRect(18, 40, 4, 16);
+  ctx.fillRect(42, 40, 4, 16);
+
+  // Details auf Rückenlehne
+  ctx.fillStyle = '#654321';
+  ctx.fillRect(24, 12, 2, 12);
+  ctx.fillRect(38, 12, 2, 12);
+
+  return canvas;
+}
+
+function createWineBottleTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Flasche
+  const bottleGradient = ctx.createLinearGradient(20, 0, 28, 0);
+  bottleGradient.addColorStop(0, '#2F4F2F');
+  bottleGradient.addColorStop(0.5, '#3A5F3A');
+  bottleGradient.addColorStop(1, '#2F4F2F');
+
+  ctx.fillStyle = bottleGradient;
+  // Flaschenhals
+  ctx.fillRect(22, 10, 4, 8);
+  // Flaschenkörper
+  ctx.fillRect(20, 18, 8, 20);
+
+  // Etikett
+  ctx.fillStyle = '#8B0000';
+  ctx.fillRect(20, 24, 8, 6);
+
+  // Glanzlicht auf Flasche
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.fillRect(21, 20, 2, 10);
+
+  // Glas daneben
+  const glassGradient = ctx.createLinearGradient(36, 0, 44, 0);
+  glassGradient.addColorStop(0, 'rgba(200, 200, 255, 0.6)');
+  glassGradient.addColorStop(0.5, 'rgba(220, 220, 255, 0.8)');
+  glassGradient.addColorStop(1, 'rgba(200, 200, 255, 0.6)');
+
+  ctx.fillStyle = glassGradient;
+  ctx.fillRect(36, 26, 8, 12);
+
+  // Glanzlicht auf Glas
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+  ctx.fillRect(37, 28, 2, 6);
+
+  return canvas;
+}
+
+function createSkeletonTexture(): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Knochen-Silhouette in Weiß
+  ctx.fillStyle = '#E0E0E0';
+
+  // Schädel
+  ctx.beginPath();
+  ctx.arc(32, 20, 10, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Augenhöhlen
+  ctx.fillStyle = '#000000';
+  ctx.beginPath();
+  ctx.arc(28, 18, 3, 0, Math.PI * 2);
+  ctx.arc(36, 18, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Wirbelsäule
+  ctx.fillStyle = '#E0E0E0';
+  ctx.fillRect(30, 30, 4, 20);
+
+  // Rippen
+  for (let i = 0; i < 4; i++) {
+    const y = 32 + i * 4;
+    ctx.fillRect(20, y, 10, 2);
+    ctx.fillRect(34, y, 10, 2);
+  }
+
+  // Arme (liegend)
+  ctx.fillRect(12, 36, 16, 3);
+  ctx.fillRect(36, 36, 16, 3);
+
+  // Beine (liegend)
+  ctx.fillRect(24, 50, 3, 10);
+  ctx.fillRect(37, 50, 3, 10);
+
+  return canvas;
+}
+
+export function applyColorVariant(
+  texture: CanvasImageSource,
+  colorVariant: number
+): CanvasImageSource {
+  // Erstelle temporäres Canvas
+  const canvas = document.createElement('canvas');
+  canvas.width = (texture as HTMLCanvasElement).width || 64;
+  canvas.height = (texture as HTMLCanvasElement).height || 64;
+  const ctx = canvas.getContext('2d')!;
+
+  // Zeichne Original-Textur
+  ctx.drawImage(texture, 0, 0);
+
+  // Wende Farbmodulation an (Hue-Shift basierend auf colorVariant)
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+
+  // Hue-Shift: colorVariant von 0-1 wird zu -30 bis +30 Grad
+  const hueShift = (colorVariant - 0.5) * 60;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+
+    // RGB zu HSL konvertieren
+    const max = Math.max(r, g, b) / 255;
+    const min = Math.min(r, g, b) / 255;
+    const l = (max + min) / 2;
+
+    if (max === min) {
+      continue; // Graustufen, keine Farbänderung
+    }
+
+    const d = max - min;
+    const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    let h = 0;
+    if (max === r / 255) {
+      h = ((g / 255 - b / 255) / d + (g < b ? 6 : 0)) / 6;
+    } else if (max === g / 255) {
+      h = ((b / 255 - r / 255) / d + 2) / 6;
+    } else {
+      h = ((r / 255 - g / 255) / d + 4) / 6;
+    }
+
+    // Hue-Shift anwenden
+    h = (h * 360 + hueShift) % 360;
+    if (h < 0) h += 360;
+    h = h / 360;
+
+    // HSL zurück zu RGB
+    const hue2rgb = (p: number, q: number, t: number) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1 / 6) return p + (q - p) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+      return p;
+    };
+
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+
+    data[i] = hue2rgb(p, q, h + 1 / 3) * 255;
+    data[i + 1] = hue2rgb(p, q, h) * 255;
+    data[i + 2] = hue2rgb(p, q, h - 1 / 3) * 255;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+  return canvas;
+}
+
+export function getDecorativeTexture(
+  objectType: DecorativeObjectType,
+  colorVariant?: number
+): CanvasImageSource | undefined {
+  const baseTexture = decorativeTextures[objectType];
+  if (!baseTexture) {
+    return undefined;
+  }
+
+  // Wenn colorVariant angegeben ist und nicht 0.5 (neutral), wende Farbmodulation an
+  if (colorVariant !== undefined && Math.abs(colorVariant - 0.5) > 0.01) {
+    return applyColorVariant(baseTexture, colorVariant);
+  }
+
+  return baseTexture;
 }
 
 export function getTexture(enemyType: EnemyType): CanvasImageSource | undefined {
