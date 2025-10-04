@@ -137,7 +137,7 @@
   - Teste Fehlerbehandlung bei korrupten Daten
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-- [ ] 16. Optimiere Performance
+- [x] 16. Optimiere Performance
   - Implementiere Sprite-Culling für Objekte außerhalb Sichtfeld
   - Implementiere Texture-Caching
   - Teste Performance mit vielen Objekten (20+ pro Map)

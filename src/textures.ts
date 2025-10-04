@@ -6,6 +6,10 @@ const wallTextures: Record<string, CanvasImageSource> = {};
 const itemTextures: Record<string, CanvasImageSource> = {};
 const decorativeTextures: Partial<Record<DecorativeObjectType, CanvasImageSource>> = {};
 
+// Texture cache for color variants (optimization)
+const colorVariantCache = new Map<string, CanvasImageSource>();
+const MAX_CACHE_SIZE = 100; // Limit cache size to prevent memory issues
+
 export function loadTextures(): Promise<void[]> {
   textures[EnemyType.ZOMBIE] = createZombieTexture();
   textures[EnemyType.MONSTER] = createMonsterTexture();
@@ -974,7 +978,27 @@ export function getDecorativeTexture(
 
   // Wenn colorVariant angegeben ist und nicht 0.5 (neutral), wende Farbmodulation an
   if (colorVariant !== undefined && Math.abs(colorVariant - 0.5) > 0.01) {
-    return applyColorVariant(baseTexture, colorVariant);
+    // Optimized: Check cache first
+    const cacheKey = `${objectType}_${colorVariant.toFixed(2)}`;
+    
+    if (colorVariantCache.has(cacheKey)) {
+      return colorVariantCache.get(cacheKey)!;
+    }
+    
+    // Generate and cache the variant
+    const variantTexture = applyColorVariant(baseTexture, colorVariant);
+    
+    // Limit cache size
+    if (colorVariantCache.size >= MAX_CACHE_SIZE) {
+      // Remove oldest entry (first entry in Map)
+      const firstKey = colorVariantCache.keys().next().value;
+      if (firstKey !== undefined) {
+        colorVariantCache.delete(firstKey);
+      }
+    }
+    
+    colorVariantCache.set(cacheKey, variantTexture);
+    return variantTexture;
   }
 
   return baseTexture;

@@ -153,11 +153,20 @@ const DECORATIVE_OBJECT_COLLISION_RADII: Record<DecorativeObjectType, number> = 
   [DecorativeObjectType.SKELETON]: 0.2
 };
 
+// Optimized collision detection with early distance check
 export function checkDecorativeObjectCollision(
   x: number,
   y: number,
   decorativeObjects: DecorativeObject[]
 ): boolean {
+  // Early exit if no objects
+  if (decorativeObjects.length === 0) {
+    return false;
+  }
+
+  // Optimized: Only check objects within reasonable distance (3 units)
+  const maxCheckDistance = 3;
+  
   for (const obj of decorativeObjects) {
     // Verwende den Kollisionsradius aus dem Objekt oder den Standard-Radius
     const collisionRadius = obj.collisionRadius || DECORATIVE_OBJECT_COLLISION_RADII[obj.type];
@@ -169,7 +178,18 @@ export function checkDecorativeObjectCollision(
     
     const dx = x - obj.x;
     const dy = y - obj.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    // Optimized: Quick distance check using squared distance to avoid sqrt
+    const distanceSquared = dx * dx + dy * dy;
+    const maxDistSquared = maxCheckDistance * maxCheckDistance;
+    
+    // Skip objects that are too far away
+    if (distanceSquared > maxDistSquared) {
+      continue;
+    }
+    
+    // Only calculate sqrt for nearby objects
+    const distance = Math.sqrt(distanceSquared);
     
     if (distance < collisionRadius) {
       return true; // Kollision erkannt

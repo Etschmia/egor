@@ -102,6 +102,25 @@ export function castRay(
   };
 }
 
+// Optimized sprite culling with view frustum check
+function isInViewFrustum(
+  transformX: number,
+  transformY: number,
+  maxDistance: number = 20
+): boolean {
+  // Check if sprite is behind camera
+  if (transformY <= 0) return false;
+  
+  // Check if sprite is too far away
+  if (transformY > maxDistance) return false;
+  
+  // Check if sprite is within horizontal field of view
+  // FOV is approximately -1 to 1 in screen space
+  if (Math.abs(transformX) > transformY * 1.5) return false;
+  
+  return true;
+}
+
 export function getSpritesToRender(
   posX: number,
   posY: number,
@@ -114,18 +133,19 @@ export function getSpritesToRender(
   decorativeObjects: DecorativeObject[] = []
 ): SpriteRender[] {
   const sprites: SpriteRender[] = [];
+  const invDet = 1.0 / (planeX * dirY - dirX * planeY);
 
   // Gegner hinzufügen (lebend und sterbend)
-  enemies.forEach((enemy) => {
+  for (const enemy of enemies) {
     if (enemy.state !== 'dead') { // Rendere lebende und sterbende Gegner
       const spriteX = enemy.x - posX;
       const spriteY = enemy.y - posY;
 
-      const invDet = 1.0 / (planeX * dirY - dirX * planeY);
       const transformX = invDet * (dirY * spriteX - dirX * spriteY);
       const transformY = invDet * (-planeY * spriteX + planeX * spriteY);
 
-      if (transformY > 0) {
+      // Optimized: Check view frustum before adding
+      if (isInViewFrustum(transformX, transformY)) {
         sprites.push({
           x: transformX,
           y: transformY,
@@ -135,19 +155,19 @@ export function getSpritesToRender(
         });
       }
     }
-  });
+  }
 
   // Leichen hinzufügen (werden separat behandelt, aber müssen auch transformiert werden)
-  enemies.forEach((enemy) => {
+  for (const enemy of enemies) {
     if (enemy.state === 'dead') {
       const spriteX = enemy.x - posX;
       const spriteY = enemy.y - posY;
 
-      const invDet = 1.0 / (planeX * dirY - dirX * planeY);
       const transformX = invDet * (dirY * spriteX - dirX * spriteY);
       const transformY = invDet * (-planeY * spriteX + planeX * spriteY);
 
-      if (transformY > 0) {
+      // Optimized: Check view frustum before adding
+      if (isInViewFrustum(transformX, transformY)) {
         sprites.push({
           x: transformX,
           y: transformY,
@@ -157,19 +177,19 @@ export function getSpritesToRender(
         });
       }
     }
-  });
+  }
 
   // Nicht gesammelte Items hinzufügen
-  items.forEach((item) => {
+  for (const item of items) {
     if (!item.collected) {
       const spriteX = item.x - posX;
       const spriteY = item.y - posY;
 
-      const invDet = 1.0 / (planeX * dirY - dirX * planeY);
       const transformX = invDet * (dirY * spriteX - dirX * spriteY);
       const transformY = invDet * (-planeY * spriteX + planeX * spriteY);
 
-      if (transformY > 0) {
+      // Optimized: Check view frustum before adding
+      if (isInViewFrustum(transformX, transformY)) {
         sprites.push({
           x: transformX,
           y: transformY,
@@ -179,18 +199,18 @@ export function getSpritesToRender(
         });
       }
     }
-  });
+  }
 
   // Dekorative Objekte hinzufügen
-  decorativeObjects.forEach((obj) => {
+  for (const obj of decorativeObjects) {
     const spriteX = obj.x - posX;
     const spriteY = obj.y - posY;
 
-    const invDet = 1.0 / (planeX * dirY - dirX * planeY);
     const transformX = invDet * (dirY * spriteX - dirX * spriteY);
     const transformY = invDet * (-planeY * spriteX + planeX * spriteY);
 
-    if (transformY > 0) {
+    // Optimized: Check view frustum before adding
+    if (isInViewFrustum(transformX, transformY)) {
       sprites.push({
         x: transformX,
         y: transformY,
@@ -199,7 +219,7 @@ export function getSpritesToRender(
         object: obj
       });
     }
-  });
+  }
 
   // Nach Entfernung sortieren (weiter hinten zuerst)
   sprites.sort((a, b) => b.distance - a.distance);

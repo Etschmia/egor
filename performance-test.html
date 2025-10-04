@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Performance Test - Decorative Objects</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Courier New', monospace;
+      background: #1a1a1a;
+      color: #00ff00;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #00ff00;
+      text-shadow: 0 0 10px #00ff00;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .test-section {
+      background: #2a2a2a;
+      border: 2px solid #00ff00;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .test-section h2 {
+      margin-top: 0;
+      color: #00ff00;
+      border-bottom: 1px solid #00ff00;
+      padding-bottom: 10px;
+    }
+    
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .metric {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 4px;
+      border: 1px solid #00ff00;
+    }
+    
+    .metric-label {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 5px;
+    }
+    
+    .metric-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00ff00;
+    }
+    
+    .metric-value.warning {
+      color: #ffaa00;
+    }
+    
+    .metric-value.error {
+      color: #ff0000;
+    }
+    
+    button {
+      background: #00ff00;
+      color: #1a1a1a;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      font-family: 'Courier New', monospace;
+    }
+    
+    button:hover {
+      background: #00cc00;
+    }
+    
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      background: #1a1a1a;
+      border: 1px solid #00ff00;
+    }
+    
+    .status.success {
+      border-color: #00ff00;
+      color: #00ff00;
+    }
+    
+    .status.warning {
+      border-color: #ffaa00;
+      color: #ffaa00;
+    }
+    
+    .status.error {
+      border-color: #ff0000;
+      color: #ff0000;
+    }
+    
+    pre {
+      background: #1a1a1a;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      border: 1px solid #00ff00;
+    }
+    
+    .test-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 Performance Test - Decorative Objects Optimization</h1>
+    
+    <div class="test-section">
+      <h2>Test Controls</h2>
+      <div class="test-controls">
+        <button onclick="runTest(10)">Test with 10 Objects</button>
+        <button onclick="runTest(20)">Test with 20 Objects</button>
+        <button onclick="runTest(30)">Test with 30 Objects</button>
+        <button onclick="runTest(50)">Test with 50 Objects</button>
+        <button onclick="runTest(100)">Test with 100 Objects</button>
+        <button onclick="clearResults()">Clear Results</button>
+      </div>
+      <div id="status" class="status" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+      <h2>Current Performance Metrics</h2>
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">FPS</div>
+          <div class="metric-value" id="fps">--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Frame Time (ms)</div>
+          <div class="metric-value" id="frameTime">--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Render Time (ms)</div>
+          <div class="metric-value" id="renderTime">--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Collision Time (ms)</div>
+          <div class="metric-value" id="collisionTime">--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Sprite Count</div>
+          <div class="metric-value" id="spriteCount">--</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Decorative Objects</div>
+          <div class="metric-value" id="objectCount">--</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2>Test Results</h2>
+      <pre id="results">No tests run yet. Click a test button above to start.</pre>
+    </div>
+    
+    <div class="test-section">
+      <h2>Optimization Features Tested</h2>
+      <ul>
+        <li>✓ Sprite Culling - Objects outside view frustum are not rendered</li>
+        <li>✓ Texture Caching - Color variant textures are cached (max 100 entries)</li>
+        <li>✓ Collision Optimization - Early distance checks and squared distance comparison</li>
+        <li>✓ View Distance Culling - Objects beyond 20 units are not rendered</li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import { performanceMonitor } from './src/performanceMonitor.ts';
+    import { getSpritesToRender } from './src/raycasting.ts';
+    import { checkDecorativeObjectCollision } from './src/gameEngine.ts';
+    import { DecorativeObjectType } from './types.ts';
+
+    let testResults = [];
+
+    function showStatus(message, type = 'success') {
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+      statusEl.style.display = 'block';
+    }
+
+    function updateMetrics(metrics) {
+      document.getElementById('fps').textContent = metrics.fps;
+      document.getElementById('frameTime').textContent = metrics.frameTime.toFixed(2);
+      document.getElementById('renderTime').textContent = metrics.renderTime.toFixed(2);
+      document.getElementById('collisionTime').textContent = metrics.collisionTime.toFixed(2);
+      document.getElementById('spriteCount').textContent = metrics.spriteCount;
+      document.getElementById('objectCount').textContent = metrics.decorativeObjectCount;
+      
+      // Color code based on performance
+      const fpsEl = document.getElementById('fps');
+      if (metrics.fps >= 60) {
+        fpsEl.className = 'metric-value';
+      } else if (metrics.fps >= 30) {
+        fpsEl.className = 'metric-value warning';
+      } else {
+        fpsEl.className = 'metric-value error';
+      }
+    }
+
+    function generateTestObjects(count) {
+      const objects = [];
+      const types = Object.values(DecorativeObjectType);
+      
+      for (let i = 0; i < count; i++) {
+        objects.push({
+          id: `test_obj_${i}`,
+          type: types[Math.floor(Math.random() * types.length)],
+          x: Math.random() * 20 + 2,
+          y: Math.random() * 20 + 2,
+          colorVariant: Math.random(),
+          collisionRadius: 0.3,
+          renderHeight: 1.0
+        });
+      }
+      
+      return objects;
+    }
+
+    async function runTest(objectCount) {
+      showStatus(`Running test with ${objectCount} objects...`, 'warning');
+      performanceMonitor.reset();
+      
+      const decorativeObjects = generateTestObjects(objectCount);
+      const testDuration = 5000; // 5 seconds
+      const startTime = performance.now();
+      let frameCount = 0;
+      
+      // Simulate game loop
+      function testFrame() {
+        const now = performance.now();
+        const elapsed = now - startTime;
+        
+        if (elapsed >= testDuration) {
+          // Test complete
+          const report = performanceMonitor.generateReport();
+          testResults.push({
+            objectCount,
+            report,
+            timestamp: new Date().toLocaleTimeString()
+          });
+          
+          displayResults();
+          showStatus(`Test complete! Ran ${frameCount} frames in ${(elapsed/1000).toFixed(2)}s`, 'success');
+          return;
+        }
+        
+        // Simulate rendering
+        performanceMonitor.startTimer('render');
+        const sprites = getSpritesToRender(
+          10, 10, // player position
+          1, 0,   // direction
+          0, 0.66, // plane
+          [],     // enemies
+          [],     // items
+          decorativeObjects
+        );
+        const renderTime = performanceMonitor.endTimer('render');
+        
+        // Simulate collision checks
+        performanceMonitor.startTimer('collision');
+        for (let i = 0; i < 10; i++) {
+          checkDecorativeObjectCollision(
+            Math.random() * 20,
+            Math.random() * 20,
+            decorativeObjects
+          );
+        }
+        const collisionTime = performanceMonitor.endTimer('collision');
+        
+        // Record metrics
+        const frameTime = performance.now() - now;
+        performanceMonitor.recordFrame(frameTime);
+        performanceMonitor.updateMetrics({
+          renderTime,
+          collisionTime,
+          spriteCount: sprites.length,
+          decorativeObjectCount: objectCount
+        });
+        
+        updateMetrics(performanceMonitor.getMetrics());
+        frameCount++;
+        
+        requestAnimationFrame(testFrame);
+      }
+      
+      requestAnimationFrame(testFrame);
+    }
+
+    function displayResults() {
+      const resultsEl = document.getElementById('results');
+      let output = '';
+      
+      for (const result of testResults) {
+        output += `\n[${result.timestamp}] Test with ${result.objectCount} objects:\n`;
+        output += result.report;
+        output += '\n' + '='.repeat(60) + '\n';
+      }
+      
+      resultsEl.textContent = output || 'No tests run yet.';
+    }
+
+    function clearResults() {
+      testResults = [];
+      displayResults();
+      showStatus('Results cleared', 'success');
+      setTimeout(() => {
+        document.getElementById('status').style.display = 'none';
+      }, 2000);
+    }
+
+    // Make functions global
+    window.runTest = runTest;
+    window.clearResults = clearResults;
+  </script>
+</body>
+</html>
