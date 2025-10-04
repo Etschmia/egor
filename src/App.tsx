@@ -201,21 +201,21 @@ function App() {
         const weaponKeys = ['1', '2', '3', '4', '5', '6'];
         const keyIndex = weaponKeys.indexOf(e.key);
         if (keyIndex >= 0) {
-        const weaponTypes = [
-          WeaponType.KNIFE,
-          WeaponType.PISTOL,
-          WeaponType.MACHINE_PISTOL,
-          WeaponType.CHAINSAW,
-          WeaponType.ASSAULT_RIFLE,
-          WeaponType.HEAVY_MG
-        ];
-        const selectedWeapon = weaponTypes[keyIndex];
-        setGameState((prev) => {
-          if (prev && prev.player.weapons.includes(selectedWeapon)) {
-            return { ...prev, player: { ...prev.player, currentWeapon: selectedWeapon } };
-          }
-          return prev;
-        });
+          const weaponTypes = [
+            WeaponType.KNIFE,
+            WeaponType.PISTOL,
+            WeaponType.MACHINE_PISTOL,
+            WeaponType.CHAINSAW,
+            WeaponType.ASSAULT_RIFLE,
+            WeaponType.HEAVY_MG
+          ];
+          const selectedWeapon = weaponTypes[keyIndex];
+          setGameState((prev) => {
+            if (prev && prev.player.weapons.includes(selectedWeapon)) {
+              return { ...prev, player: { ...prev.player, currentWeapon: selectedWeapon } };
+            }
+            return prev;
+          });
         }
       }
     };
@@ -237,7 +237,7 @@ function App() {
   const gameLoop = useCallback(() => {
     const gameState = gameStateRef.current;
     const gameMode = gameModeRef.current;
-    
+
     if (!gameState || gameMode !== 'playing' || gameState.isPaused || gameState.isGameOver) {
       return;
     }
@@ -341,13 +341,13 @@ function App() {
       newState.currentMap.decorativeObjects
     );
     newState.enemies = enemyUpdate.enemies;
-    
+
     // Prüfe ob Spieler Schaden genommen hat
     if (enemyUpdate.player.health < newState.player.health) {
       soundSystem.playPlayerHit();
     }
     newState.player = enemyUpdate.player;
-    
+
     // Wenn Gegner Türen geöffnet haben, aktualisiere die Karte
     if (enemyUpdate.tilesUpdated) {
       newState.currentMap = {
@@ -441,7 +441,7 @@ function App() {
   const render = useCallback(() => {
     const gameState = gameStateRef.current;
     const gameMode = gameModeRef.current;
-    
+
     if (!canvasRef.current || !gameState || gameMode !== 'playing') {
       return;
     }
@@ -593,14 +593,14 @@ function App() {
       let spriteHeight = Math.abs(height / sprite.y);
       let spriteWidth = spriteHeight;
       let drawStartY = -spriteHeight / 2 + height / 2;
-      
+
       const enemy = sprite.type === 'enemy' ? sprite.object as Enemy : null;
 
       // Todesanimation
       if (enemy && enemy.state === 'dying') {
         const timeSinceDeath = Date.now() - (enemy.timeOfDeath || 0);
         const animationProgress = Math.min(timeSinceDeath / 500, 1); // 500ms Animation
-        
+
         spriteHeight *= (1 - animationProgress * 0.8); // Schrumpft auf 20% Höhe
         spriteWidth *= (1 + animationProgress * 0.5); // Wird 50% breiter
         drawStartY += (spriteHeight * animationProgress); // Bewegt sich nach unten
@@ -654,11 +654,11 @@ function App() {
           } else if (sprite.type === 'decorative') {
             // Dekorative Objekte rendern
             const decorativeObj = sprite.object as DecorativeObject;
-            
+
             // Berechne spezielle Y-Offsets basierend auf Objekttyp
             let adjustedDrawStartY = drawStartY;
             let adjustedSpriteHeight = spriteHeight;
-            
+
             if (decorativeObj.type === DecorativeObjectType.CEILING_LIGHT) {
               // Leuchten erscheinen an der Decke - relativ zur Perspektive
               adjustedSpriteHeight = spriteHeight * 0.6; // Kleinere Größe
@@ -668,13 +668,19 @@ function App() {
               // Gerippe liegen auf dem Boden (unterer Bildschirmbereich)
               adjustedSpriteHeight = spriteHeight * 0.4; // Flacher
               adjustedDrawStartY = height / 2 + spriteHeight * 0.3; // Nach unten verschoben
+            } else if (decorativeObj.type === DecorativeObjectType.TABLE ||
+              decorativeObj.type === DecorativeObjectType.CHAIR ||
+              decorativeObj.type === DecorativeObjectType.BENCH) {
+              // Tische, Stühle und Bänke stehen auf dem Boden (wie Skelette)
+              adjustedDrawStartY = height / 2 + spriteHeight * 0.3;
             } else if (decorativeObj.renderHeight !== undefined) {
-              // Verwende spezifische Render-Höhe wenn angegeben
-              adjustedDrawStartY = -adjustedSpriteHeight / 2 + height / 2 - (decorativeObj.renderHeight * spriteHeight * 0.3);
+              // Verwende spezifische Render-Höhe wenn angegeben (z.B. Weinflaschen auf Tischen)
+              // Starte von der Bodenposition und hebe das Objekt basierend auf renderHeight an
+              adjustedDrawStartY = height / 2 + spriteHeight * 0.3 - (decorativeObj.renderHeight * spriteHeight);
             }
-            
+
             const adjustedDrawEndY = adjustedDrawStartY + adjustedSpriteHeight;
-            
+
             // Hole Textur mit Farbmodulation
             const decorativeTexture = getDecorativeTexture(decorativeObj.type, decorativeObj.colorVariant);
 
