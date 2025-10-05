@@ -120,7 +120,7 @@
   - Move player start marker to new position
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [-] 15. Implement toolbar component
+- [x] 15. Implement toolbar component
   - Create `src/editor/components/Toolbar.tsx`
   - Add "Save" button with click handler
   - Add "New Level" button with click handler
@@ -130,14 +130,14 @@
   - Add dirty state indicator (unsaved changes)
   - _Requirements: 10.1, 11.1, 11.2, 11.3_
 
-- [ ] 16. Implement save functionality
+- [x] 16. Implement save functionality
   - Connect Save button to saveLevel API call
   - Show success notification on successful save
   - Show error notification on save failure
   - Clear dirty state after successful save
   - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8_
 
-- [ ] 17. Implement new level creation
+- [x] 17. Implement new level creation
   - Create dialog for new level/variant input
   - Validate level and variant numbers
   - Generate empty map with default dimensions (20x20) and outer walls
@@ -145,7 +145,7 @@
   - Generate correct filename (levelX-variantY.ts)
   - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6_
 
-- [ ] 18. Implement map dimension editing
+- [x] 18. Implement map dimension editing
   - Add width and height input fields to toolbar
   - Implement "Apply Size" button handler
   - Show warning dialog about potential data loss
@@ -153,7 +153,7 @@
   - Update canvas rendering to accommodate new dimensions
   - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6_
 
-- [ ] 19. Implement map data management hook
+- [x] 19. Implement map data management hook
   - Create `src/editor/hooks/useMapData.ts`
   - Implement state management for current map data
   - Implement dirty state tracking
@@ -161,7 +161,7 @@
   - Maintain history stack (max 50 entries)
   - _Requirements: 10.1, 10.8_
 
-- [ ] 20. Add keyboard shortcuts
+- [x] 20. Add keyboard shortcuts
   - Implement Ctrl+S for save
   - Implement Ctrl+Z for undo
   - Implement Ctrl+Y for redo
@@ -169,7 +169,7 @@
   - Implement Escape for closing dialogs and deselecting
   - _Requirements: 5.5_
 
-- [ ] 21. Add visual feedback and polish
+- [x] 21. Add visual feedback and polish
   - Implement toast notification system for user feedback
   - Add loading indicators during API calls
   - Add hover effects on interactive elements
@@ -192,7 +192,7 @@
   - Write test for file system operations
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 10.1_
 
-- [ ] 24. Create documentation and finalize
+- [x] 24. Create documentation and finalize
   - Add README for editor usage instructions
   - Document keyboard shortcuts
   - Document API endpoints

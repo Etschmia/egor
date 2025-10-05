@@ -117,7 +117,7 @@ function generateLevelCode(filename, mapData) {
   }).join(',\n');
 
   // Generate the complete file content
-  const code = `import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType } from '../types.ts';
+  const code = `import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType, WeaponType } from '../types.ts';
 
 export const ${constantName}: GameMap = {
   width: ${mapData.width},

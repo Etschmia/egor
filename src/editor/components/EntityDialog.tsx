@@ -454,6 +454,22 @@ export function EntityDialog({ dialogType, onSave, onCancel }: EntityDialogProps
 
   return (
     <div style={backdropStyle} onClick={handleBackdropClick}>
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes slideUp {
+          from {
+            transform: translateY(20px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
       <div style={dialogStyle} onClick={(e) => e.stopPropagation()}>
         <div style={headerStyle}>
           <h2 style={{ margin: 0, fontSize: '1.25rem' }}>{getDialogTitle()}</h2>
@@ -475,16 +491,28 @@ export function EntityDialog({ dialogType, onSave, onCancel }: EntityDialogProps
               type="button"
               onClick={onCancel}
               style={cancelButtonStyle}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#444'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#333'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#444';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#333';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
               style={saveButtonStyle}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#45a049';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#4CAF50';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
             >
               Save
             </button>
@@ -518,6 +546,7 @@ const backdropStyle: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'center',
   zIndex: 1000,
+  animation: 'fadeIn 0.2s ease-out',
 };
 
 const dialogStyle: React.CSSProperties = {
@@ -529,6 +558,7 @@ const dialogStyle: React.CSSProperties = {
   maxHeight: '80vh',
   display: 'flex',
   flexDirection: 'column',
+  animation: 'slideUp 0.3s ease-out',
 };
 
 const headerStyle: React.CSSProperties = {
@@ -613,7 +643,8 @@ const cancelButtonStyle: React.CSSProperties = {
   color: '#fff',
   fontSize: '0.95rem',
   cursor: 'pointer',
-  transition: 'background-color 0.2s',
+  transition: 'all 0.2s ease',
+  transform: 'scale(1)',
 };
 
 const saveButtonStyle: React.CSSProperties = {
@@ -624,6 +655,7 @@ const saveButtonStyle: React.CSSProperties = {
   color: '#fff',
   fontSize: '0.95rem',
   cursor: 'pointer',
-  transition: 'background-color 0.2s',
+  transition: 'all 0.2s ease',
   fontWeight: 500,
+  transform: 'scale(1)',
 };

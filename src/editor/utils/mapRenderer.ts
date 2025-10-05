@@ -1,5 +1,14 @@
+/**
+ * Map Renderer for Level Editor
+ * 
+ * This module handles rendering the level map on a canvas element.
+ * It provides visual representation of tiles, entities, and interactive elements.
+ * The color scheme is based on the in-game MiniMap component.
+ */
+
 import type { GameMap, EnemyType, ItemType, DecorativeObjectType } from '../../types';
 
+// Size of each tile in pixels on the canvas
 export const TILE_SIZE = 25; // 25px per tile
 
 // Color scheme based on MiniMap component
@@ -33,6 +42,13 @@ export interface RenderOptions {
   selectedEntity?: { type: string; x?: number; y?: number; id?: string } | null;
 }
 
+/**
+ * Main rendering function that draws the entire map
+ * 
+ * @param ctx - Canvas 2D rendering context
+ * @param mapData - The level data to render
+ * @param options - Optional rendering options (hover, selection)
+ */
 export function renderMap(
   ctx: CanvasRenderingContext2D,
   mapData: GameMap,
@@ -393,6 +409,13 @@ function renderWallPictures(
   });
 }
 
+/**
+ * Converts screen coordinates (pixels) to map coordinates (tile indices)
+ * 
+ * @param screenX - X coordinate in pixels
+ * @param screenY - Y coordinate in pixels
+ * @returns Map coordinates as { x, y } tile indices
+ */
 export function screenToMapCoordinates(
   screenX: number,
   screenY: number
@@ -403,6 +426,12 @@ export function screenToMapCoordinates(
   };
 }
 
+/**
+ * Calculates the required canvas size based on map dimensions
+ * 
+ * @param mapData - The level data
+ * @returns Canvas dimensions in pixels
+ */
 export function calculateCanvasSize(mapData: GameMap): { width: number; height: number } {
   return {
     width: mapData.width * TILE_SIZE,

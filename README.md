@@ -147,6 +147,35 @@ Das Spiel wurde für optimale Performance optimiert:
 - **Effiziente Textur-Rendering**: Verwendung von Canvas-Operationen statt pixelweiser Manipulation
 - Ziel: 60 FPS auf modernen Browsern
 
+## Level Editor (Development Only)
+
+The project includes a visual level editor for creating and editing levels without writing code.
+
+### Starting the Editor
+
+```bash
+npm run editor
+```
+
+The editor opens at `http://localhost:3000` with a backend server on port 3001.
+
+### Features
+- Visual 2D level editing with interactive canvas
+- Load and save level files from `src/levels/`
+- Place and edit enemies, items, decorative objects, and wall pictures
+- Change tile types (walls, doors, floors)
+- Set player start position and direction
+- Create new levels and variants
+- Resize level dimensions
+- Keyboard shortcuts (Ctrl+S to save, Ctrl+Z/Y for undo/redo)
+
+### Documentation
+- **[Complete Guide](docs/LEVEL-EDITOR-README.md)** - Full usage instructions, workflows, and API docs
+- **[Quick Reference](docs/LEVEL-EDITOR-QUICK-REFERENCE.md)** - Keyboard shortcuts and quick actions
+- **[Summary](docs/LEVEL-EDITOR-SUMMARY.md)** - Implementation overview and statistics
+
+**Note**: The editor is excluded from production builds and only runs in development.
+
 ## Entwickelt von
 
 Tobias Brendler als Wolfenstein 3D-Hommage für moderne Browser.

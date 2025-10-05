@@ -3,7 +3,6 @@ import { useState } from 'react';
 interface ToolbarProps {
   isDirty: boolean;
   currentLevel: number | null;
-  currentVariant: number | null;
   mapWidth: number;
   mapHeight: number;
   onSave: () => void;
@@ -16,7 +15,6 @@ interface ToolbarProps {
 export function Toolbar({
   isDirty,
   currentLevel,
-  currentVariant,
   mapWidth,
   mapHeight,
   onSave,
@@ -64,17 +62,20 @@ export function Toolbar({
           fontSize: '0.9rem',
           fontWeight: 'bold',
           opacity: isDirty && !isSaving && currentLevel !== null ? 1 : 0.5,
-          transition: 'all 0.2s',
+          transition: 'all 0.2s ease',
+          transform: 'scale(1)',
         }}
         onMouseEnter={(e) => {
           if (isDirty && !isSaving && currentLevel !== null) {
             e.currentTarget.style.backgroundColor = '#45a049';
+            e.currentTarget.style.transform = 'scale(1.05)';
           }
         }}
         onMouseLeave={(e) => {
           if (isDirty && !isSaving) {
             e.currentTarget.style.backgroundColor = '#4CAF50';
           }
+          e.currentTarget.style.transform = 'scale(1)';
         }}
       >
         {isSaving ? '💾 Saving...' : '💾 Save'}
@@ -109,13 +110,16 @@ export function Toolbar({
           borderRadius: '4px',
           cursor: 'pointer',
           fontSize: '0.9rem',
-          transition: 'all 0.2s',
+          transition: 'all 0.2s ease',
+          transform: 'scale(1)',
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#1976D2';
+          e.currentTarget.style.transform = 'scale(1.05)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = '#2196F3';
+          e.currentTarget.style.transform = 'scale(1)';
         }}
       >
         ➕ New Level
@@ -134,17 +138,20 @@ export function Toolbar({
           cursor: currentLevel !== null ? 'pointer' : 'not-allowed',
           fontSize: '0.9rem',
           opacity: currentLevel !== null ? 1 : 0.5,
-          transition: 'all 0.2s',
+          transition: 'all 0.2s ease',
+          transform: 'scale(1)',
         }}
         onMouseEnter={(e) => {
           if (currentLevel !== null) {
             e.currentTarget.style.backgroundColor = '#7B1FA2';
+            e.currentTarget.style.transform = 'scale(1.05)';
           }
         }}
         onMouseLeave={(e) => {
           if (currentLevel !== null) {
             e.currentTarget.style.backgroundColor = '#9C27B0';
           }
+          e.currentTarget.style.transform = 'scale(1)';
         }}
       >
         ➕ New Variant
@@ -223,17 +230,20 @@ export function Toolbar({
             cursor: sizeChanged && currentLevel !== null ? 'pointer' : 'not-allowed',
             fontSize: '0.9rem',
             opacity: sizeChanged && currentLevel !== null ? 1 : 0.5,
-            transition: 'all 0.2s',
+            transition: 'all 0.2s ease',
+            transform: 'scale(1)',
           }}
           onMouseEnter={(e) => {
             if (sizeChanged && currentLevel !== null) {
               e.currentTarget.style.backgroundColor = '#F57C00';
+              e.currentTarget.style.transform = 'scale(1.05)';
             }
           }}
           onMouseLeave={(e) => {
             if (sizeChanged && currentLevel !== null) {
               e.currentTarget.style.backgroundColor = '#FF9800';
             }
+            e.currentTarget.style.transform = 'scale(1)';
           }}
         >
           ✓ Apply Size

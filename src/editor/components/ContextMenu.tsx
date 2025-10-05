@@ -66,58 +66,76 @@ export function ContextMenu({ contextMenu, onClose }: ContextMenuProps) {
   }
 
   return (
-    <div
-      ref={menuRef}
-      style={{
-        position: 'fixed',
-        left: `${adjustedPosition.x}px`,
-        top: `${adjustedPosition.y}px`,
-        backgroundColor: '#2d2d2d',
-        border: '1px solid #444',
-        borderRadius: '4px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
-        padding: '4px',
-        minWidth: '180px',
-        zIndex: 1000,
-        color: '#ffffff',
-      }}
-    >
-      {contextMenu.options.map((option, index) => (
-        <button
-          key={index}
-          onClick={() => {
-            option.action();
-            onClose();
-          }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%',
-            padding: '8px 12px',
-            backgroundColor: 'transparent',
-            border: 'none',
-            color: '#ffffff',
-            fontSize: '14px',
-            textAlign: 'left',
-            cursor: 'pointer',
-            borderRadius: '2px',
-            transition: 'background-color 0.15s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#3d3d3d';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'transparent';
-          }}
-        >
-          {option.icon && (
-            <span style={{ marginRight: '8px', fontSize: '16px' }}>
-              {option.icon}
-            </span>
-          )}
-          <span>{option.label}</span>
-        </button>
-      ))}
-    </div>
+    <>
+      <style>{`
+        @keyframes contextMenuFadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
+      <div
+        ref={menuRef}
+        style={{
+          position: 'fixed',
+          left: `${adjustedPosition.x}px`,
+          top: `${adjustedPosition.y}px`,
+          backgroundColor: '#2d2d2d',
+          border: '1px solid #444',
+          borderRadius: '4px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+          padding: '4px',
+          minWidth: '180px',
+          zIndex: 1000,
+          color: '#ffffff',
+          animation: 'contextMenuFadeIn 0.15s ease-out',
+        }}
+      >
+        {contextMenu.options.map((option, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              option.action();
+              onClose();
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              padding: '8px 12px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: '#ffffff',
+              fontSize: '14px',
+              textAlign: 'left',
+              cursor: 'pointer',
+              borderRadius: '2px',
+              transition: 'all 0.15s ease',
+              transform: 'scale(1)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#3d3d3d';
+              e.currentTarget.style.transform = 'scale(1.02)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            {option.icon && (
+              <span style={{ marginRight: '8px', fontSize: '16px' }}>
+                {option.icon}
+              </span>
+            )}
+            <span>{option.label}</span>
+          </button>
+        ))}
+      </div>
+    </>
   );
 }

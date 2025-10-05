@@ -1,4 +1,4 @@
-import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType } from '../types.ts';
+import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType, WeaponType } from '../types.ts';
 
 export const LEVEL_1_VARIANT_2: GameMap = {
   width: 20,
@@ -20,9 +20,9 @@ export const LEVEL_1_VARIANT_2: GameMap = {
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1],
     [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
+    [1,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
     [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
-    [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
   ],
   enemies: [
@@ -104,7 +104,6 @@ export const LEVEL_1_VARIANT_2: GameMap = {
     { id: 'wp3', x: 8, y: 7, side: 0, offset: 0.5, type: WallPictureType.ABSTRACT }
   ],
   decorativeObjects: [
-    // Ceiling lights (every 4-6 tiles)
     { id: 'do1', type: DecorativeObjectType.CEILING_LIGHT, x: 5.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
     { id: 'do2', type: DecorativeObjectType.CEILING_LIGHT, x: 10.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
     { id: 'do3', type: DecorativeObjectType.CEILING_LIGHT, x: 13.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
@@ -114,27 +113,22 @@ export const LEVEL_1_VARIANT_2: GameMap = {
     { id: 'do7', type: DecorativeObjectType.CEILING_LIGHT, x: 5.5, y: 13.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
     { id: 'do8', type: DecorativeObjectType.CEILING_LIGHT, x: 10.5, y: 13.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
     { id: 'do9', type: DecorativeObjectType.CEILING_LIGHT, x: 10.5, y: 16.5, colorVariant: 0.5, collisionRadius: 0, renderHeight: 1.5 },
-    // Hallway decorations
     { id: 'do10', type: DecorativeObjectType.VASE, x: 2.5, y: 4.5, colorVariant: 0.25, collisionRadius: 0.25 },
     { id: 'do11', type: DecorativeObjectType.CRATE, x: 2.5, y: 9.5, colorVariant: 0.65, collisionRadius: 0.35 },
     { id: 'do12', type: DecorativeObjectType.BENCH, x: 10.5, y: 2.5, colorVariant: 0.45, collisionRadius: 0.4 },
     { id: 'do13', type: DecorativeObjectType.VASE, x: 17.5, y: 4.5, colorVariant: 0.55, collisionRadius: 0.25 },
     { id: 'do14', type: DecorativeObjectType.CRATE, x: 17.5, y: 9.5, colorVariant: 0.35, collisionRadius: 0.35 },
-    // Room furniture (left rooms)
     { id: 'do15', type: DecorativeObjectType.TABLE, x: 5.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0.45 },
     { id: 'do16', type: DecorativeObjectType.WINE_BOTTLE, x: 5.5, y: 5.5, colorVariant: 0.6, collisionRadius: 0.1, renderHeight: 0.5, parentId: 'do15' },
     { id: 'do17', type: DecorativeObjectType.CHAIR, x: 6.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0.3 },
     { id: 'do18', type: DecorativeObjectType.TABLE, x: 5.5, y: 8.5, colorVariant: 0.5, collisionRadius: 0.45 },
     { id: 'do19', type: DecorativeObjectType.CHAIR, x: 6.5, y: 8.5, colorVariant: 0.5, collisionRadius: 0.3 },
-    // Room furniture (right rooms)
     { id: 'do20', type: DecorativeObjectType.TABLE, x: 14.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0.45 },
     { id: 'do21', type: DecorativeObjectType.CHAIR, x: 13.5, y: 5.5, colorVariant: 0.5, collisionRadius: 0.3 },
     { id: 'do22', type: DecorativeObjectType.TABLE, x: 14.5, y: 8.5, colorVariant: 0.5, collisionRadius: 0.45 },
     { id: 'do23', type: DecorativeObjectType.CHAIR, x: 13.5, y: 8.5, colorVariant: 0.5, collisionRadius: 0.3 },
-    // Room furniture (bottom room)
     { id: 'do24', type: DecorativeObjectType.TABLE, x: 10.5, y: 16.5, colorVariant: 0.5, collisionRadius: 0.45 },
     { id: 'do25', type: DecorativeObjectType.CHAIR, x: 9.5, y: 16.5, colorVariant: 0.5, collisionRadius: 0.3 },
-    // Skeletons
     { id: 'do26', type: DecorativeObjectType.SKELETON, x: 3.5, y: 17.5, colorVariant: 0.5, collisionRadius: 0.2 },
     { id: 'do27', type: DecorativeObjectType.SKELETON, x: 16.5, y: 12.5, colorVariant: 0.5, collisionRadius: 0.2 }
   ],
@@ -142,4 +136,3 @@ export const LEVEL_1_VARIANT_2: GameMap = {
   playerStartY: 2,
   playerStartDirection: 0
 };
-

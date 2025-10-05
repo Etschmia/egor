@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useApiClient } from '../hooks/useApiClient';
+import { LoadingSpinner } from './LoadingSpinner';
 import type { GameMap } from '../../types';
 
 interface LevelInfo {
@@ -103,6 +104,15 @@ export function LevelSelector({
             color: '#ffffff',
             cursor: 'pointer',
             minWidth: '100px',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            if (!isLoading && uniqueLevels.length > 0) {
+              e.currentTarget.style.borderColor = '#4CAF50';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = '#555';
           }}
         >
           <option value="">Select Level</option>
@@ -128,6 +138,15 @@ export function LevelSelector({
             color: '#ffffff',
             cursor: 'pointer',
             minWidth: '100px',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            if (!isLoading && selectedLevel !== null && availableVariants.length > 0) {
+              e.currentTarget.style.borderColor = '#4CAF50';
+            }
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = '#555';
           }}
         >
           <option value="">Select Variant</option>
@@ -140,9 +159,12 @@ export function LevelSelector({
       </label>
 
       {isLoading && (
-        <span style={{ color: '#888', fontSize: '0.9rem' }}>
-          Loading...
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <LoadingSpinner size={16} color="#4CAF50" />
+          <span style={{ color: '#888', fontSize: '0.9rem' }}>
+            Loading...
+          </span>
+        </div>
       )}
     </div>
   );

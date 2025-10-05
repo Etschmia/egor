@@ -1,58 +1,143 @@
-import { useState } from 'react';
-import type { EditorState, ContextMenuOption } from './types';
+import { useState, useEffect } from 'react';
+import type { ContextMenuState, ContextMenuOption } from './types';
 import type { GameMap, Enemy, EnemyType, Item, ItemType, WeaponType, DecorativeObject, DecorativeObjectType, WallPicture, WallPictureType } from '../types';
 import { LevelSelector } from './components/LevelSelector';
 import { MapCanvas } from './components/MapCanvas';
 import { ContextMenu } from './components/ContextMenu';
 import { EntityDialog, type EntityDialogType } from './components/EntityDialog';
+import { NewLevelDialog, type NewLevelDialogType } from './components/NewLevelDialog';
 import { Toolbar } from './components/Toolbar';
+import { ToastContainer } from './components/Toast';
+import { LoadingOverlay } from './components/LoadingSpinner';
 import { useSelection } from './hooks/useSelection';
 import { useApiClient } from './hooks/useApiClient';
+import { useMapData } from './hooks/useMapData';
+import { useToast } from './hooks/useToast';
 
 export function Editor() {
-  const [editorState, setEditorState] = useState<EditorState>({
-    currentLevel: null,
-    currentVariant: null,
-    mapData: null,
-    selectedEntity: null,
-    isDirty: false,
-    contextMenu: null,
-  });
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [currentLevel, setCurrentLevel] = useState<number | null>(null);
+  const [currentVariant, setCurrentVariant] = useState<number | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [entityDialog, setEntityDialog] = useState<EntityDialogType | null>(null);
+  const [newLevelDialog, setNewLevelDialog] = useState<NewLevelDialogType | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Use map data hook with undo/redo support
+  const { mapData, isDirty, canUndo, canRedo, setMapData, updateMapData, undo, redo, markAsSaved } = useMapData();
 
   // Use selection hook
-  const { selectedEntity, handleTileClick, clearSelection } = useSelection(editorState.mapData);
+  const { selectedEntity, handleTileClick, clearSelection } = useSelection(mapData);
   
   // Use API client hook
   const { saveLevel, isLoading: isSaving } = useApiClient();
 
-  const handleLevelLoad = (level: number, variant: number, mapData: GameMap) => {
-    setEditorState(prev => ({
-      ...prev,
-      currentLevel: level,
-      currentVariant: variant,
-      mapData,
-      selectedEntity: null,
-      isDirty: false,
-    }));
-    setErrorMessage(null);
+  // Use toast notifications
+  const { toasts, removeToast, success, error: showError, info } = useToast();
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check if we're in an input field
+      const target = event.target as HTMLElement;
+      const isInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT';
+
+      // Ctrl+S: Save
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault();
+        if (!isInputField) {
+          handleSave();
+        }
+      }
+
+      // Ctrl+Z: Undo
+      if ((event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey) {
+        event.preventDefault();
+        if (!isInputField && canUndo) {
+          undo();
+        }
+      }
+
+      // Ctrl+Y or Ctrl+Shift+Z: Redo
+      if (((event.ctrlKey || event.metaKey) && event.key === 'y') || 
+          ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'z')) {
+        event.preventDefault();
+        if (!isInputField && canRedo) {
+          redo();
+        }
+      }
+
+      // Delete: Remove selected entity
+      if (event.key === 'Delete' && !isInputField) {
+        event.preventDefault();
+        handleDeleteSelectedEntity();
+      }
+
+      // Escape: Close dialogs and deselect
+      if (event.key === 'Escape') {
+        if (entityDialog) {
+          setEntityDialog(null);
+        } else if (newLevelDialog) {
+          setNewLevelDialog(null);
+        } else if (contextMenu) {
+          setContextMenu(null);
+        } else if (selectedEntity) {
+          clearSelection();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [canUndo, canRedo, undo, redo, entityDialog, newLevelDialog, contextMenu, selectedEntity, clearSelection]);
+
+  // Handle delete selected entity
+  const handleDeleteSelectedEntity = () => {
+    if (!selectedEntity || !mapData) return;
+
+    if (selectedEntity.type === 'enemy') {
+      const enemy = mapData.enemies.find(e => e.id === selectedEntity.id);
+      if (enemy) {
+        handleRemoveEnemy(selectedEntity.id);
+      }
+    } else if (selectedEntity.type === 'item') {
+      const item = mapData.items.find(i => i.id === selectedEntity.id);
+      if (item) {
+        handleRemoveItem(selectedEntity.id);
+      }
+    } else if (selectedEntity.type === 'decorative') {
+      const decorative = mapData.decorativeObjects.find(d => d.id === selectedEntity.id);
+      if (decorative) {
+        handleRemoveDecorativeObject(selectedEntity.id);
+      }
+    } else if (selectedEntity.type === 'wallPicture') {
+      const wallPicture = mapData.wallPictures.find(w => w.id === selectedEntity.id);
+      if (wallPicture) {
+        handleRemoveWallPicture(selectedEntity.id);
+      }
+    }
+    
     clearSelection();
   };
 
-  const handleError = (error: string) => {
-    setErrorMessage(error);
+  const handleLevelLoad = (level: number, variant: number, loadedMapData: GameMap) => {
+    setCurrentLevel(level);
+    setCurrentVariant(variant);
+    setMapData(loadedMapData);
+    clearSelection();
+    info(`Loaded Level ${level} Variant ${variant}`);
+  };
+
+  const handleError = (errorMessage: string) => {
+    showError(errorMessage);
   };
 
   // Handle context menu
   const handleContextMenu = (event: React.MouseEvent, x: number, y: number) => {
     event.preventDefault();
     
-    if (!editorState.mapData) return;
+    if (!mapData) return;
 
     const options: ContextMenuOption[] = [];
-    const mapData = editorState.mapData;
     const tileValue = mapData.tiles[y][x];
 
     // Check if there's an entity at this position
@@ -133,44 +218,33 @@ export function Editor() {
     }
 
     if (options.length > 0) {
-      setEditorState(prev => ({
-        ...prev,
-        contextMenu: {
-          x: event.clientX,
-          y: event.clientY,
-          options,
-        },
-      }));
+      setContextMenu({
+        x: event.clientX,
+        y: event.clientY,
+        options,
+      });
     }
   };
 
   const handleCloseContextMenu = () => {
-    setEditorState(prev => ({
-      ...prev,
-      contextMenu: null,
-    }));
+    setContextMenu(null);
   };
 
   // Handle tile type changes
   const handleChangeTileType = (x: number, y: number, newTileType: number) => {
-    if (!editorState.mapData) return;
+    if (!mapData) return;
 
-    // Create a deep copy of the map data
-    const updatedMapData: GameMap = {
-      ...editorState.mapData,
-      tiles: editorState.mapData.tiles.map((row, rowIndex) => 
-        rowIndex === y 
-          ? row.map((tile, colIndex) => colIndex === x ? newTileType : tile)
-          : [...row]
-      ),
-    };
-
-    // Update the editor state with the new map data
-    setEditorState(prev => ({
-      ...prev,
-      mapData: updatedMapData,
-      isDirty: true,
-    }));
+    updateMapData(
+      (prev) => ({
+        ...prev,
+        tiles: prev.tiles.map((row, rowIndex) => 
+          rowIndex === y 
+            ? row.map((tile, colIndex) => colIndex === x ? newTileType : tile)
+            : [...row]
+        ),
+      }),
+      `Change tile at (${x}, ${y}) to type ${newTileType}`
+    );
 
     // Close the context menu
     handleCloseContextMenu();
@@ -192,18 +266,15 @@ export function Editor() {
   };
 
   const handleRemoveEnemy = (enemyId: string) => {
-    if (!editorState.mapData) return;
+    if (!mapData) return;
 
-    const updatedMapData: GameMap = {
-      ...editorState.mapData,
-      enemies: editorState.mapData.enemies.filter(e => e.id !== enemyId),
-    };
-
-    setEditorState(prev => ({
-      ...prev,
-      mapData: updatedMapData,
-      isDirty: true,
-    }));
+    updateMapData(
+      (prev) => ({
+        ...prev,
+        enemies: prev.enemies.filter(e => e.id !== enemyId),
+      }),
+      `Remove enemy ${enemyId}`
+    );
   };
 
   // Item management handlers
@@ -222,18 +293,15 @@ export function Editor() {
   };
 
   const handleRemoveItem = (itemId: string) => {
-    if (!editorState.mapData) return;
+    if (!mapData) return;
 
-    const updatedMapData: GameMap = {
-      ...editorState.mapData,
-      items: editorState.mapData.items.filter(i => i.id !== itemId),
-    };
-
-    setEditorState(prev => ({
-      ...prev,
-      mapData: updatedMapData,
-      isDirty: true,
-    }));
+    updateMapData(
+      (prev) => ({
+        ...prev,
+        items: prev.items.filter(i => i.id !== itemId),
+      }),
+      `Remove item ${itemId}`
+    );
   };
 
   // Decorative object management handlers
@@ -252,18 +320,15 @@ export function Editor() {
   };
 
   const handleRemoveDecorativeObject = (decorativeId: string) => {
-    if (!editorState.mapData) return;
+    if (!mapData) return;
 
-    const updatedMapData: GameMap = {
-      ...editorState.mapData,
-      decorativeObjects: editorState.mapData.decorativeObjects.filter(d => d.id !== decorativeId),
-    };
-
-    setEditorState(prev => ({
-      ...prev,
-      mapData: updatedMapData,
-      isDirty: true,
-    }));
+    updateMapData(
+      (prev) => ({
+        ...prev,
+        decorativeObjects: prev.decorativeObjects.filter(d => d.id !== decorativeId),
+      }),
+      `Remove decorative object ${decorativeId}`
+    );
   };
 
   // Wall picture management handlers
@@ -276,24 +341,24 @@ export function Editor() {
 
   // Player start position handlers
   const handleSetPlayerStart = (x: number, y: number) => {
-    if (!editorState.mapData) return;
+    if (!mapData) return;
     
     setEntityDialog({
       type: 'playerStart',
-      direction: editorState.mapData.playerStartDirection,
+      direction: mapData.playerStartDirection,
       position: { x: x + 0.5, y: y + 0.5 }, // Center of tile
     });
   };
 
   const handleEditPlayerStart = () => {
-    if (!editorState.mapData) return;
+    if (!mapData) return;
     
     setEntityDialog({
       type: 'playerStart',
-      direction: editorState.mapData.playerStartDirection,
+      direction: mapData.playerStartDirection,
       position: { 
-        x: editorState.mapData.playerStartX, 
-        y: editorState.mapData.playerStartY 
+        x: mapData.playerStartX, 
+        y: mapData.playerStartY 
       },
     });
   };
@@ -306,46 +371,44 @@ export function Editor() {
   };
 
   const handleRemoveWallPicture = (wallPictureId: string) => {
-    if (!editorState.mapData) return;
+    if (!mapData) return;
 
-    const updatedMapData: GameMap = {
-      ...editorState.mapData,
-      wallPictures: editorState.mapData.wallPictures.filter(w => w.id !== wallPictureId),
-    };
-
-    setEditorState(prev => ({
-      ...prev,
-      mapData: updatedMapData,
-      isDirty: true,
-    }));
+    updateMapData(
+      (prev) => ({
+        ...prev,
+        wallPictures: prev.wallPictures.filter(w => w.id !== wallPictureId),
+      }),
+      `Remove wall picture ${wallPictureId}`
+    );
   };
 
   const handleEntityDialogSave = (data: any) => {
-    if (!editorState.mapData || !entityDialog) return;
-
-    let updatedMapData: GameMap = { ...editorState.mapData };
+    if (!mapData || !entityDialog) return;
 
     switch (entityDialog.type) {
       case 'enemy': {
         if ('entity' in entityDialog && entityDialog.entity) {
           // Edit existing enemy
-          updatedMapData = {
-            ...updatedMapData,
-            enemies: updatedMapData.enemies.map(e =>
-              e.id === entityDialog.entity!.id
-                ? {
-                    ...e,
-                    type: data.type as EnemyType,
-                    x: data.x,
-                    y: data.y,
-                    health: data.health,
-                    maxHealth: data.maxHealth,
-                    damage: data.damage,
-                    speed: data.speed,
-                  }
-                : e
-            ),
-          };
+          updateMapData(
+            (prev) => ({
+              ...prev,
+              enemies: prev.enemies.map(e =>
+                e.id === entityDialog.entity!.id
+                  ? {
+                      ...e,
+                      type: data.type as EnemyType,
+                      x: data.x,
+                      y: data.y,
+                      health: data.health,
+                      maxHealth: data.maxHealth,
+                      damage: data.damage,
+                      speed: data.speed,
+                    }
+                  : e
+              ),
+            }),
+            `Edit enemy ${entityDialog.entity.id}`
+          );
         } else {
           // Add new enemy
           const newEnemy: Enemy = {
@@ -362,31 +425,37 @@ export function Editor() {
             lastAttackTime: 0,
             attackCooldown: 1000,
           };
-          updatedMapData = {
-            ...updatedMapData,
-            enemies: [...updatedMapData.enemies, newEnemy],
-          };
+          updateMapData(
+            (prev) => ({
+              ...prev,
+              enemies: [...prev.enemies, newEnemy],
+            }),
+            `Add enemy at (${data.x}, ${data.y})`
+          );
         }
         break;
       }
       case 'item': {
         if ('entity' in entityDialog && entityDialog.entity) {
           // Edit existing item
-          updatedMapData = {
-            ...updatedMapData,
-            items: updatedMapData.items.map(i =>
-              i.id === entityDialog.entity!.id
-                ? {
-                    ...i,
-                    type: data.type as ItemType,
-                    x: data.x,
-                    y: data.y,
-                    value: data.value,
-                    weaponType: data.type === 'WEAPON' ? (data.weaponType as WeaponType) : undefined,
-                  }
-                : i
-            ),
-          };
+          updateMapData(
+            (prev) => ({
+              ...prev,
+              items: prev.items.map(i =>
+                i.id === entityDialog.entity!.id
+                  ? {
+                      ...i,
+                      type: data.type as ItemType,
+                      x: data.x,
+                      y: data.y,
+                      value: data.value,
+                      weaponType: data.type === 'WEAPON' ? (data.weaponType as WeaponType) : undefined,
+                    }
+                  : i
+              ),
+            }),
+            `Edit item ${entityDialog.entity.id}`
+          );
         } else {
           // Add new item
           const newItem: Item = {
@@ -398,32 +467,38 @@ export function Editor() {
             value: data.value,
             weaponType: data.type === 'WEAPON' ? (data.weaponType as WeaponType) : undefined,
           };
-          updatedMapData = {
-            ...updatedMapData,
-            items: [...updatedMapData.items, newItem],
-          };
+          updateMapData(
+            (prev) => ({
+              ...prev,
+              items: [...prev.items, newItem],
+            }),
+            `Add item at (${data.x}, ${data.y})`
+          );
         }
         break;
       }
       case 'decorative': {
         if ('entity' in entityDialog && entityDialog.entity) {
           // Edit existing decorative object
-          updatedMapData = {
-            ...updatedMapData,
-            decorativeObjects: updatedMapData.decorativeObjects.map(d =>
-              d.id === entityDialog.entity!.id
-                ? {
-                    ...d,
-                    type: data.type as DecorativeObjectType,
-                    x: data.x,
-                    y: data.y,
-                    colorVariant: data.colorVariant,
-                    collisionRadius: data.collisionRadius,
-                    renderHeight: data.renderHeight,
-                  }
-                : d
-            ),
-          };
+          updateMapData(
+            (prev) => ({
+              ...prev,
+              decorativeObjects: prev.decorativeObjects.map(d =>
+                d.id === entityDialog.entity!.id
+                  ? {
+                      ...d,
+                      type: data.type as DecorativeObjectType,
+                      x: data.x,
+                      y: data.y,
+                      colorVariant: data.colorVariant,
+                      collisionRadius: data.collisionRadius,
+                      renderHeight: data.renderHeight,
+                    }
+                  : d
+              ),
+            }),
+            `Edit decorative object ${entityDialog.entity.id}`
+          );
         } else {
           // Add new decorative object
           const newDecorativeObject: DecorativeObject = {
@@ -435,31 +510,37 @@ export function Editor() {
             collisionRadius: data.collisionRadius,
             renderHeight: data.renderHeight,
           };
-          updatedMapData = {
-            ...updatedMapData,
-            decorativeObjects: [...updatedMapData.decorativeObjects, newDecorativeObject],
-          };
+          updateMapData(
+            (prev) => ({
+              ...prev,
+              decorativeObjects: [...prev.decorativeObjects, newDecorativeObject],
+            }),
+            `Add decorative object at (${data.x}, ${data.y})`
+          );
         }
         break;
       }
       case 'wallPicture': {
         if ('entity' in entityDialog && entityDialog.entity) {
           // Edit existing wall picture
-          updatedMapData = {
-            ...updatedMapData,
-            wallPictures: updatedMapData.wallPictures.map(w =>
-              w.id === entityDialog.entity!.id
-                ? {
-                    ...w,
-                    type: data.type as WallPictureType,
-                    x: data.x,
-                    y: data.y,
-                    side: data.side,
-                    offset: data.offset,
-                  }
-                : w
-            ),
-          };
+          updateMapData(
+            (prev) => ({
+              ...prev,
+              wallPictures: prev.wallPictures.map(w =>
+                w.id === entityDialog.entity!.id
+                  ? {
+                      ...w,
+                      type: data.type as WallPictureType,
+                      x: data.x,
+                      y: data.y,
+                      side: data.side,
+                      offset: data.offset,
+                    }
+                  : w
+              ),
+            }),
+            `Edit wall picture ${entityDialog.entity.id}`
+          );
         } else {
           // Add new wall picture
           const newWallPicture: WallPicture = {
@@ -470,30 +551,30 @@ export function Editor() {
             side: data.side,
             offset: data.offset,
           };
-          updatedMapData = {
-            ...updatedMapData,
-            wallPictures: [...updatedMapData.wallPictures, newWallPicture],
-          };
+          updateMapData(
+            (prev) => ({
+              ...prev,
+              wallPictures: [...prev.wallPictures, newWallPicture],
+            }),
+            `Add wall picture at (${data.x}, ${data.y})`
+          );
         }
         break;
       }
       case 'playerStart': {
         // Update player start position and direction
-        updatedMapData = {
-          ...updatedMapData,
-          playerStartX: data.x,
-          playerStartY: data.y,
-          playerStartDirection: data.direction,
-        };
+        updateMapData(
+          (prev) => ({
+            ...prev,
+            playerStartX: data.x,
+            playerStartY: data.y,
+            playerStartDirection: data.direction,
+          }),
+          `Set player start to (${data.x}, ${data.y})`
+        );
         break;
       }
     }
-
-    setEditorState(prev => ({
-      ...prev,
-      mapData: updatedMapData,
-      isDirty: true,
-    }));
 
     setEntityDialog(null);
   };
@@ -504,39 +585,180 @@ export function Editor() {
 
   // Toolbar handlers
   const handleSave = async () => {
-    if (!editorState.mapData || editorState.currentLevel === null || editorState.currentVariant === null) {
+    if (!mapData || currentLevel === null || currentVariant === null) {
       return;
     }
 
-    const filename = `level${editorState.currentLevel}-variant${editorState.currentVariant}.ts`;
+    const filename = `level${currentLevel}-variant${currentVariant}.ts`;
     
     try {
-      await saveLevel(filename, editorState.mapData);
-      setEditorState(prev => ({
-        ...prev,
-        isDirty: false,
-      }));
-      setSuccessMessage('Level saved successfully!');
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to save level');
-      setTimeout(() => setErrorMessage(null), 5000);
+      setIsLoading(true);
+      await saveLevel(filename, mapData);
+      markAsSaved();
+      success('Level saved successfully!');
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to save level');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleNewLevel = () => {
-    // TODO: Implement in task 17
-    alert('New Level functionality will be implemented in task 17');
+    setNewLevelDialog({ type: 'newLevel' });
   };
 
   const handleNewVariant = () => {
-    // TODO: Implement in task 17
-    alert('New Variant functionality will be implemented in task 17');
+    if (currentLevel === null) return;
+    setNewLevelDialog({ type: 'newVariant', currentLevel: currentLevel });
+  };
+
+  const createEmptyMap = (width: number, height: number): GameMap => {
+    // Create tiles array with outer walls and floor inside
+    const tiles: number[][] = [];
+    for (let y = 0; y < height; y++) {
+      const row: number[] = [];
+      for (let x = 0; x < width; x++) {
+        // Set outer edges as walls (1), interior as floor (0)
+        if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
+          row.push(1); // Wall
+        } else {
+          row.push(0); // Floor
+        }
+      }
+      tiles.push(row);
+    }
+
+    return {
+      width,
+      height,
+      tiles,
+      enemies: [],
+      items: [],
+      wallPictures: [],
+      decorativeObjects: [],
+      playerStartX: 2.5,
+      playerStartY: 2.5,
+      playerStartDirection: 0,
+    };
+  };
+
+  const handleNewLevelDialogSave = async (level: number, variant: number) => {
+    const filename = `level${level}-variant${variant}.ts`;
+    
+    // Create empty map with default dimensions
+    const emptyMap = createEmptyMap(20, 20);
+    
+    try {
+      setIsLoading(true);
+      // Save the new level
+      await saveLevel(filename, emptyMap);
+      
+      // Load the new level in the editor
+      setCurrentLevel(level);
+      setCurrentVariant(variant);
+      setMapData(emptyMap);
+      clearSelection();
+      
+      success(`Level ${level} Variant ${variant} created successfully!`);
+      setNewLevelDialog(null);
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to create level');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNewLevelDialogCancel = () => {
+    setNewLevelDialog(null);
   };
 
   const handleApplySize = (width: number, height: number) => {
-    // TODO: Implement in task 18
-    alert(`Apply Size functionality will be implemented in task 18. Requested size: ${width}x${height}`);
+    if (!mapData) return;
+
+    const currentWidth = mapData.width;
+    const currentHeight = mapData.height;
+
+    // Check if size actually changed
+    if (width === currentWidth && height === currentHeight) {
+      return;
+    }
+
+    // Show warning dialog about potential data loss
+    const willShrink = width < currentWidth || height < currentHeight;
+    const message = willShrink
+      ? `Warning: Resizing from ${currentWidth}x${currentHeight} to ${width}x${height} will remove tiles and entities outside the new boundaries. This action cannot be undone. Continue?`
+      : `Resize map from ${currentWidth}x${currentHeight} to ${width}x${height}?`;
+
+    if (!confirm(message)) {
+      return;
+    }
+
+    // Resize the map
+    const resizedMapData = resizeMap(mapData, width, height);
+
+    updateMapData(
+      () => resizedMapData,
+      `Resize map to ${width}x${height}`
+    );
+
+    success(`Map resized to ${width}x${height}`);
+  };
+
+  const resizeMap = (mapData: GameMap, newWidth: number, newHeight: number): GameMap => {
+    const oldWidth = mapData.width;
+    const oldHeight = mapData.height;
+
+    // Create new tiles array
+    const newTiles: number[][] = [];
+    for (let y = 0; y < newHeight; y++) {
+      const row: number[] = [];
+      for (let x = 0; x < newWidth; x++) {
+        if (y < oldHeight && x < oldWidth) {
+          // Copy existing tile
+          row.push(mapData.tiles[y][x]);
+        } else {
+          // New tile - set as floor (0)
+          row.push(0);
+        }
+      }
+      newTiles.push(row);
+    }
+
+    // Filter entities that are outside the new boundaries
+    const filteredEnemies = mapData.enemies.filter(
+      e => Math.floor(e.x) < newWidth && Math.floor(e.y) < newHeight
+    );
+    const filteredItems = mapData.items.filter(
+      i => Math.floor(i.x) < newWidth && Math.floor(i.y) < newHeight
+    );
+    const filteredDecorativeObjects = mapData.decorativeObjects.filter(
+      d => Math.floor(d.x) < newWidth && Math.floor(d.y) < newHeight
+    );
+    const filteredWallPictures = mapData.wallPictures.filter(
+      w => w.x < newWidth && w.y < newHeight
+    );
+
+    // Adjust player start position if it's outside new boundaries
+    let playerStartX = mapData.playerStartX;
+    let playerStartY = mapData.playerStartY;
+    if (Math.floor(playerStartX) >= newWidth || Math.floor(playerStartY) >= newHeight) {
+      // Move player start to a safe position (center of map or 2.5, 2.5)
+      playerStartX = Math.min(2.5, newWidth - 1.5);
+      playerStartY = Math.min(2.5, newHeight - 1.5);
+    }
+
+    return {
+      ...mapData,
+      width: newWidth,
+      height: newHeight,
+      tiles: newTiles,
+      enemies: filteredEnemies,
+      items: filteredItems,
+      decorativeObjects: filteredDecorativeObjects,
+      wallPictures: filteredWallPictures,
+      playerStartX,
+      playerStartY,
+    };
   };
 
   return (
@@ -559,11 +781,10 @@ export function Editor() {
       </header>
       
       <Toolbar
-        isDirty={editorState.isDirty}
-        currentLevel={editorState.currentLevel}
-        currentVariant={editorState.currentVariant}
-        mapWidth={editorState.mapData?.width || 20}
-        mapHeight={editorState.mapData?.height || 20}
+        isDirty={isDirty}
+        currentLevel={currentLevel}
+        mapWidth={mapData?.width || 20}
+        mapHeight={mapData?.height || 20}
         onSave={handleSave}
         onNewLevel={handleNewLevel}
         onNewVariant={handleNewVariant}
@@ -577,37 +798,11 @@ export function Editor() {
         backgroundColor: '#252525',
       }}>
         <LevelSelector
-          currentLevel={editorState.currentLevel}
-          currentVariant={editorState.currentVariant}
+          currentLevel={currentLevel}
+          currentVariant={currentVariant}
           onLevelLoad={handleLevelLoad}
           onError={handleError}
         />
-        {errorMessage && (
-          <div style={{
-            marginTop: '0.5rem',
-            padding: '0.5rem',
-            backgroundColor: '#ff000020',
-            border: '1px solid #ff0000',
-            borderRadius: '4px',
-            color: '#ff6b6b',
-            fontSize: '0.9rem',
-          }}>
-            Error: {errorMessage}
-          </div>
-        )}
-        {successMessage && (
-          <div style={{
-            marginTop: '0.5rem',
-            padding: '0.5rem',
-            backgroundColor: '#00ff0020',
-            border: '1px solid #00ff00',
-            borderRadius: '4px',
-            color: '#6bff6b',
-            fontSize: '0.9rem',
-          }}>
-            {successMessage}
-          </div>
-        )}
       </div>
       
       <main style={{ 
@@ -616,15 +811,25 @@ export function Editor() {
         flexDirection: 'column',
         overflow: 'hidden'
       }}>
-        {editorState.mapData && (
+        {mapData && (
           <div style={{ padding: '1rem', textAlign: 'center', color: '#888', borderBottom: '1px solid #333' }}>
             <p style={{ margin: '0.25rem 0' }}>
-              Level {editorState.currentLevel} - Variant {editorState.currentVariant} | 
-              Map size: {editorState.mapData.width} x {editorState.mapData.height}
+              Level {currentLevel} - Variant {currentVariant} | 
+              Map size: {mapData.width} x {mapData.height}
               {selectedEntity && (
                 <span style={{ marginLeft: '1rem', color: '#4CAF50' }}>
                   | Selected: {selectedEntity.type}
                   {selectedEntity.type === 'tile' && ` (${selectedEntity.x}, ${selectedEntity.y})`}
+                </span>
+              )}
+              {canUndo && (
+                <span style={{ marginLeft: '1rem', color: '#888' }}>
+                  | Ctrl+Z: Undo
+                </span>
+              )}
+              {canRedo && (
+                <span style={{ marginLeft: '1rem', color: '#888' }}>
+                  | Ctrl+Y: Redo
                 </span>
               )}
             </p>
@@ -632,7 +837,7 @@ export function Editor() {
         )}
         <div style={{ flex: 1, overflow: 'auto' }}>
           <MapCanvas 
-            mapData={editorState.mapData}
+            mapData={mapData}
             selectedEntity={selectedEntity}
             onTileClick={handleTileClick}
             onContextMenu={handleContextMenu}
@@ -640,7 +845,7 @@ export function Editor() {
         </div>
       </main>
       <ContextMenu 
-        contextMenu={editorState.contextMenu}
+        contextMenu={contextMenu}
         onClose={handleCloseContextMenu}
       />
       <EntityDialog
@@ -648,6 +853,13 @@ export function Editor() {
         onSave={handleEntityDialogSave}
         onCancel={handleEntityDialogCancel}
       />
+      <NewLevelDialog
+        dialogType={newLevelDialog}
+        onSave={handleNewLevelDialogSave}
+        onCancel={handleNewLevelDialogCancel}
+      />
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      {isLoading && <LoadingOverlay message="Processing..." />}
     </div>
   );
 }
