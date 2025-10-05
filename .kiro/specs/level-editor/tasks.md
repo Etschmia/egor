@@ -72,13 +72,13 @@
   - Implement click-outside-to-close functionality
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 9. Implement tile editing functionality
+- [x] 9. Implement tile editing functionality
   - Add tile type change logic in Editor.tsx
   - Update map data when tile type is changed
   - Implement immediate visual update after tile change
   - _Requirements: 5.2, 5.3, 5.4_
 
-- [ ] 10. Implement entity dialog component
+- [x] 10. Implement entity dialog component
   - Create `src/editor/components/EntityDialog.tsx`
   - Implement modal dialog with form fields
   - Create dynamic form fields based on entity type
@@ -86,7 +86,7 @@
   - Implement save and cancel handlers
   - _Requirements: 6.5, 6.6, 7.6_
 
-- [ ] 11. Implement enemy management
+- [x] 11. Implement enemy management
   - Add "Add Enemy" action to context menu for floor tiles
   - Implement enemy type selection dialog (ZOMBIE, MONSTER, GHOST, DOG)
   - Create enemy with default properties (health, damage, speed) at clicked position
@@ -95,7 +95,7 @@
   - Update visual representation immediately after changes
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7_
 
-- [ ] 12. Implement item management
+- [x] 12. Implement item management
   - Add "Add Item" action to context menu for floor tiles
   - Implement item type selection dialog (HEALTH_SMALL, HEALTH_LARGE, TREASURE, AMMO, WEAPON)
   - Add weapon type selection for WEAPON items
@@ -104,7 +104,7 @@
   - Add "Remove Item" functionality
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7_
 
-- [ ] 13. Implement decorative objects and wall pictures
+- [x] 13. Implement decorative objects and wall pictures
   - Add "Add Decorative Object" action to context menu for floor tiles
   - Implement decorative object type selection dialog (CEILING_LIGHT, VASE, CRATE, BENCH, TABLE, CHAIR, WINE_BOTTLE, SKELETON)
   - Add "Add Wall Picture" action to context menu for walls
@@ -113,14 +113,14 @@
   - Add edit and remove functionality for decorative objects and wall pictures
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6_
 
-- [ ] 14. Implement player start position management
+- [x] 14. Implement player start position management
   - Add "Set as Player Start" action to context menu for floor tiles
   - Implement direction input dialog (0-360 degrees)
   - Update playerStartX, playerStartY, and playerStartDirection in map data
   - Move player start marker to new position
   - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 15. Implement toolbar component
+- [-] 15. Implement toolbar component
   - Create `src/editor/components/Toolbar.tsx`
   - Add "Save" button with click handler
   - Add "New Level" button with click handler
