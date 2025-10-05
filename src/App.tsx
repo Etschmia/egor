@@ -616,9 +616,18 @@ function App() {
       const spriteScreenX = ((width / 2) * (1 + sprite.x / sprite.y));
       let spriteHeight = Math.abs(height / sprite.y);
       let spriteWidth = spriteHeight;
-      let drawStartY = -spriteHeight / 2 + height / 2 + jumpOffset;
-
+      
       const enemy = sprite.type === 'enemy' ? sprite.object as Enemy : null;
+      
+      // Gegner und Leichen sollten auf dem Boden stehen
+      let drawStartY: number;
+      if (sprite.type === 'enemy') {
+        // Gegner stehen auf dem Boden (untere Hälfte des Bildschirms)
+        drawStartY = height / 2 + jumpOffset;
+      } else {
+        // Andere Sprites (Items) bleiben zentriert
+        drawStartY = -spriteHeight / 2 + height / 2 + jumpOffset;
+      }
 
       // Todesanimation
       if (enemy && enemy.state === 'dying') {
@@ -627,7 +636,7 @@ function App() {
 
         spriteHeight *= (1 - animationProgress * 0.8); // Schrumpft auf 20% Höhe
         spriteWidth *= (1 + animationProgress * 0.5); // Wird 50% breiter
-        drawStartY += (spriteHeight * animationProgress); // Bewegt sich nach unten
+        drawStartY += (spriteHeight * animationProgress * 0.5); // Bewegt sich etwas nach unten
       }
 
       const drawStartX = -spriteWidth / 2 + spriteScreenX;
