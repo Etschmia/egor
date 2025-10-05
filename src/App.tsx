@@ -527,8 +527,9 @@ function App() {
         // Rendere Bild
         const pictureHeight = lineHeight * 0.5; // Bild nimmt 50% der Wandhöhe ein
 
-        const pictureDrawStart = height / 2 - pictureHeight / 2;
-        const pictureDrawEnd = height / 2 + pictureHeight / 2;
+        // Wandbilder müssen mit jumpOffset verschoben werden, um mit der Wand synchron zu bleiben
+        const pictureDrawStart = height / 2 - pictureHeight / 2 + jumpOffset;
+        const pictureDrawEnd = height / 2 + pictureHeight / 2 + jumpOffset;
 
         // Prüfe ob wir im Bild-Bereich sind
         const distFromCenter = Math.abs(wallX - picture.offset);
