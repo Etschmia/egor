@@ -5,8 +5,10 @@ Dieses Dokument beschreibt den Plan zur Erstellung eines In-Browser Level-Editor
 ## 1. Ziel
 
 - Ein webbasierter Editor zum Erstellen und Bearbeiten von Level-Dateien (`.ts`) im Verzeichnis `src/levels`.
-- Der Editor soll über einen eigenen Befehl gestartet werden, z.B. `npm run editor`.
-- Der Editor-Code darf nicht im produktiven Build (`npm run build`) enthalten sein.
+- Der Editor soll über einen eigenen Befehl gestartet werden, z.B. `npm run editor`, Port 3001+.
+- `npm run dev` soll wie bisher die Hauptanwendung starten, Port 5173+.
+- `npm run build` soll wie bisher die Hauptanwendung bauen, Port 4173+.
+- `npm run dev` und `npm run editor` sollen unabhängig voneinander starten und enden können.
 - Der Editor benötigt Lese- und Schreibzugriff auf das Dateisystem (`src/levels`), um Level zu laden und zu speichern.
 
 ## 2. Technische Umsetzung
