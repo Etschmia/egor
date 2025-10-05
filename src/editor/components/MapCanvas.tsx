@@ -7,9 +7,10 @@ interface MapCanvasProps {
   mapData: GameMap | null;
   selectedEntity?: SelectedEntity | null;
   onTileClick?: (x: number, y: number) => void;
+  onContextMenu?: (event: React.MouseEvent, x: number, y: number) => void;
 }
 
-export function MapCanvas({ mapData, selectedEntity, onTileClick }: MapCanvasProps) {
+export function MapCanvas({ mapData, selectedEntity, onTileClick, onContextMenu }: MapCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hoverTile, setHoverTile] = useState<{ x: number; y: number } | null>(null);
 
@@ -75,6 +76,28 @@ export function MapCanvas({ mapData, selectedEntity, onTileClick }: MapCanvasPro
     }
   };
 
+  // Handle right-click for context menu
+  const handleContextMenuClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    event.preventDefault();
+    if (!canvasRef.current || !mapData || !onContextMenu) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const screenX = event.clientX - rect.left;
+    const screenY = event.clientY - rect.top;
+
+    const mapCoords = screenToMapCoordinates(screenX, screenY);
+
+    // Check if coordinates are within map bounds
+    if (
+      mapCoords.x >= 0 &&
+      mapCoords.x < mapData.width &&
+      mapCoords.y >= 0 &&
+      mapCoords.y < mapData.height
+    ) {
+      onContextMenu(event, mapCoords.x, mapCoords.y);
+    }
+  };
+
   if (!mapData) {
     return (
       <div style={{
@@ -109,6 +132,7 @@ export function MapCanvas({ mapData, selectedEntity, onTileClick }: MapCanvasPro
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onClick={handleClick}
+        onContextMenu={handleContextMenuClick}
         style={{
           border: '2px solid #444',
           cursor: 'crosshair',

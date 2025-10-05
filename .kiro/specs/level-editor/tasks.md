@@ -54,7 +54,7 @@
   - Implement wall picture markers
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10_
 
-- [ ] 7. Implement interactive canvas features
+- [x] 7. Implement interactive canvas features
   - Add mouse click event handler to MapCanvas
   - Add hover effect visualization
   - Add selection highlighting (yellow border)
@@ -62,7 +62,7 @@
   - Implement coordinate conversion from screen to map coordinates
   - _Requirements: 5.1_
 
-- [ ] 8. Implement context menu component
+- [x] 8. Implement context menu component
   - Create `src/editor/components/ContextMenu.tsx`
   - Implement context menu positioning at mouse coordinates
   - Implement dynamic menu options based on clicked element type
