@@ -9,6 +9,7 @@ import { NewLevelDialog, type NewLevelDialogType } from './components/NewLevelDi
 import { Toolbar } from './components/Toolbar';
 import { ToastContainer } from './components/Toast';
 import { LoadingOverlay } from './components/LoadingSpinner';
+import { Legend } from './components/Legend';
 import { useSelection } from './hooks/useSelection';
 import { useApiClient } from './hooks/useApiClient';
 import { useMapData } from './hooks/useMapData';
@@ -860,6 +861,7 @@ export function Editor() {
       />
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       {isLoading && <LoadingOverlay message="Processing..." />}
+      <Legend />
     </div>
   );
 }

@@ -218,6 +218,14 @@ export const LEVEL_3_VARIANT_4: GameMap = {
       y: 18,
       collected: false,
       value: 200
+    },
+    {
+      id: 'item_1759784626787_wf3ot5u0q',
+      type: ItemType.HEALTH_SMALL,
+      x: 7.5,
+      y: 13.5,
+      collected: false,
+      value: 25
     }
   ],
   wallPictures: [

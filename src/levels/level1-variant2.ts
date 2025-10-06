@@ -85,6 +85,21 @@ export const LEVEL_1_VARIANT_2: GameMap = {
       direction: 0,
       lastAttackTime: 0,
       attackCooldown: 1000
+    },
+    {
+      id: 'enemy_1759784664717_es0t3y7dp',
+      type: EnemyType.ZOMBIE,
+      x: 14.5,
+      y: 16.5,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 1,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
     }
   ],
   items: [
@@ -111,6 +126,14 @@ export const LEVEL_1_VARIANT_2: GameMap = {
       y: 12,
       collected: false,
       value: 100
+    },
+    {
+      id: 'item_1759784674720_mvtoajb3o',
+      type: ItemType.HEALTH_SMALL,
+      x: 1.5,
+      y: 13.5,
+      collected: false,
+      value: 25
     }
   ],
   wallPictures: [
