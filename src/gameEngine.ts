@@ -557,7 +557,14 @@ export function collectItem(player: Player, items: Item[]): { player: Player; no
             player.ammo[item.weaponType] = WEAPONS[item.weaponType].ammo;
             itemMessage = `${WEAPONS[item.weaponType!].name} gefunden!`;
           } else {
-            itemMessage = 'Waffe bereits vorhanden';
+            // Waffe bereits vorhanden - gebe stattdessen Munition
+            Object.keys(player.ammo).forEach((key) => {
+              const weaponType = key as WeaponType;
+              if (WEAPONS[weaponType].needsAmmo) {
+                player.ammo[weaponType] += 30;
+              }
+            });
+            itemMessage = 'Waffe bereits vorhanden - Munition erhalten (+30)';
           }
           break;
       }

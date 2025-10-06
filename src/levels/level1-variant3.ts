@@ -1,4 +1,4 @@
-import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType, WeaponType } from '../types.ts';
+import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType } from '../types.ts';
 
 export const LEVEL_1_VARIANT_3: GameMap = {
   width: 20,
