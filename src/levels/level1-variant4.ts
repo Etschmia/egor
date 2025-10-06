@@ -1,4 +1,4 @@
-import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType } from '../types.ts';
+import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType, WeaponType } from '../types.ts';
 
 export const LEVEL_1_VARIANT_4: GameMap = {
   width: 20,
@@ -13,7 +13,7 @@ export const LEVEL_1_VARIANT_4: GameMap = {
     [1,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,0,0,1],
     [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
     [1,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],
-    [1,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1],
+    [1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,1],
     [1,0,0,1,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1],
     [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,1],
     [1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],

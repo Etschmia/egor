@@ -1,4 +1,4 @@
-import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType } from '../types.ts';
+import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType, WeaponType } from '../types.ts';
 
 export const LEVEL_1_VARIANT_1: GameMap = {
   width: 20,
@@ -65,6 +65,21 @@ export const LEVEL_1_VARIANT_1: GameMap = {
       maxHealth: 100,
       damage: 10,
       speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    },
+    {
+      id: 'enemy_1759767502893_53tudsvb1',
+      type: EnemyType.GHOST,
+      x: 17.5,
+      y: 2.5,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 1,
       state: 'alive',
       isAlive: true,
       direction: 0,

@@ -134,6 +134,22 @@ export const LEVEL_2_VARIANT_1: GameMap = {
       y: 17,
       collected: false,
       value: 150
+    },
+    {
+      id: 'item_1759768141803_1gbkdpv7a',
+      type: ItemType.HEALTH_SMALL,
+      x: 16.5,
+      y: 3.5,
+      collected: false,
+      value: 25
+    },
+    {
+      id: 'item_1759768149860_p9fvodfqc',
+      type: ItemType.AMMO,
+      x: 10.5,
+      y: 14.5,
+      collected: false,
+      value: 25
     }
   ],
   wallPictures: [

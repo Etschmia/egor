@@ -1,4 +1,4 @@
-import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType } from '../types.ts';
+import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType, WeaponType } from '../types.ts';
 
 export const LEVEL_1_VARIANT_2: GameMap = {
   width: 20,
@@ -65,6 +65,21 @@ export const LEVEL_1_VARIANT_2: GameMap = {
       maxHealth: 100,
       damage: 10,
       speed: 0.02,
+      state: 'alive',
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 1000
+    },
+    {
+      id: 'enemy_1759767529055_hvo8aqs5s',
+      type: EnemyType.MONSTER,
+      x: 6.5,
+      y: 16.5,
+      health: 100,
+      maxHealth: 100,
+      damage: 10,
+      speed: 1,
       state: 'alive',
       isAlive: true,
       direction: 0,
