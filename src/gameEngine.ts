@@ -617,6 +617,9 @@ export function loadNextLevel(gameState: GameState): GameState {
   gameState.player.y = level.playerStartY;
   gameState.player.direction = level.playerStartDirection;
 
+  // Gebe dem Spieler 25 HP für das Erreichen des nächsten Levels
+  gameState.player.health = Math.min(gameState.player.health + 25, gameState.player.maxHealth);
+
   // Benachrichtigung zurücksetzen
   delete gameState.lastItemNotification;
 

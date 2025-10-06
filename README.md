@@ -8,6 +8,7 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
 - **3D-Raycasting-Engine** für klassisches Retro-Gameplay
 - **8 Level** mit steigendem Schwierigkeitsgrad und mehreren Varianten pro Level
 - **Dynamische Level-Auswahl**: Jedes Level hat mehrere Varianten, die automatisch rotiert werden
+- **Level-Belohnung**: Beim Erreichen eines neuen Levels erhältst du automatisch 25 HP (bis zum Maximum)
 - **Türen** die mit der Taste 'E' geöffnet werden können:
   - Normale Türen (braune Wände)
   - Spezielle "Nächste Ebene" Tür (grüne Wand) - öffnet sich nur wenn alle Gegner besiegt sind
@@ -19,6 +20,7 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
   - Sturmgewehr (Level 4-6)
   - Schweres Maschinengewehr (Level 5-7)
 - **Backup-Waffen**: Falls du eine Waffe in einem früheren Level verpasst hast, findest du sie als Backup in späteren Levels
+- **Waffen-zu-Munition**: Wenn du eine Waffe aufsammelst, die du bereits besitzt, erhältst du stattdessen 30 Schuss Munition für alle Waffen
 - **Gegner**: Vier verschiedene Gegner-Typen mit KI
   - **Zombies** (grün): Grundlegende Gegner mit mäßiger Geschwindigkeit
   - **Monster** (rot): Starke, gefährliche Gegner mit hoher Gesundheit
@@ -133,6 +135,8 @@ Kämpfe dich durch 7 Level voller Zombies, Monster, Geister und Hunde. Besiege a
 - Die spezielle "Nächste Ebene" Tür (grüne Wand) öffnet sich nur wenn alle Gegner besiegt sind
 - Ein pulsierender Indikator zeigt an, wenn die Exit-Tür verfügbar ist
 - Items zeigen Benachrichtigungen beim Sammeln
+- Doppelte Waffen werden automatisch in Munition umgewandelt (+30 Schuss)
+- Jedes neue Level belohnt dich mit 25 HP
 - Statistiken über Items und besiegte Gegner mit Taste 'T' abrufbar
 - Dekorative Objekte wie Vasen, Kisten und Möbel können Kollisionen verursachen
 - Deckenleuchten sind fest an der Decke montiert und haben keine Kollision
