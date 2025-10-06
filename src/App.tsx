@@ -100,6 +100,10 @@ function App() {
   const handleLoadGame = (name: string) => {
     const loadedState = loadGame(name);
     if (loadedState) {
+      // Migration: Setze currentVariant auf 0, falls es fehlt (alte Spielstände)
+      if (loadedState.currentVariant === undefined) {
+        loadedState.currentVariant = 0;
+      }
       const gameStateWithTextures = assignEnemyTextures(loadedState);
       setGameState(gameStateWithTextures);
       setGameMode('playing');
@@ -833,7 +837,7 @@ function App() {
                       <div className="save-item-info">
                         <div className="save-item-name">{save.name}</div>
                         <div className="save-item-date">
-                          Level {save.gameState.currentLevel + 1} -{' '}
+                          Level {save.gameState.currentLevel + 1} V{(save.gameState.currentVariant ?? 0) + 1} -{' '}
                           {new Date(save.timestamp).toLocaleString('de-DE')}
                         </div>
                       </div>
@@ -952,7 +956,7 @@ function App() {
                   Glückwunsch!
                 </div>
                 <div style={{ fontSize: '20px', marginBottom: '10px' }}>
-                  Level {gameState ? gameState.currentLevel + 1 : 0} abgeschlossen!
+                  Level {gameState ? gameState.currentLevel + 1 : 0} V{gameState ? (gameState.currentVariant ?? 0) + 1 : 0} abgeschlossen!
                 </div>
                 <div style={{ fontSize: '18px' }}>
                   Punkte: {gameState ? gameState.player.score : 0}
@@ -1037,7 +1041,7 @@ function App() {
     return (
       <>
         <div className="level-info">
-          Level {gameState.currentLevel + 1} / {LEVELS.length}
+          Level {gameState.currentLevel + 1} V{(gameState.currentVariant ?? 0) + 1} / {LEVELS.length}
         </div>
         <div className="crosshair"></div>
         <div className="hud">
@@ -1179,7 +1183,7 @@ function App() {
                 Punkte: {gameState.player.score}
               </div>
               <div style={{ fontSize: '18px' }}>
-                Level erreicht: {gameState.currentLevel + 1} / {LEVELS.length}
+                Level erreicht: {gameState.currentLevel + 1} V{(gameState.currentVariant ?? 0) + 1} / {LEVELS.length}
               </div>
             </div>
             <button className="menu-button" onClick={() => {

@@ -144,6 +144,7 @@ export interface Player {
 export interface GameState {
   player: Player;
   currentLevel: number;
+  currentVariant?: number;
   difficulty: Difficulty;
   isPaused: boolean;
   isGameOver: boolean;

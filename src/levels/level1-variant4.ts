@@ -96,6 +96,14 @@ export const LEVEL_1_VARIANT_4: GameMap = {
       y: 15,
       collected: false,
       value: 100
+    },
+    {
+      id: 'item_1759784373412_7hzi4hvcg',
+      type: ItemType.HEALTH_SMALL,
+      x: 11.5,
+      y: 13.5,
+      collected: false,
+      value: 25
     }
   ],
   wallPictures: [

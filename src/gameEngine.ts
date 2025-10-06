@@ -66,6 +66,7 @@ export function createInitialGameState(difficulty: Difficulty): GameState {
   const state = {
     player,
     currentLevel: 0,
+    currentVariant: variant,
     difficulty,
     isPaused: false,
     isGameOver: false,
@@ -599,6 +600,7 @@ export function loadNextLevel(gameState: GameState): GameState {
   saveMapHistory(updatedHistory);
 
   gameState.currentLevel = nextLevel;
+  gameState.currentVariant = variant;
   gameState.currentMap = level;
   gameState.enemies = JSON.parse(JSON.stringify(level.enemies));
 

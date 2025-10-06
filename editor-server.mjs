@@ -116,8 +116,17 @@ function generateLevelCode(filename, mapData) {
     return objStr;
   }).join(',\n');
 
+  // Check if any item has a weaponType to determine if we need to import WeaponType
+  const needsWeaponType = mapData.items.some(item => item.weaponType !== undefined);
+  
+  // Build import statement dynamically
+  const imports = ['type GameMap', 'EnemyType', 'ItemType', 'WallPictureType', 'DecorativeObjectType'];
+  if (needsWeaponType) {
+    imports.push('WeaponType');
+  }
+
   // Generate the complete file content
-  const code = `import { type GameMap, EnemyType, ItemType, WallPictureType, DecorativeObjectType, WeaponType } from '../types.ts';
+  const code = `import { ${imports.join(', ')} } from '../types.ts';
 
 export const ${constantName}: GameMap = {
   width: ${mapData.width},
