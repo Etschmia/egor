@@ -1085,11 +1085,11 @@ function App() {
           <div className="hud-right">
             <div>Punkte: {gameState.player.score}</div>
             <div>
-              Gegner: {gameState.enemies.filter((e) => e.state === 'alive').length} /{' '}
+              Gegner: {gameState.enemies.filter((e) => e.state === 'dead' || e.state === 'dying').length} /{' '}
               {gameState.enemies.length}
             </div>
             <div>
-              Items: {gameState.collectedItemsInLevel} /{' '}
+              Gegenstände: {gameState.collectedItemsInLevel} /{' '}
               {gameState.totalItemsInLevel}
             </div>
           </div>
