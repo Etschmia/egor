@@ -1,0 +1,496 @@
+{
+  "id": "default",
+  "name": "Default EGOR Theme",
+  "version": "1.0.0",
+  "description": "Default wall theme based on original hardcoded values",
+  "author": "EGOR Game Engine",
+  "created": "2024-10-07T00:00:00.000Z",
+  "modified": "2024-10-07T00:00:00.000Z",
+  "wallTypes": {
+    "brick": {
+      "id": "brick",
+      "displayName": "Brick Wall",
+      "description": "Traditional brick masonry with mortar joints",
+      "colors": {
+        "primary": {
+          "value": "#8B4513",
+          "displayName": "Mortar Color"
+        },
+        "secondary": {
+          "value": "#D3D3D3",
+          "displayName": "Brick Color"
+        },
+        "accent": {
+          "value": "#A0522D",
+          "displayName": "Joint Color"
+        },
+        "shadow": {
+          "value": "#5A3D1A",
+          "displayName": "Shadow Color"
+        },
+        "highlight": {
+          "value": "#B85A2A",
+          "displayName": "Highlight Color"
+        }
+      },
+      "dimensions": {
+        "width": {
+          "value": 16,
+          "displayName": "Brick Width",
+          "min": 8,
+          "max": 32,
+          "step": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 4,
+          "displayName": "Brick Height",
+          "min": 2,
+          "max": 8,
+          "step": 1,
+          "unit": "px"
+        },
+        "spacing": {
+          "value": 8,
+          "displayName": "Row Spacing",
+          "min": 4,
+          "max": 16,
+          "step": 1,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 1,
+          "displayName": "Joint Width",
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "unit": "px"
+        }
+      },
+      "texture": {
+        "pattern": "BRICK",
+        "intensity": {
+          "value": 1.0,
+          "displayName": "Pattern Intensity",
+          "min": 0.1,
+          "max": 2.0,
+          "step": 0.1,
+          "unit": ""
+        },
+        "blendMode": "NORMAL",
+        "procedural": true
+      },
+      "effects": {
+        "shadow": {
+          "enabled": true,
+          "color": {
+            "value": "#5A3D1A",
+            "displayName": "Shadow Color"
+          },
+          "offset": {
+            "value": 1,
+            "displayName": "Shadow Offset",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "displayName": "Shadow Blur",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "unit": "px"
+          }
+        },
+        "highlight": {
+          "enabled": true,
+          "color": {
+            "value": "#B85A2A",
+            "displayName": "Highlight Color"
+          },
+          "intensity": {
+            "value": 0.5,
+            "displayName": "Highlight Intensity",
+            "min": 0.0,
+            "max": 1.0,
+            "step": 0.1,
+            "unit": ""
+          }
+        },
+        "gradient": {
+          "enabled": false,
+          "type": "linear",
+          "colors": []
+        }
+      }
+    },
+    "wood": {
+      "id": "wood",
+      "displayName": "Wood Paneling",
+      "description": "Vertical wood planks with natural grain texture",
+      "colors": {
+        "primary": {
+          "value": "#8B4513",
+          "displayName": "Base Wood Color"
+        },
+        "secondary": {
+          "value": "#654321",
+          "displayName": "Plank Color"
+        },
+        "accent": {
+          "value": "#4A4A4A",
+          "displayName": "Gap Color"
+        },
+        "shadow": {
+          "value": "#5D4037",
+          "displayName": "Grain Color"
+        },
+        "highlight": {
+          "value": "#A0522D",
+          "displayName": "Wood Highlight"
+        }
+      },
+      "dimensions": {
+        "width": {
+          "value": 4,
+          "displayName": "Plank Width",
+          "min": 2,
+          "max": 8,
+          "step": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 32,
+          "displayName": "Plank Height",
+          "min": 16,
+          "max": 64,
+          "step": 1,
+          "unit": "px"
+        },
+        "spacing": {
+          "value": 8,
+          "displayName": "Plank Spacing",
+          "min": 4,
+          "max": 16,
+          "step": 1,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 1,
+          "displayName": "Gap Width",
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "unit": "px"
+        }
+      },
+      "texture": {
+        "pattern": "WOOD_GRAIN",
+        "intensity": {
+          "value": 1.0,
+          "displayName": "Grain Intensity",
+          "min": 0.1,
+          "max": 2.0,
+          "step": 0.1,
+          "unit": ""
+        },
+        "blendMode": "NORMAL",
+        "procedural": true
+      },
+      "effects": {
+        "shadow": {
+          "enabled": true,
+          "color": {
+            "value": "#3D2914",
+            "displayName": "Shadow Color"
+          },
+          "offset": {
+            "value": 1,
+            "displayName": "Shadow Offset",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "displayName": "Shadow Blur",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "unit": "px"
+          }
+        },
+        "highlight": {
+          "enabled": true,
+          "color": {
+            "value": "#A0522D",
+            "displayName": "Highlight Color"
+          },
+          "intensity": {
+            "value": 0.3,
+            "displayName": "Highlight Intensity",
+            "min": 0.0,
+            "max": 1.0,
+            "step": 0.1,
+            "unit": ""
+          }
+        },
+        "gradient": {
+          "enabled": false,
+          "type": "linear",
+          "colors": []
+        }
+      }
+    },
+    "stone": {
+      "id": "stone",
+      "displayName": "Stone Blocks",
+      "description": "Large stone blocks with natural variations",
+      "colors": {
+        "primary": {
+          "value": "#708090",
+          "displayName": "Base Stone Color"
+        },
+        "secondary": {
+          "value": "#778899",
+          "displayName": "Stone Variant"
+        },
+        "accent": {
+          "value": "#696969",
+          "displayName": "Accent Stone"
+        },
+        "shadow": {
+          "value": "#2F4F4F",
+          "displayName": "Shadow Color"
+        },
+        "highlight": {
+          "value": "#B0C4DE",
+          "displayName": "Stone Highlight"
+        }
+      },
+      "dimensions": {
+        "width": {
+          "value": 16,
+          "displayName": "Block Width",
+          "min": 8,
+          "max": 32,
+          "step": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 16,
+          "displayName": "Block Height",
+          "min": 8,
+          "max": 32,
+          "step": 1,
+          "unit": "px"
+        },
+        "spacing": {
+          "value": 0,
+          "displayName": "Block Spacing",
+          "min": 0,
+          "max": 4,
+          "step": 1,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 1,
+          "displayName": "Block Border",
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "unit": "px"
+        }
+      },
+      "texture": {
+        "pattern": "STONE_BLOCKS",
+        "intensity": {
+          "value": 1.0,
+          "displayName": "Texture Intensity",
+          "min": 0.1,
+          "max": 2.0,
+          "step": 0.1,
+          "unit": ""
+        },
+        "blendMode": "NORMAL",
+        "procedural": true
+      },
+      "effects": {
+        "shadow": {
+          "enabled": true,
+          "color": {
+            "value": "#2F4F4F",
+            "displayName": "Shadow Color"
+          },
+          "offset": {
+            "value": 1,
+            "displayName": "Shadow Offset",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "displayName": "Shadow Blur",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "unit": "px"
+          }
+        },
+        "highlight": {
+          "enabled": true,
+          "color": {
+            "value": "#B0C4DE",
+            "displayName": "Highlight Color"
+          },
+          "intensity": {
+            "value": 0.4,
+            "displayName": "Highlight Intensity",
+            "min": 0.0,
+            "max": 1.0,
+            "step": 0.1,
+            "unit": ""
+          }
+        },
+        "gradient": {
+          "enabled": false,
+          "type": "linear",
+          "colors": []
+        }
+      }
+    },
+    "door": {
+      "id": "door",
+      "displayName": "Wooden Door",
+      "description": "Detailed wooden door with metal hardware",
+      "colors": {
+        "primary": {
+          "value": "#654321",
+          "displayName": "Door Wood Color"
+        },
+        "secondary": {
+          "value": "#8B4513",
+          "displayName": "Plank Color"
+        },
+        "accent": {
+          "value": "#FFD700",
+          "displayName": "Handle Color"
+        },
+        "shadow": {
+          "value": "#2A2A2A",
+          "displayName": "Hardware Color"
+        },
+        "highlight": {
+          "value": "#FFFFE0",
+          "displayName": "Wood Highlight"
+        }
+      },
+      "dimensions": {
+        "width": {
+          "value": 6,
+          "displayName": "Panel Width",
+          "min": 4,
+          "max": 12,
+          "step": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 28,
+          "displayName": "Panel Height",
+          "min": 20,
+          "max": 40,
+          "step": 1,
+          "unit": "px"
+        },
+        "spacing": {
+          "value": 1,
+          "displayName": "Panel Spacing",
+          "min": 0,
+          "max": 3,
+          "step": 1,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 1,
+          "displayName": "Panel Border",
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "unit": "px"
+        }
+      },
+      "texture": {
+        "pattern": "WOOD_GRAIN",
+        "intensity": {
+          "value": 1.2,
+          "displayName": "Wood Detail",
+          "min": 0.5,
+          "max": 2.0,
+          "step": 0.1,
+          "unit": ""
+        },
+        "blendMode": "NORMAL",
+        "procedural": true
+      },
+      "effects": {
+        "shadow": {
+          "enabled": true,
+          "color": {
+            "value": "#2A1A0A",
+            "displayName": "Shadow Color"
+          },
+          "offset": {
+            "value": 1,
+            "displayName": "Shadow Offset",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "displayName": "Shadow Blur",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "unit": "px"
+          }
+        },
+        "highlight": {
+          "enabled": true,
+          "color": {
+            "value": "#8B6A3A",
+            "displayName": "Highlight Color"
+          },
+          "intensity": {
+            "value": 0.6,
+            "displayName": "Highlight Intensity",
+            "min": 0.0,
+            "max": 1.0,
+            "step": 0.1,
+            "unit": ""
+          }
+        },
+        "gradient": {
+          "enabled": true,
+          "type": "linear",
+          "colors": [
+            {
+              "value": "#654321",
+              "displayName": "Gradient Start"
+            },
+            {
+              "value": "#4A2A0A",
+              "displayName": "Gradient End"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

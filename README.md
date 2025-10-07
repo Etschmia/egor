@@ -151,34 +151,141 @@ Das Spiel wurde für optimale Performance optimiert:
 - **Effiziente Textur-Rendering**: Verwendung von Canvas-Operationen statt pixelweiser Manipulation
 - Ziel: 60 FPS auf modernen Browsern
 
-## Level Editor (Development Only)
+## Level Editor (Nur in der Entwicklung)
 
-The project includes a visual level editor for creating and editing levels without writing code.
+Das Projekt enthält einen visuellen Level-Editor zum Erstellen und Bearbeiten von Leveln ohne Code zu schreiben.
 
-### Starting the Editor
+### Editor starten
 
 ```bash
 npm run editor
 ```
 
-The editor opens at `http://localhost:3000` with a backend server on port 3001.
+Der Editor öffnet sich unter `http://localhost:3000` mit einem Backend-Server auf Port 3001.
 
 ### Features
-- Visual 2D level editing with interactive canvas
-- Load and save level files from `src/levels/`
-- Place and edit enemies, items, decorative objects, and wall pictures
-- Change tile types (walls, doors, floors)
-- Set player start position and direction
-- Create new levels and variants
-- Resize level dimensions
-- Keyboard shortcuts (Ctrl+S to save, Ctrl+Z/Y for undo/redo)
+- Visuelle 2D-Level-Bearbeitung mit interaktiver Canvas
+- Level-Dateien aus `src/levels/` laden und speichern
+- Gegner, Items, dekorative Objekte und Wandbilder platzieren und bearbeiten
+- Kachel-Typen ändern (Wände, Türen, Böden)
+- Spieler-Startposition und -richtung festlegen
+- Neue Level und Varianten erstellen
+- Level-Dimensionen ändern
+- Tastenkürzel (Strg+S zum Speichern, Strg+Z/Y für Rückgängig/Wiederholen)
 
-### Documentation
-- **[Complete Guide](docs/LEVEL-EDITOR-README.md)** - Full usage instructions, workflows, and API docs
-- **[Quick Reference](docs/LEVEL-EDITOR-QUICK-REFERENCE.md)** - Keyboard shortcuts and quick actions
-- **[Summary](docs/LEVEL-EDITOR-SUMMARY.md)** - Implementation overview and statistics
+### Dokumentation
+- **[Vollständiger Guide](docs/LEVEL-EDITOR-README.md)** - Ausführliche Nutzungsanweisungen, Workflows und API-Dokumentation
+- **[Schnellreferenz](docs/LEVEL-EDITOR-QUICK-REFERENCE.md)** - Tastenkürzel und schnelle Aktionen
+- **[Zusammenfassung](docs/LEVEL-EDITOR-SUMMARY.md)** - Implementierungs-Übersicht und Statistiken
 
-**Note**: The editor is excluded from production builds and only runs in development.
+**Hinweis**: Der Editor ist von Produktions-Builds ausgeschlossen und läuft nur in der Entwicklung.
+
+## Designer Modus (Nur in der Entwicklung)
+
+Das Projekt enthält einen fortschrittlichen Designer Modus für die visuelle Erstellung und Anpassung von Wand-Texturen und Themes.
+
+### Designer Modus starten
+
+```bash
+npm run designer:frontend
+npm run designer:backend
+```
+
+Oder beide Server gleichzeitig:
+
+```bash
+npm run designer
+```
+
+Der Designer öffnet sich unter `http://localhost:3000` mit einem Backend-Server auf Port 3002.
+
+### Features
+
+#### Wand-Textur-Design
+- **Echtzeit-Vorschau**: Sofortige Visualisierung von Textur-Änderungen
+- **Interaktive Eigenschaften-Editoren**: 
+  - Farbauswahl mit Hex-, RGB-, HSL- und Preset-Modi
+  - Zahlen-Schieberegler für Dimensionen und Intensitäten
+  - Wand-Typ-Auswahl (Ziegel, Holz, Stein, Türen)
+- **Theme-System**: Verwaltung mehrerer Wand-Themes
+- **Live-Textur-Generierung**: Prozedurale Textur-Erstellung basierend auf Design-Tokens
+
+#### Design-Token-System
+- **Hierarchische Eigenschaften**: Strukturierte Farbschemata, Dimensionen und Effekte
+- **Token-Resolution**: Automatische Auflösung von Design-Token-Referenzen
+- **Validierung**: Eingebaute Validierung für Theme-Konsistenz
+- **Migration**: Automatische Migration zwischen Theme-Versionen
+
+#### Wand-Typen
+1. **Ziegel-Wände**: Traditionelle Ziegelstein-Textur mit Mörtel
+   - Primärfarbe (Mörtel), Sekundärfarbe (Ziegel), Akzentfarbe (Fugen)
+   - Anpassbare Ziegelbreite, -höhe und Fugenbreite
+   - Schatten- und Highlight-Effekte für 3D-Tiefe
+
+2. **Holz-Wände**: Vertikale Holzpaneele mit natürlicher Maserung
+   - Basis-Holzfarbe, Plankenfarbe, Maserungsfarbe
+   - Plankenbreite und Abstand zwischen Planken
+   - Holzmaserung-Intensität und Mischmodius
+
+3. **Stein-Wände**: Steinblock-Textur mit natürlicher Variation
+   - Steinfarbe, Mörtelfarbe, Variationsfarbe
+   - Blockgröße und Mörtelbreite
+   - Steinblock-Muster mit zufälliger Variation
+
+4. **Tür-Texturen**: Spezielle Texturen für interaktive Türen
+   - Holzmaserung mit Metallbeschlägen
+   - Türrahmen und Panel-Details
+   - Spezielle Farbgebung für verschiedene Tür-Typen
+
+#### Benutzeroberfläche
+- **Eigenschaften-Panel**: Detaillierte Kontrolle über alle Textur-Parameter
+- **Live-Vorschau**: Gekachelte Vorschau der Textur in verschiedenen Zoom-Stufen
+- **Performance-Statistiken**: Generierungszeit und Cache-Informationen
+- **Export-Funktionen**: Texturen als PNG exportieren
+- **Tastenkürzel**: Vollständige Tastatur-Navigation und -steuerung
+
+### Technische Implementierung
+
+#### Frontend-Architektur
+- **React-Komponenten** mit TypeScript für Type-Safety
+- **Design-Token-Integration** für konsistente Gestaltung
+- **Echtzeit-Rendering** mit Canvas-basierter Textur-Generierung
+- **State-Management** mit React Hooks
+
+#### Backend-System
+- **Theme-Manager**: Zentrale Verwaltung von Design-Themes
+- **Token-Resolution-Engine**: Intelligente Auflösung von Design-Token-Referenzen
+- **Validierungs-System**: Automatische Überprüfung der Theme-Integrität
+- **Migrations-Framework**: Nahtlose Updates zwischen Theme-Versionen
+
+#### Projektstruktur
+```
+src/
+├── designer/
+│   ├── components/          # React-Komponenten für Designer-UI
+│   │   ├── ColorPicker.tsx  # Farb-Auswahl-Komponente
+│   │   ├── LivePreview.tsx  # Echtzeit-Textur-Vorschau
+│   │   ├── NumberSlider.tsx # Zahlen-Eingabe mit Schieberegler
+│   │   └── PropertyEditor.tsx # Eigenschaften-Editor
+│   ├── hooks/               # React Hooks für State-Management
+│   └── types.ts             # TypeScript-Definitionen
+├── shared/
+│   ├── design-tokens/       # Design-Token-System
+│   │   ├── ThemeManager.ts  # Theme-Verwaltung
+│   │   ├── defaultTheme.ts  # Standard-Theme-Definition
+│   │   └── types.ts         # Token-Type-Definitionen
+│   └── texture-generation/  # Textur-Generierungs-Engine
+│       └── TextureGenerator.ts
+└── designer-server.mjs      # Backend-Server (Port 3002)
+```
+
+### Anwendungsfälle
+- **Spiel-Artists**: Erstellen neuer Wand-Texturen ohne Code-Kenntnisse
+- **Level-Designer**: Anpassen der visuellen Atmosphäre verschiedener Level
+- **Entwickler**: Schnelle Prototyp-Erstellung für neue Textur-Konzepte
+- **Theme-Entwicklung**: Konsistente Gestaltungs-Systeme für das gesamte Spiel
+
+**Hinweis**: Der Designer Modus ist nur in der Entwicklungsumgebung verfügbar und wird nicht in Produktions-Builds eingeschlossen.
 
 ## Entwickelt von
 
