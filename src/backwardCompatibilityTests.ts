@@ -227,6 +227,8 @@ export function testOldSavegameCompatibility(): { success: boolean; message: str
         enemies: [],
         items: [],
         currentMap: LEVEL_VARIANTS[1][0], // Use first variant of level 1
+        totalItemsInLevel: 0,
+        collectedItemsInLevel: 0,
         gameStartTime: Date.now()
       }
     };
