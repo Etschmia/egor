@@ -73,6 +73,8 @@ export function createInitialGameState(difficulty: Difficulty): GameState {
     enemies: JSON.parse(JSON.stringify(level.enemies)),
     items: JSON.parse(JSON.stringify(level.items)),
     currentMap: level,
+    totalItemsInLevel: level.items.length, // Initialize total items
+    collectedItemsInLevel: 0, // Initialize collected items
     gameStartTime: Date.now()
   };
   state.enemies.forEach((enemy: Enemy) => {
@@ -513,8 +515,9 @@ export function fireWeapon(
   return { player, enemies, hit: false, outOfAmmo: false };
 }
 
-export function collectItem(player: Player, items: Item[]): { player: Player; notification?: string } {
+export function collectItem(player: Player, items: Item[], collectedItemsInLevel: number): { player: Player; notification?: string; newCollectedItemsInLevel: number } {
   let notification: string | undefined;
+  let newCollectedItemsInLevel = collectedItemsInLevel;
 
   items.forEach((item) => {
     if (item.collected) return;
@@ -525,6 +528,7 @@ export function collectItem(player: Player, items: Item[]): { player: Player; no
 
     if (distance < 0.7) {
       item.collected = true;
+      newCollectedItemsInLevel++; // Increment collected count
 
       // Statistiken aktualisieren
       player.collectedItems[item.type]++;
@@ -574,7 +578,7 @@ export function collectItem(player: Player, items: Item[]): { player: Player; no
     }
   });
 
-  return { player, notification };
+  return { player, notification, newCollectedItemsInLevel };
 }
 
 export function checkLevelComplete(enemies: Enemy[]): boolean {
@@ -602,6 +606,8 @@ export function loadNextLevel(gameState: GameState): GameState {
   gameState.currentLevel = nextLevel;
   gameState.currentVariant = variant;
   gameState.currentMap = level;
+  gameState.totalItemsInLevel = level.items.length; // Initialize total items for new level
+  gameState.collectedItemsInLevel = 0; // Reset collected items for new level
   gameState.enemies = JSON.parse(JSON.stringify(level.enemies));
 
   // Füge einen Hund hinzu

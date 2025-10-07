@@ -375,8 +375,9 @@ function App() {
     }
 
     // Items sammeln
-    const itemCollection = collectItem(newState.player, newState.items);
+    const itemCollection = collectItem(newState.player, newState.items, newState.collectedItemsInLevel);
     newState.player = itemCollection.player;
+    newState.collectedItemsInLevel = itemCollection.newCollectedItemsInLevel; // Update collected items count
 
     // Benachrichtigung setzen
     if (itemCollection.notification) {
@@ -1086,6 +1087,10 @@ function App() {
             <div>
               Gegner: {gameState.enemies.filter((e) => e.state === 'alive').length} /{' '}
               {gameState.enemies.length}
+            </div>
+            <div>
+              Items: {gameState.collectedItemsInLevel} /{' '}
+              {gameState.totalItemsInLevel}
             </div>
           </div>
         </div>

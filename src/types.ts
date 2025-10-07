@@ -151,6 +151,8 @@ export interface GameState {
   enemies: Enemy[];
   items: Item[];
   currentMap: GameMap;
+  totalItemsInLevel: number; // Gesamtanzahl der Items in diesem Level
+  collectedItemsInLevel: number; // Anzahl der gesammelten Items in diesem Level
   gameStartTime: number;
   lastItemNotification?: {
     message: string;
