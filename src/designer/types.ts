@@ -36,6 +36,7 @@ export interface WallTypeSelectorProps {
   availableWallTypes: WallTypeDefinition[];
   selectedWallType: string | null;
   onWallTypeChange: (wallTypeId: string) => void;
+  onCreateNewWallType?: (wallType: WallTypeDefinition) => void;
 }
 
 export interface LivePreviewProps {

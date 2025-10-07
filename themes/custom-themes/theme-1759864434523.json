@@ -1,0 +1,835 @@
+{
+  "id": "theme-1759864434523",
+  "name": "New Theme 7.10.2025",
+  "version": "1.0.0",
+  "description": "Custom theme created in Designer Mode",
+  "author": "Designer Mode",
+  "created": "2025-10-07T19:13:54.553Z",
+  "modified": "2025-10-07T19:13:54.553Z",
+  "wallTypes": {
+    "brick": {
+      "id": "brick",
+      "displayName": "Brick Wall",
+      "description": "Traditional brick masonry with mortar joints",
+      "colors": {
+        "primary": {
+          "value": "#8B4513",
+          "displayName": "Mortar Color",
+          "presets": [
+            {
+              "name": "Classic Brown",
+              "value": "#8B4513",
+              "description": "Traditional saddle brown mortar"
+            },
+            {
+              "name": "Light Gray",
+              "value": "#A9A9A9",
+              "description": "Modern light gray mortar"
+            },
+            {
+              "name": "Dark Red",
+              "value": "#722F37",
+              "description": "Dark red clay mortar"
+            }
+          ]
+        },
+        "secondary": {
+          "value": "#D3D3D3",
+          "displayName": "Brick Color",
+          "presets": [
+            {
+              "name": "Classic Red",
+              "value": "#B22222",
+              "description": "Traditional red brick"
+            },
+            {
+              "name": "Light Gray",
+              "value": "#D3D3D3",
+              "description": "Modern gray brick"
+            },
+            {
+              "name": "Dark Brown",
+              "value": "#8B4513",
+              "description": "Chocolate brown brick"
+            }
+          ]
+        },
+        "accent": {
+          "value": "#A0522D",
+          "displayName": "Joint Color",
+          "presets": [
+            {
+              "name": "Sienna",
+              "value": "#A0522D",
+              "description": "Natural sienna joints"
+            },
+            {
+              "name": "Dark Gray",
+              "value": "#696969",
+              "description": "Dark gray joints"
+            },
+            {
+              "name": "Black",
+              "value": "#2F2F2F",
+              "description": "Deep black joints"
+            }
+          ]
+        },
+        "shadow": {
+          "value": "#5A3D1A",
+          "displayName": "Shadow Color",
+          "presets": [
+            {
+              "name": "Dark Brown",
+              "value": "#5A3D1A",
+              "description": "Natural dark brown shadow"
+            },
+            {
+              "name": "Dark Gray",
+              "value": "#404040",
+              "description": "Gray shadow"
+            }
+          ]
+        },
+        "highlight": {
+          "value": "#B85A2A",
+          "displayName": "Highlight Color",
+          "presets": [
+            {
+              "name": "Light Brown",
+              "value": "#B85A2A",
+              "description": "Warm light brown highlight"
+            },
+            {
+              "name": "Light Gray",
+              "value": "#E0E0E0",
+              "description": "Light gray highlight"
+            }
+          ]
+        }
+      },
+      "dimensions": {
+        "width": {
+          "value": 16,
+          "displayName": "Brick Width",
+          "min": 8,
+          "max": 32,
+          "step": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 4,
+          "displayName": "Brick Height",
+          "min": 2,
+          "max": 8,
+          "step": 1,
+          "unit": "px"
+        },
+        "spacing": {
+          "value": 8,
+          "displayName": "Row Spacing",
+          "min": 4,
+          "max": 16,
+          "step": 1,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 1,
+          "displayName": "Joint Width",
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "unit": "px"
+        }
+      },
+      "texture": {
+        "pattern": "BRICK",
+        "intensity": {
+          "value": 1,
+          "displayName": "Pattern Intensity",
+          "min": 0.1,
+          "max": 2,
+          "step": 0.1,
+          "unit": ""
+        },
+        "blendMode": "NORMAL",
+        "procedural": true
+      },
+      "effects": {
+        "shadow": {
+          "enabled": true,
+          "color": {
+            "value": "#5A3D1A",
+            "displayName": "Shadow Color"
+          },
+          "offset": {
+            "value": 1,
+            "displayName": "Shadow Offset",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "displayName": "Shadow Blur",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "unit": "px"
+          }
+        },
+        "highlight": {
+          "enabled": true,
+          "color": {
+            "value": "#B85A2A",
+            "displayName": "Highlight Color"
+          },
+          "intensity": {
+            "value": 0.5,
+            "displayName": "Highlight Intensity",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "unit": ""
+          }
+        },
+        "gradient": {
+          "enabled": false,
+          "type": "linear",
+          "colors": []
+        }
+      },
+      "legacyMapping": {
+        "#8B4513": "colors.primary.value",
+        "#D3D3D3": "colors.secondary.value",
+        "#A0522D": "colors.accent.value"
+      }
+    },
+    "wood": {
+      "id": "wood",
+      "displayName": "Wood Paneling",
+      "description": "Vertical wood planks with natural grain texture",
+      "colors": {
+        "primary": {
+          "value": "#8B4513",
+          "displayName": "Base Wood Color",
+          "presets": [
+            {
+              "name": "Saddle Brown",
+              "value": "#8B4513",
+              "description": "Classic saddle brown wood"
+            },
+            {
+              "name": "Dark Oak",
+              "value": "#654321",
+              "description": "Rich dark oak"
+            },
+            {
+              "name": "Pine",
+              "value": "#DEB887",
+              "description": "Light pine wood"
+            }
+          ]
+        },
+        "secondary": {
+          "value": "#654321",
+          "displayName": "Plank Color",
+          "presets": [
+            {
+              "name": "Dark Brown",
+              "value": "#654321",
+              "description": "Dark brown planks"
+            },
+            {
+              "name": "Medium Brown",
+              "value": "#8B4513",
+              "description": "Medium brown planks"
+            },
+            {
+              "name": "Light Brown",
+              "value": "#A0522D",
+              "description": "Light brown planks"
+            }
+          ]
+        },
+        "accent": {
+          "value": "#4A4A4A",
+          "displayName": "Gap Color",
+          "presets": [
+            {
+              "name": "Dark Gray",
+              "value": "#4A4A4A",
+              "description": "Natural dark gray gaps"
+            },
+            {
+              "name": "Black",
+              "value": "#2F2F2F",
+              "description": "Deep black gaps"
+            },
+            {
+              "name": "Brown",
+              "value": "#3D2914",
+              "description": "Dark brown gaps"
+            }
+          ]
+        },
+        "shadow": {
+          "value": "#5D4037",
+          "displayName": "Grain Color",
+          "presets": [
+            {
+              "name": "Dark Grain",
+              "value": "#5D4037",
+              "description": "Natural dark wood grain"
+            },
+            {
+              "name": "Medium Grain",
+              "value": "#6D4C36",
+              "description": "Medium wood grain"
+            }
+          ]
+        },
+        "highlight": {
+          "value": "#A0522D",
+          "displayName": "Wood Highlight",
+          "presets": [
+            {
+              "name": "Sienna",
+              "value": "#A0522D",
+              "description": "Natural sienna highlight"
+            },
+            {
+              "name": "Light Brown",
+              "value": "#CD853F",
+              "description": "Light brown highlight"
+            }
+          ]
+        }
+      },
+      "dimensions": {
+        "width": {
+          "value": 4,
+          "displayName": "Plank Width",
+          "min": 2,
+          "max": 8,
+          "step": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 32,
+          "displayName": "Plank Height",
+          "min": 16,
+          "max": 64,
+          "step": 1,
+          "unit": "px"
+        },
+        "spacing": {
+          "value": 8,
+          "displayName": "Plank Spacing",
+          "min": 4,
+          "max": 16,
+          "step": 1,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 1,
+          "displayName": "Gap Width",
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "unit": "px"
+        }
+      },
+      "texture": {
+        "pattern": "WOOD_GRAIN",
+        "intensity": {
+          "value": 1,
+          "displayName": "Grain Intensity",
+          "min": 0.1,
+          "max": 2,
+          "step": 0.1,
+          "unit": ""
+        },
+        "blendMode": "NORMAL",
+        "procedural": true
+      },
+      "effects": {
+        "shadow": {
+          "enabled": true,
+          "color": {
+            "value": "#3D2914",
+            "displayName": "Shadow Color"
+          },
+          "offset": {
+            "value": 1,
+            "displayName": "Shadow Offset",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "displayName": "Shadow Blur",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "unit": "px"
+          }
+        },
+        "highlight": {
+          "enabled": true,
+          "color": {
+            "value": "#A0522D",
+            "displayName": "Highlight Color"
+          },
+          "intensity": {
+            "value": 0.3,
+            "displayName": "Highlight Intensity",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "unit": ""
+          }
+        },
+        "gradient": {
+          "enabled": false,
+          "type": "linear",
+          "colors": []
+        }
+      },
+      "legacyMapping": {
+        "#8B4513": "colors.primary.value",
+        "#654321": "colors.secondary.value",
+        "#4A4A4A": "colors.accent.value",
+        "#5D4037": "colors.shadow.value"
+      }
+    },
+    "stone": {
+      "id": "stone",
+      "displayName": "Stone Blocks",
+      "description": "Large stone blocks with natural variations",
+      "colors": {
+        "primary": {
+          "value": "#708090",
+          "displayName": "Base Stone Color",
+          "presets": [
+            {
+              "name": "Slate Gray",
+              "value": "#708090",
+              "description": "Classic slate gray stone"
+            },
+            {
+              "name": "Light Gray",
+              "value": "#A9A9A9",
+              "description": "Light gray limestone"
+            },
+            {
+              "name": "Dark Gray",
+              "value": "#696969",
+              "description": "Dark granite"
+            }
+          ]
+        },
+        "secondary": {
+          "value": "#778899",
+          "displayName": "Stone Variant",
+          "presets": [
+            {
+              "name": "Light Slate",
+              "value": "#778899",
+              "description": "Light slate gray"
+            },
+            {
+              "name": "Medium Gray",
+              "value": "#808080",
+              "description": "Medium gray stone"
+            },
+            {
+              "name": "Blue Gray",
+              "value": "#6A5ACD",
+              "description": "Blue-gray stone"
+            }
+          ]
+        },
+        "accent": {
+          "value": "#696969",
+          "displayName": "Accent Stone",
+          "presets": [
+            {
+              "name": "Dim Gray",
+              "value": "#696969",
+              "description": "Dim gray stone"
+            },
+            {
+              "name": "Dark Slate",
+              "value": "#2F4F4F",
+              "description": "Dark slate stone"
+            },
+            {
+              "name": "Gray",
+              "value": "#808080",
+              "description": "Standard gray stone"
+            }
+          ]
+        },
+        "shadow": {
+          "value": "#2F4F4F",
+          "displayName": "Shadow Color",
+          "presets": [
+            {
+              "name": "Dark Slate",
+              "value": "#2F4F4F",
+              "description": "Dark slate shadow"
+            },
+            {
+              "name": "Black",
+              "value": "#1C1C1C",
+              "description": "Deep black shadow"
+            }
+          ]
+        },
+        "highlight": {
+          "value": "#B0C4DE",
+          "displayName": "Stone Highlight",
+          "presets": [
+            {
+              "name": "Light Steel Blue",
+              "value": "#B0C4DE",
+              "description": "Light blue-gray highlight"
+            },
+            {
+              "name": "Light Gray",
+              "value": "#D3D3D3",
+              "description": "Light gray highlight"
+            }
+          ]
+        }
+      },
+      "dimensions": {
+        "width": {
+          "value": 16,
+          "displayName": "Block Width",
+          "min": 8,
+          "max": 32,
+          "step": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 16,
+          "displayName": "Block Height",
+          "min": 8,
+          "max": 32,
+          "step": 1,
+          "unit": "px"
+        },
+        "spacing": {
+          "value": 0,
+          "displayName": "Block Spacing",
+          "min": 0,
+          "max": 4,
+          "step": 1,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 1,
+          "displayName": "Block Border",
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "unit": "px"
+        }
+      },
+      "texture": {
+        "pattern": "STONE_BLOCKS",
+        "intensity": {
+          "value": 1,
+          "displayName": "Texture Intensity",
+          "min": 0.1,
+          "max": 2,
+          "step": 0.1,
+          "unit": ""
+        },
+        "blendMode": "NORMAL",
+        "procedural": true
+      },
+      "effects": {
+        "shadow": {
+          "enabled": true,
+          "color": {
+            "value": "#2F4F4F",
+            "displayName": "Shadow Color"
+          },
+          "offset": {
+            "value": 1,
+            "displayName": "Shadow Offset",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "displayName": "Shadow Blur",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "unit": "px"
+          }
+        },
+        "highlight": {
+          "enabled": true,
+          "color": {
+            "value": "#B0C4DE",
+            "displayName": "Highlight Color"
+          },
+          "intensity": {
+            "value": 0.4,
+            "displayName": "Highlight Intensity",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "unit": ""
+          }
+        },
+        "gradient": {
+          "enabled": false,
+          "type": "linear",
+          "colors": []
+        }
+      },
+      "legacyMapping": {
+        "#708090": "colors.primary.value",
+        "#778899": "colors.secondary.value",
+        "#696969": "colors.accent.value",
+        "#2F4F4F": "colors.shadow.value"
+      }
+    },
+    "door": {
+      "id": "door",
+      "displayName": "Wooden Door",
+      "description": "Detailed wooden door with metal hardware",
+      "colors": {
+        "primary": {
+          "value": "#654321",
+          "displayName": "Door Wood Color",
+          "presets": [
+            {
+              "name": "Dark Brown",
+              "value": "#654321",
+              "description": "Rich dark brown wood"
+            },
+            {
+              "name": "Medium Brown",
+              "value": "#8B4513",
+              "description": "Medium brown wood"
+            },
+            {
+              "name": "Light Oak",
+              "value": "#DEB887",
+              "description": "Light oak wood"
+            }
+          ]
+        },
+        "secondary": {
+          "value": "#8B4513",
+          "displayName": "Plank Color",
+          "presets": [
+            {
+              "name": "Saddle Brown",
+              "value": "#8B4513",
+              "description": "Classic saddle brown"
+            },
+            {
+              "name": "Sienna",
+              "value": "#A0522D",
+              "description": "Natural sienna"
+            },
+            {
+              "name": "Peru",
+              "value": "#CD853F",
+              "description": "Peru brown"
+            }
+          ]
+        },
+        "accent": {
+          "value": "#FFD700",
+          "displayName": "Handle Color",
+          "presets": [
+            {
+              "name": "Gold",
+              "value": "#FFD700",
+              "description": "Bright gold handle"
+            },
+            {
+              "name": "Brass",
+              "value": "#B8860B",
+              "description": "Antique brass"
+            },
+            {
+              "name": "Silver",
+              "value": "#C0C0C0",
+              "description": "Silver handle"
+            },
+            {
+              "name": "Bronze",
+              "value": "#CD7F32",
+              "description": "Bronze handle"
+            }
+          ]
+        },
+        "shadow": {
+          "value": "#2A2A2A",
+          "displayName": "Hardware Color",
+          "presets": [
+            {
+              "name": "Dark Gray",
+              "value": "#2A2A2A",
+              "description": "Dark metal hardware"
+            },
+            {
+              "name": "Black",
+              "value": "#1A1A1A",
+              "description": "Black iron hardware"
+            },
+            {
+              "name": "Brown",
+              "value": "#3D2914",
+              "description": "Dark brown hardware"
+            }
+          ]
+        },
+        "highlight": {
+          "value": "#FFFFE0",
+          "displayName": "Wood Highlight",
+          "presets": [
+            {
+              "name": "Light Yellow",
+              "value": "#FFFFE0",
+              "description": "Natural wood shine"
+            },
+            {
+              "name": "Ivory",
+              "value": "#FFFFF0",
+              "description": "Ivory highlight"
+            },
+            {
+              "name": "Beige",
+              "value": "#F5F5DC",
+              "description": "Beige highlight"
+            }
+          ]
+        }
+      },
+      "dimensions": {
+        "width": {
+          "value": 6,
+          "displayName": "Panel Width",
+          "min": 4,
+          "max": 12,
+          "step": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 28,
+          "displayName": "Panel Height",
+          "min": 20,
+          "max": 40,
+          "step": 1,
+          "unit": "px"
+        },
+        "spacing": {
+          "value": 1,
+          "displayName": "Panel Spacing",
+          "min": 0,
+          "max": 3,
+          "step": 1,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 1,
+          "displayName": "Panel Border",
+          "min": 1,
+          "max": 3,
+          "step": 1,
+          "unit": "px"
+        }
+      },
+      "texture": {
+        "pattern": "WOOD_GRAIN",
+        "intensity": {
+          "value": 1.2,
+          "displayName": "Wood Detail",
+          "min": 0.5,
+          "max": 2,
+          "step": 0.1,
+          "unit": ""
+        },
+        "blendMode": "NORMAL",
+        "procedural": true
+      },
+      "effects": {
+        "shadow": {
+          "enabled": true,
+          "color": {
+            "value": "#2A1A0A",
+            "displayName": "Shadow Color"
+          },
+          "offset": {
+            "value": 1,
+            "displayName": "Shadow Offset",
+            "min": 0,
+            "max": 5,
+            "step": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 0,
+            "displayName": "Shadow Blur",
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "unit": "px"
+          }
+        },
+        "highlight": {
+          "enabled": true,
+          "color": {
+            "value": "#8B6A3A",
+            "displayName": "Highlight Color"
+          },
+          "intensity": {
+            "value": 0.6,
+            "displayName": "Highlight Intensity",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "unit": ""
+          }
+        },
+        "gradient": {
+          "enabled": true,
+          "type": "linear",
+          "colors": [
+            {
+              "value": "#654321",
+              "displayName": "Gradient Start"
+            },
+            {
+              "value": "#4A2A0A",
+              "displayName": "Gradient End"
+            }
+          ]
+        }
+      },
+      "legacyMapping": {
+        "#654321": "colors.primary.value",
+        "#8B4513": "colors.secondary.value",
+        "#FFD700": "colors.accent.value",
+        "#2A2A2A": "colors.shadow.value",
+        "#FFFFE0": "colors.highlight.value"
+      }
+    }
+  }
+}

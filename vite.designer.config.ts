@@ -9,6 +9,7 @@ export default defineConfig({
     },
   })],
   root: '.',
+  base: '/',
   build: {
     rollupOptions: {
       input: {
@@ -17,7 +18,8 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3001,
-    open: '/designer.html'
+    port: 3000,
+    open: 'designer.html',
+    host: true
   }
 })

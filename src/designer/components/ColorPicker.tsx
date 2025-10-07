@@ -7,6 +7,14 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   label,
   showPresets = true
 }) => {
+  console.log('🎨 ColorPicker: Rendering', { 
+    label, 
+    value: colorProperty.value, 
+    displayName: colorProperty.displayName,
+    onChange: typeof onChange,
+    element: 'Look for a colored square with this color:',
+    backgroundColor: colorProperty.value
+  });
   const [showPicker, setShowPicker] = useState(false);
   const [inputMethod, setInputMethod] = useState<ColorInputMethod>('picker');
   const [tempColor, setTempColor] = useState(colorProperty.value);
@@ -29,8 +37,10 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
   }, []);
 
   const handleColorChange = (newColor: string) => {
+    console.log('🎨 ColorPicker: Color change detected', { from: tempColor, to: newColor, label });
     setTempColor(newColor);
     onChange(newColor);
+    console.log('🎨 ColorPicker: onChange callback executed');
   };
 
   const handleHexInput = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,9 +142,18 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         {/* Color preview and trigger */}
         <div
           className="color-picker__preview"
-          style={{ backgroundColor: tempColor }}
-          onClick={() => setShowPicker(!showPicker)}
-          title={`${colorProperty.displayName}: ${tempColor}`}
+          style={{ 
+            backgroundColor: tempColor,
+            border: '3px solid #ff0000',
+            cursor: 'pointer',
+            padding: '8px',
+            borderRadius: '4px'
+          }}
+          onClick={() => {
+            console.log('🖥️ ColorPicker: Preview clicked', { label, currentColor: tempColor, showPicker });
+            setShowPicker(!showPicker);
+          }}
+          title={`CLICK HERE! ${colorProperty.displayName}: ${tempColor}`}
         >
           <span className="color-picker__preview-text">{tempColor}</span>
         </div>

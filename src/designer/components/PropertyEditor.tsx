@@ -8,12 +8,18 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({
   onPropertyChange,
   onReset
 }) => {
+  console.log('🏗️ PropertyEditor: Rendering with wallType:', wallType.id, wallType);
+  console.log('🏗️ PropertyEditor: onPropertyChange callback:', typeof onPropertyChange);
   const handleColorChange = (colorKey: string, value: string) => {
+    console.log('🎨 PropertyEditor: Color change requested', { colorKey, value, wallType: wallType.id });
     onPropertyChange(`colors.${colorKey}.value`, value);
+    console.log('🎨 PropertyEditor: Color change callback executed');
   };
 
   const handleDimensionChange = (dimensionKey: string, value: number) => {
+    console.log('📏 PropertyEditor: Dimension change requested', { dimensionKey, value, wallType: wallType.id });
     onPropertyChange(`dimensions.${dimensionKey}.value`, value);
+    console.log('📏 PropertyEditor: Dimension change callback executed');
   };
 
   const handleTextureChange = (property: string, value: any) => {

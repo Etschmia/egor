@@ -1,11 +1,87 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { WallTypeSelectorProps } from '../types';
+import type { WallTypeDefinition } from '../../shared/design-tokens/types';
+
+// Helper function to create a new wall type based on an existing one
+function createNewWallTypeFromBase(baseWallType: WallTypeDefinition, newName: string): WallTypeDefinition {
+  const timestamp = Date.now();
+  const newId = `custom_${newName.toLowerCase().replace(/\s+/g, '_')}_${timestamp}`;
+  
+  return {
+    ...baseWallType,
+    id: newId,
+    displayName: newName,
+    description: `Custom ${newName} based on ${baseWallType.displayName}`,
+    // Deep clone colors to avoid reference issues
+    colors: {
+      primary: { ...baseWallType.colors.primary },
+      secondary: { ...baseWallType.colors.secondary },
+      accent: { ...baseWallType.colors.accent },
+      shadow: { ...baseWallType.colors.shadow },
+      highlight: { ...baseWallType.colors.highlight }
+    },
+    // Deep clone dimensions
+    dimensions: {
+      width: { ...baseWallType.dimensions.width },
+      height: { ...baseWallType.dimensions.height },
+      spacing: { ...baseWallType.dimensions.spacing },
+      borderWidth: { ...baseWallType.dimensions.borderWidth }
+    },
+    // Deep clone texture
+    texture: {
+      ...baseWallType.texture,
+      intensity: { ...baseWallType.texture.intensity }
+    },
+    // Deep clone effects
+    effects: {
+      shadow: {
+        ...baseWallType.effects.shadow,
+        color: { ...baseWallType.effects.shadow.color },
+        offset: { ...baseWallType.effects.shadow.offset },
+        blur: { ...baseWallType.effects.shadow.blur }
+      },
+      highlight: {
+        ...baseWallType.effects.highlight,
+        color: { ...baseWallType.effects.highlight.color },
+        intensity: { ...baseWallType.effects.highlight.intensity }
+      },
+      gradient: {
+        ...baseWallType.effects.gradient,
+        colors: baseWallType.effects.gradient.colors?.map(c => ({ ...c })) || []
+      }
+    },
+    // Clear legacy mapping for new wall types
+    legacyMapping: {}
+  };
+}
 
 export const WallTypeSelector: React.FC<WallTypeSelectorProps> = ({
   availableWallTypes,
   selectedWallType,
-  onWallTypeChange
+  onWallTypeChange,
+  onCreateNewWallType
 }) => {
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newWallTypeName, setNewWallTypeName] = useState('');
+  const [basedOnType, setBasedOnType] = useState<string>('brick');
+
+  const handleCreateNewWallType = () => {
+    if (newWallTypeName.trim() && onCreateNewWallType) {
+      console.log('🏗️ Creating new wall type:', { name: newWallTypeName, basedOn: basedOnType });
+      
+      // Create a new wall type based on the selected base type
+      const baseWallType = availableWallTypes.find(wt => wt.id === basedOnType);
+      if (baseWallType) {
+        const newWallType = createNewWallTypeFromBase(baseWallType, newWallTypeName.trim());
+        onCreateNewWallType(newWallType);
+      }
+      
+      // Reset form
+      setNewWallTypeName('');
+      setBasedOnType('brick');
+      setShowCreateDialog(false);
+    }
+  };
   return (
     <div className="wall-type-selector">
       <h3 className="wall-type-selector__title">Wall Type</h3>
@@ -90,10 +166,7 @@ export const WallTypeSelector: React.FC<WallTypeSelectorProps> = ({
       {/* Add new wall type button */}
       <button
         className="wall-type-selector__add-button"
-        onClick={() => {
-          // TODO: Implement create new wall type functionality
-          console.log('Create new wall type');
-        }}
+        onClick={() => setShowCreateDialog(true)}
         title="Create a new wall type"
       >
         <svg
@@ -112,6 +185,70 @@ export const WallTypeSelector: React.FC<WallTypeSelectorProps> = ({
         </svg>
         <span>Add New Wall Type</span>
       </button>
+
+      {/* Create New Wall Type Dialog */}
+      {showCreateDialog && (
+        <div className="wall-type-selector__dialog-overlay" onClick={() => setShowCreateDialog(false)}>
+          <div className="wall-type-selector__dialog" onClick={e => e.stopPropagation()}>
+            <div className="wall-type-selector__dialog-header">
+              <h3>Create New Wall Type</h3>
+              <button 
+                onClick={() => setShowCreateDialog(false)}
+                className="wall-type-selector__dialog-close"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="wall-type-selector__dialog-content">
+              <div className="wall-type-selector__form-group">
+                <label htmlFor="wall-type-name">Wall Type Name:</label>
+                <input
+                  id="wall-type-name"
+                  type="text"
+                  value={newWallTypeName}
+                  onChange={(e) => setNewWallTypeName(e.target.value)}
+                  placeholder="Enter wall type name..."
+                  className="wall-type-selector__text-input"
+                  autoFocus
+                />
+              </div>
+              
+              <div className="wall-type-selector__form-group">
+                <label htmlFor="base-type">Based on:</label>
+                <select
+                  id="base-type"
+                  value={basedOnType}
+                  onChange={(e) => setBasedOnType(e.target.value)}
+                  className="wall-type-selector__select"
+                >
+                  {availableWallTypes.map(wallType => (
+                    <option key={wallType.id} value={wallType.id}>
+                      {wallType.displayName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="wall-type-selector__dialog-actions">
+              <button 
+                onClick={() => setShowCreateDialog(false)}
+                className="wall-type-selector__button wall-type-selector__button--secondary"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleCreateNewWallType}
+                disabled={!newWallTypeName.trim()}
+                className="wall-type-selector__button wall-type-selector__button--primary"
+              >
+                Create Wall Type
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

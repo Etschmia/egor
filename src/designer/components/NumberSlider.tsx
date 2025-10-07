@@ -6,6 +6,15 @@ export const NumberSlider: React.FC<NumberSliderProps> = ({
   onChange,
   label
 }) => {
+  console.log('🔢 NumberSlider: Rendering', { 
+    label, 
+    value: numberProperty.value, 
+    displayName: numberProperty.displayName,
+    min: numberProperty.min,
+    max: numberProperty.max,
+    onChange: typeof onChange,
+    element: 'Look for a slider or number input'
+  });
   const [tempValue, setTempValue] = useState(numberProperty.value);
   const [inputValue, setInputValue] = useState(numberProperty.value.toString());
 
@@ -16,9 +25,11 @@ export const NumberSlider: React.FC<NumberSliderProps> = ({
 
   const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(event.target.value);
+    console.log('🔢 NumberSlider: Slider change', { label, value, previous: tempValue });
     setTempValue(value);
     setInputValue(value.toString());
     onChange(value);
+    console.log('🔢 NumberSlider: onChange callback executed');
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,8 +83,13 @@ export const NumberSlider: React.FC<NumberSliderProps> = ({
             value={tempValue}
             onChange={handleSliderChange}
             style={{
-              background: `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${percentage}%, var(--track-color) ${percentage}%, var(--track-color) 100%)`
+              background: `linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) ${percentage}%, var(--track-color) ${percentage}%, var(--track-color) 100%)`,
+              border: '2px solid #00ff00',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              height: '20px'
             }}
+            title="DRAG THIS SLIDER!"
           />
           
           {/* Slider track marks for major values */}

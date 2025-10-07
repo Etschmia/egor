@@ -8,6 +8,10 @@ import { useThemeManager } from './hooks';
 import './styles.css';
 
 export const Designer: React.FC = () => {
+  console.log('🎨🎨🎨 DESIGNER MODE LOADED! 🎨🎨🎨');
+  console.log('If you see this message, you are in Designer Mode!');
+  console.log('URL should be: http://localhost:3001/designer.html');
+  console.log('🎨🎨🎨🎨🎨🎨🎨🎨🎨🎨🎨🎨');
   const [selectedWallType, setSelectedWallType] = useState<string>('brick');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   // const [showThemeManager, setShowThemeManager] = useState(false);
@@ -31,7 +35,8 @@ export const Designer: React.FC = () => {
     redo,
     importTheme,
     exportTheme,
-    clearError
+    clearError,
+    addWallTypeToTheme
   } = useThemeManager();
 
   // Keyboard shortcuts
@@ -81,9 +86,14 @@ export const Designer: React.FC = () => {
   }, [saveTheme, undo, redo, clearError]);
 
   const handlePropertyChange = (path: string, value: any) => {
+    console.log('🎯 Designer: Property change requested', { path, value, selectedWallType });
     if (selectedWallType) {
       const fullPath = `${selectedWallType}.${path}`;
+      console.log('🎯 Designer: Calling updateThemeProperty with fullPath:', fullPath);
       updateThemeProperty(fullPath, value);
+      console.log('🎯 Designer: updateThemeProperty callback executed');
+    } else {
+      console.warn('⚠️ Designer: No selectedWallType - cannot update property');
     }
   };
 
@@ -92,6 +102,13 @@ export const Designer: React.FC = () => {
       // Reset only the selected wall type to default
       resetTheme();
     }
+  };
+
+  const handleCreateNewWallType = (wallType: any) => {
+    console.log('🏗️ Designer: Creating new wall type:', wallType.displayName);
+    addWallTypeToTheme(wallType);
+    // Switch to the newly created wall type
+    setSelectedWallType(wallType.id);
   };
 
   const handleCreateNewTheme = async () => {
@@ -144,6 +161,16 @@ export const Designer: React.FC = () => {
   }
 
   const currentWallType = activeTheme.wallTypes[selectedWallType];
+
+  console.log('🏗️ Designer: Current state:', {
+    selectedWallType,
+    activeTheme: activeTheme?.id,
+    currentWallType: currentWallType?.id,
+    isDirty,
+    isLoading,
+    wallTypeColors: currentWallType?.colors,
+    wallTypeDimensions: currentWallType?.dimensions
+  });
 
   return (
     <div className={`designer ${sidebarCollapsed ? 'designer--sidebar-collapsed' : ''}`}>
@@ -289,6 +316,7 @@ export const Designer: React.FC = () => {
                 availableWallTypes={Object.values(activeTheme.wallTypes)}
                 selectedWallType={selectedWallType}
                 onWallTypeChange={setSelectedWallType}
+                onCreateNewWallType={handleCreateNewWallType}
               />
 
               {currentWallType && (

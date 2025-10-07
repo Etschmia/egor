@@ -116,9 +116,14 @@ export const useThemeManager = () => {
   }, []);
 
   const updateThemeProperty = useCallback((path: string, value: any) => {
-    if (!state.activeTheme) return;
+    console.log('🌎 useThemeManager: updateThemeProperty called', { path, value, activeTheme: state.activeTheme?.id });
+    if (!state.activeTheme) {
+      console.warn('⚠️ useThemeManager: No active theme - cannot update property');
+      return;
+    }
 
     try {
+      console.log('🌎 useThemeManager: Attempting to update token...');
       // Update the theme in memory
       themeManager.updateToken(
         {
@@ -128,9 +133,11 @@ export const useThemeManager = () => {
         },
         value
       );
+      console.log('🌎 useThemeManager: Token update successful');
 
       const updatedTheme = themeManager.getActiveTheme();
       if (updatedTheme) {
+        console.log('🌎 useThemeManager: Setting updated theme', updatedTheme.id);
         setState(prev => ({
           ...prev,
           activeTheme: updatedTheme,
@@ -139,9 +146,13 @@ export const useThemeManager = () => {
 
         // Add to change history
         addToHistory(updatedTheme);
+        console.log('🌎 useThemeManager: Theme update complete');
+      } else {
+        console.error('❌ useThemeManager: Failed to get updated theme');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update property';
+      console.error('❌ useThemeManager: Error updating property:', error);
       setState(prev => ({ ...prev, error: errorMessage }));
     }
   }, [state.activeTheme]);
@@ -352,6 +363,46 @@ export const useThemeManager = () => {
     }
   }, [apiClient]);
 
+  const addWallTypeToTheme = useCallback((wallType: any) => {
+    if (!state.activeTheme) {
+      console.warn('⚠️ useThemeManager: No active theme - cannot add wall type');
+      return;
+    }
+
+    try {
+      console.log('🏗️ useThemeManager: Adding new wall type:', wallType.id);
+      
+      // Create a new theme with the added wall type
+      const updatedTheme = {
+        ...state.activeTheme,
+        wallTypes: {
+          ...state.activeTheme.wallTypes,
+          [wallType.id]: wallType
+        },
+        modified: new Date()
+      };
+      
+      // Register the updated theme
+      themeManager.registerTheme(updatedTheme);
+      themeManager.setActiveTheme(updatedTheme.id);
+      
+      setState(prev => ({
+        ...prev,
+        activeTheme: updatedTheme,
+        isDirty: true,
+      }));
+      
+      // Add to change history
+      addToHistory(updatedTheme);
+      console.log('🏗️ useThemeManager: Wall type added successfully');
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add wall type';
+      console.error('❌ useThemeManager: Error adding wall type:', error);
+      setState(prev => ({ ...prev, error: errorMessage }));
+    }
+  }, [state.activeTheme, addToHistory]);
+
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
   }, []);
@@ -369,6 +420,7 @@ export const useThemeManager = () => {
     createNewTheme,
     deleteTheme,
     resetTheme,
+    addWallTypeToTheme,
 
     // History
     undo,
