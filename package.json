@@ -10,7 +10,11 @@
     "preview": "vite preview",
     "editor": "concurrently \"npm run editor:frontend\" \"npm run editor:backend\"",
     "editor:frontend": "vite --config vite.editor.config.ts",
-    "editor:backend": "node editor-server.mjs"
+    "editor:backend": "node editor-server.mjs",
+    "designer": "concurrently \"npm run designer:frontend\" \"npm run designer:backend\"",
+    "designer:frontend": "vite --config vite.designer.config.ts",
+    "designer:backend": "node designer-server.mjs",
+    "test:designer": "node test-designer.mjs"
   },
   "dependencies": {
     "react": "^19.1.1",
