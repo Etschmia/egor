@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { Theme } from '../../shared/design-tokens';
+import type { Theme } from '../types';
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -27,20 +27,122 @@ export interface BackupApiResponse extends ApiResponse {
   count?: number;
 }
 
+interface RetryOptions {
+  maxRetries?: number;
+  initialDelay?: number;
+  maxDelay?: number;
+  shouldRetry?: (error: Error, attempt: number) => boolean;
+}
+
+/**
+ * Converts technical error messages to user-friendly messages
+ */
+const getUserFriendlyErrorMessage = (error: Error): string => {
+  const message = error.message.toLowerCase();
+  
+  // Network errors
+  if (message.includes('failed to fetch') || message.includes('network')) {
+    return 'Unable to connect to the server. Please check your connection and try again.';
+  }
+  
+  // Timeout errors
+  if (message.includes('timeout')) {
+    return 'The request took too long. Please try again.';
+  }
+  
+  // Server errors
+  if (message.includes('500') || message.includes('internal server')) {
+    return 'The server encountered an error. Please try again later.';
+  }
+  
+  // Not found errors
+  if (message.includes('404') || message.includes('not found')) {
+    return 'The requested resource was not found.';
+  }
+  
+  // Permission errors
+  if (message.includes('403') || message.includes('forbidden')) {
+    return 'You do not have permission to perform this action.';
+  }
+  
+  // Validation errors
+  if (message.includes('validation') || message.includes('invalid')) {
+    return error.message; // Keep original validation messages
+  }
+  
+  // Default to original message if it's already user-friendly
+  if (error.message.length < 100 && !message.includes('error')) {
+    return error.message;
+  }
+  
+  return 'An unexpected error occurred. Please try again.';
+};
+
+/**
+ * Implements exponential backoff retry logic
+ */
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const fetchWithRetry = async (
+  requestFn: () => Promise<Response>,
+  options: RetryOptions = {}
+): Promise<Response> => {
+  const {
+    maxRetries = 3,
+    initialDelay = 1000,
+    maxDelay = 10000,
+    shouldRetry = (error: Error, attempt: number) => {
+      // Retry on network errors or 5xx server errors
+      const message = error.message.toLowerCase();
+      return (
+        attempt < maxRetries &&
+        (message.includes('fetch') || 
+         message.includes('network') || 
+         message.includes('500') ||
+         message.includes('502') ||
+         message.includes('503') ||
+         message.includes('504'))
+      );
+    }
+  } = options;
+
+  let lastError: Error;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await requestFn();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Unknown error');
+      
+      if (attempt < maxRetries && shouldRetry(lastError, attempt)) {
+        // Calculate exponential backoff delay: initialDelay * 2^attempt
+        const delay = Math.min(initialDelay * Math.pow(2, attempt), maxDelay);
+        await sleep(delay);
+        continue;
+      }
+      
+      throw lastError;
+    }
+  }
+  
+  throw lastError!;
+};
+
 export const useApiClient = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const baseUrl = 'http://localhost:3002/api';
+  const baseUrl = 'http://localhost:3004/api';
 
   const handleRequest = useCallback(async <T = any>(
-    requestFn: () => Promise<Response>
+    requestFn: () => Promise<Response>,
+    retryOptions?: RetryOptions
   ): Promise<T | null> => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await requestFn();
+      const response = await fetchWithRetry(requestFn, retryOptions);
       const data = await response.json();
 
       if (!response.ok) {
@@ -49,9 +151,10 @@ export const useApiClient = () => {
 
       return data;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(errorMessage);
-      console.error('API request failed:', err);
+      const originalError = err instanceof Error ? err : new Error('Unknown error occurred');
+      const userFriendlyMessage = getUserFriendlyErrorMessage(originalError);
+      setError(userFriendlyMessage);
+      console.error('API request failed:', originalError);
       return null;
     } finally {
       setLoading(false);
@@ -60,50 +163,55 @@ export const useApiClient = () => {
 
   // Theme operations
   const getThemes = useCallback(async (): Promise<Theme[] | null> => {
-    const response = await handleRequest<ThemeApiResponse>(() =>
-      fetch(`${baseUrl}/themes`)
+    const response = await handleRequest<ThemeApiResponse>(
+      () => fetch(`${baseUrl}/themes`),
+      { maxRetries: 3 } // Retry GET requests
     );
-    return response?.themes || null;
+    return (response?.themes as Theme[]) || null;
   }, [handleRequest, baseUrl]);
 
   const getTheme = useCallback(async (id: string): Promise<Theme | null> => {
-    const response = await handleRequest<ThemeApiResponse>(() =>
-      fetch(`${baseUrl}/themes/${id}`)
+    const response = await handleRequest<ThemeApiResponse>(
+      () => fetch(`${baseUrl}/themes/${id}`),
+      { maxRetries: 3 } // Retry GET requests
     );
-    return response?.theme || null;
+    return (response?.theme as Theme) || null;
   }, [handleRequest, baseUrl]);
 
   const createTheme = useCallback(async (theme: Theme): Promise<Theme | null> => {
-    const response = await handleRequest<ThemeApiResponse>(() =>
-      fetch(`${baseUrl}/themes`, {
+    const response = await handleRequest<ThemeApiResponse>(
+      () => fetch(`${baseUrl}/themes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(theme),
-      })
+      }),
+      { maxRetries: 1 } // Limited retries for POST
     );
-    return response?.theme || null;
+    return (response?.theme as Theme) || null;
   }, [handleRequest, baseUrl]);
 
   const updateTheme = useCallback(async (id: string, theme: Theme): Promise<Theme | null> => {
-    const response = await handleRequest<ThemeApiResponse>(() =>
-      fetch(`${baseUrl}/themes/${id}`, {
+    const response = await handleRequest<ThemeApiResponse>(
+      () => fetch(`${baseUrl}/themes/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(theme),
-      })
+      }),
+      { maxRetries: 1 } // Limited retries for PUT
     );
-    return response?.theme || null;
+    return (response?.theme as Theme) || null;
   }, [handleRequest, baseUrl]);
 
   const deleteTheme = useCallback(async (id: string): Promise<boolean> => {
-    const response = await handleRequest<ApiResponse>(() =>
-      fetch(`${baseUrl}/themes/${id}`, {
+    const response = await handleRequest<ApiResponse>(
+      () => fetch(`${baseUrl}/themes/${id}`, {
         method: 'DELETE',
-      })
+      }),
+      { maxRetries: 0 } // No retries for DELETE
     );
     return response?.success || false;
   }, [handleRequest, baseUrl]);
@@ -114,7 +222,10 @@ export const useApiClient = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${baseUrl}/themes/${id}/export?format=${format}`);
+      const response = await fetchWithRetry(
+        () => fetch(`${baseUrl}/themes/${id}/export?format=${format}`),
+        { maxRetries: 3 }
+      );
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -128,9 +239,10 @@ export const useApiClient = () => {
         return await response.text();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Export failed';
-      setError(errorMessage);
-      console.error('Export failed:', err);
+      const originalError = err instanceof Error ? err : new Error('Export failed');
+      const userFriendlyMessage = getUserFriendlyErrorMessage(originalError);
+      setError(userFriendlyMessage);
+      console.error('Export failed:', originalError);
       return null;
     } finally {
       setLoading(false);
@@ -138,16 +250,17 @@ export const useApiClient = () => {
   }, [baseUrl]);
 
   const importTheme = useCallback(async (themeData: Theme, overwrite: boolean = false): Promise<Theme | null> => {
-    const response = await handleRequest<ThemeApiResponse>(() =>
-      fetch(`${baseUrl}/themes/import`, {
+    const response = await handleRequest<ThemeApiResponse>(
+      () => fetch(`${baseUrl}/themes/import`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ themeData, overwrite }),
-      })
+      }),
+      { maxRetries: 1 } // Limited retries for import
     );
-    return response?.theme || null;
+    return (response?.theme as Theme) || null;
   }, [handleRequest, baseUrl]);
 
   const importThemeFromFile = useCallback(async (file: File, overwrite: boolean = false): Promise<Theme | null> => {
@@ -160,9 +273,10 @@ export const useApiClient = () => {
 
       return await importTheme(themeData, overwrite);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Import failed';
-      setError(errorMessage);
-      console.error('Import failed:', err);
+      const originalError = err instanceof Error ? err : new Error('Import failed');
+      const userFriendlyMessage = getUserFriendlyErrorMessage(originalError);
+      setError(userFriendlyMessage);
+      console.error('Import failed:', originalError);
       return null;
     } finally {
       setLoading(false);
@@ -174,7 +288,10 @@ export const useApiClient = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${baseUrl}/themes/${id}/export?format=${format}`);
+      const response = await fetchWithRetry(
+        () => fetch(`${baseUrl}/themes/${id}/export?format=${format}`),
+        { maxRetries: 3 }
+      );
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -201,9 +318,10 @@ export const useApiClient = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Download failed';
-      setError(errorMessage);
-      console.error('Download failed:', err);
+      const originalError = err instanceof Error ? err : new Error('Download failed');
+      const userFriendlyMessage = getUserFriendlyErrorMessage(originalError);
+      setError(userFriendlyMessage);
+      console.error('Download failed:', originalError);
     } finally {
       setLoading(false);
     }
@@ -211,19 +329,21 @@ export const useApiClient = () => {
 
   // Backup operations
   const getBackups = useCallback(async (): Promise<BackupInfo[] | null> => {
-    const response = await handleRequest<BackupApiResponse>(() =>
-      fetch(`${baseUrl}/backups`)
+    const response = await handleRequest<BackupApiResponse>(
+      () => fetch(`${baseUrl}/backups`),
+      { maxRetries: 3 } // Retry GET requests
     );
     return response?.backups || null;
   }, [handleRequest, baseUrl]);
 
   const restoreBackup = useCallback(async (filename: string): Promise<Theme | null> => {
-    const response = await handleRequest<ThemeApiResponse>(() =>
-      fetch(`${baseUrl}/backups/${filename}/restore`, {
+    const response = await handleRequest<ThemeApiResponse>(
+      () => fetch(`${baseUrl}/backups/${filename}/restore`, {
         method: 'POST',
-      })
+      }),
+      { maxRetries: 1 } // Limited retries for restore
     );
-    return response?.theme || null;
+    return (response?.theme as Theme) || null;
   }, [handleRequest, baseUrl]);
 
   // Preview generation
@@ -233,14 +353,15 @@ export const useApiClient = () => {
     width: number = 256,
     height: number = 256
   ): Promise<string | null> => {
-    const response = await handleRequest<{ preview: { dataUrl: string } }>(() =>
-      fetch(`${baseUrl}/themes/${themeId}/preview`, {
+    const response = await handleRequest<{ preview: { dataUrl: string } }>(
+      () => fetch(`${baseUrl}/themes/${themeId}/preview`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ wallTypeId, width, height }),
-      })
+      }),
+      { maxRetries: 2 } // Some retries for preview generation
     );
     return response?.preview?.dataUrl || null;
   }, [handleRequest, baseUrl]);

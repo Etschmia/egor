@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Setup project structure and configuration
+- [x] 1. Setup project structure and configuration
   - Create `designer.html` entry point in project root
   - Create `vite.designer.config.ts` with port 3002 configuration
   - Create `designer-server.mjs` backend server file
@@ -8,7 +8,7 @@
   - Create `src/designer/` directory structure
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 2. Implement backend API server
+- [x] 2. Implement backend API server
   - Set up Express server on port 3003 with CORS
   - Implement GET /api/themes endpoint to list all themes
   - Implement GET /api/themes/:id endpoint to load specific theme
@@ -21,7 +21,7 @@
   - Add theme validation logic
   - _Requirements: 1.1, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8_
 
-- [ ] 3. Create base designer application structure
+- [x] 3. Create base designer application structure
   - Create `src/designer/main.tsx` entry point
   - Create `src/designer/Designer.tsx` main component
   - Create `src/designer/types.ts` with TypeScript interfaces
@@ -29,7 +29,7 @@
   - Implement basic layout structure (header, sidebar, preview, property panel)
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
-- [ ] 4. Implement theme management hook
+- [x] 4. Implement theme management hook
   - Create `src/designer/hooks/useThemeManager.ts`
   - Implement theme loading from API
   - Implement theme state management with React state
@@ -39,7 +39,7 @@
   - Add theme validation before save
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 13.1_
 
-- [ ] 5. Implement API client hook
+- [x] 5. Implement API client hook
   - Create `src/designer/hooks/useApiClient.ts`
   - Implement fetch wrapper with error handling
   - Implement retry logic with exponential backoff
@@ -47,7 +47,7 @@
   - Add error state management with user-friendly messages
   - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6_
 
-- [ ] 6. Create header component
+- [x] 6. Create header component
   - Create `src/designer/components/Header.tsx`
   - Implement theme selector dropdown
   - Implement undo/redo buttons with enabled/disabled states
@@ -58,14 +58,14 @@
   - Add visual feedback for all actions
   - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 10.1_
 
-- [ ] 7. Create asset type selector component
+- [x] 7. Create asset type selector component
   - Create `src/designer/components/AssetTypeSelector.tsx`
   - Implement dropdown with asset type options (Wall Types, Objects, Pictures, Lights, Enemies)
   - Add "Coming soon" message for non-implemented types
   - Style according to Level Editor design
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
 
-- [ ] 8. Create sidebar component with wall type list
+- [x] 8. Create sidebar component with wall type list
   - Create `src/designer/components/Sidebar.tsx`
   - Create `src/designer/components/WallTypeList.tsx`
   - Implement collapsible sidebar with toggle button
@@ -75,7 +75,7 @@
   - Style with Level Editor dark theme
   - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 11.1, 11.2, 11.3, 11.4_
 
-- [ ] 9. Create new wall type dialog
+- [x] 9. Create new wall type dialog
   - Create dialog component for wall type creation
   - Implement name input field
   - Implement "based on" selector dropdown
@@ -84,7 +84,7 @@
   - Style as modal overlay with Level Editor theme
   - _Requirements: 4.6, 4.7_
 
-- [ ] 10. Create property panel component
+- [x] 10. Create property panel component
   - Create `src/designer/components/PropertyPanel.tsx`
   - Create `src/designer/components/PropertyGroup.tsx` for collapsible groups
   - Implement collapsible property groups (Colors, Dimensions, Texture, Effects)
@@ -93,7 +93,7 @@
   - Style with Level Editor dark theme
   - _Requirements: 5.1, 5.2, 5.3, 5.4_
 
-- [ ] 11. Create color picker component
+- [x] 11. Create color picker component
   - Create `src/designer/components/ColorPicker.tsx`
   - Implement color preview box with click handler
   - Create color picker dialog with hex input

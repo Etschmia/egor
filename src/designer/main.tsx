@@ -1,10 +1,16 @@
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Designer } from './Designer';
+import Designer from './Designer';
+import './styles.css';
 
-const container = document.getElementById('designer-root');
-if (!container) {
-  throw new Error('Designer root element not found');
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error('Root element not found');
 }
 
-const root = createRoot(container);
-root.render(<Designer />);
+createRoot(rootElement).render(
+  <StrictMode>
+    <Designer />
+  </StrictMode>
+);

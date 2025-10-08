@@ -9,7 +9,6 @@ export const NumberSlider: React.FC<NumberSliderProps> = ({
   console.log('🔢 NumberSlider: Rendering', { 
     label, 
     value: numberProperty.value, 
-    displayName: numberProperty.displayName,
     min: numberProperty.min,
     max: numberProperty.max,
     onChange: typeof onChange,
@@ -62,9 +61,9 @@ export const NumberSlider: React.FC<NumberSliderProps> = ({
 
   return (
     <div className="number-slider">
-      {(label || numberProperty.displayName) && (
+      {label && (
         <label className="number-slider__label">
-          {label || numberProperty.displayName}
+          {label}
           {numberProperty.unit && (
             <span className="number-slider__unit">({numberProperty.unit})</span>
           )}

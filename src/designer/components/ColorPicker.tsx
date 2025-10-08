@@ -1,387 +1,324 @@
-import React, { useState, useRef, useEffect } from 'react';
-import type { ColorPickerProps, ColorInputMethod } from '../types';
+import { useState, useEffect, useRef } from 'react';
+import type { ColorProperty } from '../types';
 
-export const ColorPicker: React.FC<ColorPickerProps> = ({
-  colorProperty,
-  onChange,
-  label,
-  showPresets = true
-}) => {
-  console.log('🎨 ColorPicker: Rendering', { 
-    label, 
-    value: colorProperty.value, 
-    displayName: colorProperty.displayName,
-    onChange: typeof onChange,
-    element: 'Look for a colored square with this color:',
-    backgroundColor: colorProperty.value
-  });
-  const [showPicker, setShowPicker] = useState(false);
-  const [inputMethod, setInputMethod] = useState<ColorInputMethod>('picker');
-  const [tempColor, setTempColor] = useState(colorProperty.value);
-  const pickerRef = useRef<HTMLDivElement>(null);
+interface ColorPickerProps {
+  color: ColorProperty;
+  onChange: (value: string) => void;
+  onClose: () => void;
+}
 
+// Utility functions for color conversion
+function hexToHSL(hex: string): { h: number; s: number; l: number } {
+  // Remove # if present
+  hex = hex.replace('#', '');
+  
+  // Convert hex to RGB
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+  
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+  
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    
+    switch (max) {
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
+    }
+  }
+  
+  return {
+    h: Math.round(h * 360),
+    s: Math.round(s * 100),
+    l: Math.round(l * 100),
+  };
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  s /= 100;
+  l /= 100;
+  
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  
+  if (h >= 0 && h < 60) {
+    r = c; g = x; b = 0;
+  } else if (h >= 60 && h < 120) {
+    r = x; g = c; b = 0;
+  } else if (h >= 120 && h < 180) {
+    r = 0; g = c; b = x;
+  } else if (h >= 180 && h < 240) {
+    r = 0; g = x; b = c;
+  } else if (h >= 240 && h < 300) {
+    r = x; g = 0; b = c;
+  } else if (h >= 300 && h < 360) {
+    r = c; g = 0; b = x;
+  }
+  
+  const toHex = (n: number) => {
+    const hex = Math.round((n + m) * 255).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+  
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function isValidHex(hex: string): boolean {
+  return /^#?[0-9A-Fa-f]{6}$/.test(hex);
+}
+
+function normalizeHex(hex: string): string {
+  hex = hex.replace('#', '').toUpperCase();
+  return `#${hex}`;
+}
+
+// Default preset colors
+const DEFAULT_PRESETS = [
+  '#FF0000', '#FF4500', '#FF8C00', '#FFD700', '#FFFF00',
+  '#9ACD32', '#00FF00', '#00FA9A', '#00CED1', '#1E90FF',
+  '#0000FF', '#8A2BE2', '#9370DB', '#FF1493', '#FF69B4',
+  '#FFFFFF', '#D3D3D3', '#A9A9A9', '#808080', '#696969',
+  '#000000', '#8B4513', '#A0522D', '#CD853F', '#DEB887',
+];
+
+export default function ColorPicker({ color, onChange, onClose }: ColorPickerProps) {
+  const [hexInput, setHexInput] = useState(color.value);
+  const [hsl, setHsl] = useState(hexToHSL(color.value));
+  const [hexError, setHexError] = useState('');
+  const dialogRef = useRef<HTMLDivElement>(null);
+  
+  // Use color presets from the color property or default presets
+  const presets = color.presets || DEFAULT_PRESETS;
+  
+  // Update HSL when hex input changes
   useEffect(() => {
-    setTempColor(colorProperty.value);
-  }, [colorProperty.value]);
-
-  // Close picker when clicking outside
+    if (isValidHex(hexInput)) {
+      const normalized = normalizeHex(hexInput);
+      setHsl(hexToHSL(normalized));
+      setHexError('');
+    }
+  }, [hexInput]);
+  
+  // Handle hex input change
+  const handleHexChange = (value: string) => {
+    setHexInput(value);
+    
+    if (isValidHex(value)) {
+      const normalized = normalizeHex(value);
+      onChange(normalized);
+      setHexError('');
+    } else if (value.length > 0) {
+      setHexError('Invalid hex color (e.g., #FF0000)');
+    } else {
+      setHexError('');
+    }
+  };
+  
+  // Handle HSL slider change
+  const handleHSLChange = (component: 'h' | 's' | 'l', value: number) => {
+    const newHsl = { ...hsl, [component]: value };
+    setHsl(newHsl);
+    
+    const newHex = hslToHex(newHsl.h, newHsl.s, newHsl.l);
+    setHexInput(newHex);
+    onChange(newHex);
+  };
+  
+  // Handle preset color selection
+  const handlePresetClick = (presetColor: string) => {
+    const normalized = normalizeHex(presetColor);
+    setHexInput(normalized);
+    onChange(normalized);
+  };
+  
+  // Handle click outside to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setShowPicker(false);
+      if (dialogRef.current && !dialogRef.current.contains(event.target as Node)) {
+        onClose();
       }
     };
-
+    
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleColorChange = (newColor: string) => {
-    console.log('🎨 ColorPicker: Color change detected', { from: tempColor, to: newColor, label });
-    setTempColor(newColor);
-    onChange(newColor);
-    console.log('🎨 ColorPicker: onChange callback executed');
-  };
-
-  const handleHexInput = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let value = event.target.value;
-    if (!value.startsWith('#')) {
-      value = '#' + value;
-    }
-    if (value.match(/^#[0-9A-Fa-f]{0,6}$/)) {
-      setTempColor(value);
-      if (value.length === 7) {
-        onChange(value);
+  }, [onClose]);
+  
+  // Handle escape key to close
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
       }
-    }
-  };
-
-  const handleRGBInput = (r: number, g: number, b: number) => {
-    const hex = '#' + [r, g, b].map(x => {
-      const hex = x.toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    }).join('');
-    handleColorChange(hex);
-  };
-
-  const handleHSLInput = (h: number, s: number, l: number) => {
-    const rgb = hslToRgb(h / 360, s / 100, l / 100);
-    handleRGBInput(rgb.r, rgb.g, rgb.b);
-  };
-
-  const hexToRgb = (hex: string) => {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : { r: 0, g: 0, b: 0 };
-  };
-
-  const rgbToHsl = (r: number, g: number, b: number) => {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h = 0, s = 0, l = (max + min) / 2;
-
-    if (max !== min) {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-      switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        case b: h = (r - g) / d + 4; break;
-      }
-      h /= 6;
-    }
-
-    return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
-  };
-
-  const hslToRgb = (h: number, s: number, l: number) => {
-    const hue2rgb = (p: number, q: number, t: number) => {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-      return p;
     };
-
-    let r: number, g: number, b: number;
-
-    if (s === 0) {
-      r = g = b = l;
-    } else {
-      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-      const p = 2 * l - q;
-      r = hue2rgb(p, q, h + 1/3);
-      g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1/3);
-    }
-
-    return {
-      r: Math.round(r * 255),
-      g: Math.round(g * 255),
-      b: Math.round(b * 255)
-    };
-  };
-
-  const currentRgb = hexToRgb(tempColor);
-  const currentHsl = rgbToHsl(currentRgb.r, currentRgb.g, currentRgb.b);
-
+    
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
+  
   return (
-    <div className="color-picker">
-      {label && <label className="color-picker__label">{label}</label>}
-      
-      <div className="color-picker__main">
-        {/* Color preview and trigger */}
-        <div
-          className="color-picker__preview"
-          style={{ 
-            backgroundColor: tempColor,
-            border: '3px solid #ff0000',
-            cursor: 'pointer',
-            padding: '8px',
-            borderRadius: '4px'
-          }}
-          onClick={() => {
-            console.log('🖥️ ColorPicker: Preview clicked', { label, currentColor: tempColor, showPicker });
-            setShowPicker(!showPicker);
-          }}
-          title={`CLICK HERE! ${colorProperty.displayName}: ${tempColor}`}
-        >
-          <span className="color-picker__preview-text">{tempColor}</span>
-        </div>
-
-        {/* Input method selector */}
-        <select
-          className="color-picker__method"
-          value={inputMethod}
-          onChange={(e) => setInputMethod(e.target.value as ColorInputMethod)}
-        >
-          <option value="picker">Color Picker</option>
-          <option value="hex">Hex Code</option>
-          <option value="rgb">RGB</option>
-          <option value="hsl">HSL</option>
-          <option value="named">Named Colors</option>
-          {showPresets && colorProperty.presets && <option value="preset">Presets</option>}
-        </select>
-      </div>
-
-      {/* Color picker panel */}
-      {showPicker && (
-        <div className="color-picker__panel" ref={pickerRef}>
-          {inputMethod === 'picker' && (
-            <div className="color-picker__visual">
-              {/* HSL Color Wheel */}
-              <div className="color-picker__wheel">
-                <canvas
-                  width={200}
-                  height={200}
-                  style={{ cursor: 'crosshair' }}
-                  onClick={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = e.clientX - rect.left - 100;
-                    const y = e.clientY - rect.top - 100;
-                    const distance = Math.sqrt(x * x + y * y);
-                    
-                    if (distance <= 100) {
-                      const angle = Math.atan2(y, x);
-                      const hue = ((angle * 180 / Math.PI + 360) % 360);
-                      const saturation = Math.min(distance, 100);
-                      handleHSLInput(hue, saturation, currentHsl.l);
-                    }
+    <div className="dialog-backdrop">
+      <div className="dialog color-picker-dialog" ref={dialogRef}>
+        <div className="dialog__content">
+          <div className="dialog__header">
+            <h2 className="dialog__title">
+              {color.displayName}
+            </h2>
+            <button
+              className="dialog__close"
+              onClick={onClose}
+              aria-label="Close color picker"
+              type="button"
+            >
+              ×
+            </button>
+          </div>
+          
+          <div className="dialog__body">
+            {/* Color Preview */}
+            <div className="color-picker__preview-section">
+              <div
+                className="color-picker__preview-large"
+                style={{ backgroundColor: hexInput }}
+                aria-label={`Current color: ${hexInput}`}
+              />
+            </div>
+            
+            {/* Hex Input */}
+            <div className="form-field">
+              <label className="form-field__label" htmlFor="hex-input">
+                Hex Color
+              </label>
+              <input
+                id="hex-input"
+                type="text"
+                className={`form-field__input ${hexError ? 'form-field__input--error' : ''}`}
+                value={hexInput}
+                onChange={(e) => handleHexChange(e.target.value)}
+                placeholder="#FF0000"
+                maxLength={7}
+              />
+              {hexError && (
+                <div className="form-field__error">{hexError}</div>
+              )}
+              <div className="form-field__hint">
+                Enter a 6-digit hex color code (e.g., #FF0000)
+              </div>
+            </div>
+            
+            {/* HSL Sliders */}
+            <div className="color-picker__sliders">
+              <div className="color-picker__slider-group">
+                <label className="color-picker__slider-label">
+                  <span>Hue</span>
+                  <span className="color-picker__slider-value">{hsl.h}°</span>
+                </label>
+                <input
+                  type="range"
+                  className="color-picker__slider color-picker__slider--hue"
+                  min="0"
+                  max="360"
+                  value={hsl.h}
+                  onChange={(e) => handleHSLChange('h', parseInt(e.target.value))}
+                  aria-label="Hue"
+                />
+              </div>
+              
+              <div className="color-picker__slider-group">
+                <label className="color-picker__slider-label">
+                  <span>Saturation</span>
+                  <span className="color-picker__slider-value">{hsl.s}%</span>
+                </label>
+                <input
+                  type="range"
+                  className="color-picker__slider color-picker__slider--saturation"
+                  min="0"
+                  max="100"
+                  value={hsl.s}
+                  onChange={(e) => handleHSLChange('s', parseInt(e.target.value))}
+                  aria-label="Saturation"
+                  style={{
+                    background: `linear-gradient(to right, 
+                      hsl(${hsl.h}, 0%, ${hsl.l}%), 
+                      hsl(${hsl.h}, 100%, ${hsl.l}%))`
                   }}
                 />
               </div>
-
-              {/* Lightness slider */}
-              <div className="color-picker__lightness">
+              
+              <div className="color-picker__slider-group">
+                <label className="color-picker__slider-label">
+                  <span>Lightness</span>
+                  <span className="color-picker__slider-value">{hsl.l}%</span>
+                </label>
                 <input
                   type="range"
+                  className="color-picker__slider color-picker__slider--lightness"
                   min="0"
                   max="100"
-                  value={currentHsl.l}
-                  onChange={(e) => handleHSLInput(currentHsl.h, currentHsl.s, parseInt(e.target.value))}
-                  className="color-picker__slider"
+                  value={hsl.l}
+                  onChange={(e) => handleHSLChange('l', parseInt(e.target.value))}
+                  aria-label="Lightness"
+                  style={{
+                    background: `linear-gradient(to right, 
+                      hsl(${hsl.h}, ${hsl.s}%, 0%), 
+                      hsl(${hsl.h}, ${hsl.s}%, 50%), 
+                      hsl(${hsl.h}, ${hsl.s}%, 100%))`
+                  }}
                 />
-                <label>Lightness: {currentHsl.l}%</label>
               </div>
             </div>
-          )}
-
-          {inputMethod === 'hex' && (
-            <div className="color-picker__hex">
-              <input
-                type="text"
-                value={tempColor}
-                onChange={handleHexInput}
-                placeholder="#000000"
-                className="color-picker__hex-input"
-                maxLength={7}
-              />
-            </div>
-          )}
-
-          {inputMethod === 'rgb' && (
-            <div className="color-picker__rgb">
-              <div className="color-picker__rgb-inputs">
-                <label>
-                  R:
-                  <input
-                    type="number"
-                    min="0"
-                    max="255"
-                    value={currentRgb.r}
-                    onChange={(e) => handleRGBInput(parseInt(e.target.value) || 0, currentRgb.g, currentRgb.b)}
-                  />
-                </label>
-                <label>
-                  G:
-                  <input
-                    type="number"
-                    min="0"
-                    max="255"
-                    value={currentRgb.g}
-                    onChange={(e) => handleRGBInput(currentRgb.r, parseInt(e.target.value) || 0, currentRgb.b)}
-                  />
-                </label>
-                <label>
-                  B:
-                  <input
-                    type="number"
-                    min="0"
-                    max="255"
-                    value={currentRgb.b}
-                    onChange={(e) => handleRGBInput(currentRgb.r, currentRgb.g, parseInt(e.target.value) || 0)}
-                  />
-                </label>
-              </div>
-            </div>
-          )}
-
-          {inputMethod === 'hsl' && (
-            <div className="color-picker__hsl">
-              <div className="color-picker__hsl-inputs">
-                <label>
-                  H:
-                  <input
-                    type="number"
-                    min="0"
-                    max="360"
-                    value={currentHsl.h}
-                    onChange={(e) => handleHSLInput(parseInt(e.target.value) || 0, currentHsl.s, currentHsl.l)}
-                  />
-                </label>
-                <label>
-                  S:
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={currentHsl.s}
-                    onChange={(e) => handleHSLInput(currentHsl.h, parseInt(e.target.value) || 0, currentHsl.l)}
-                  />
-                </label>
-                <label>
-                  L:
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={currentHsl.l}
-                    onChange={(e) => handleHSLInput(currentHsl.h, currentHsl.s, parseInt(e.target.value) || 0)}
-                  />
-                </label>
-              </div>
-            </div>
-          )}
-
-          {inputMethod === 'named' && (
-            <div className="color-picker__named">
-              <select
-                value={tempColor}
-                onChange={(e) => handleColorChange(e.target.value)}
-                className="color-picker__named-select"
-              >
-                <option value="">Select a named color...</option>
-                <optgroup label="Basic Colors">
-                  <option value="#FF0000">Red</option>
-                  <option value="#00FF00">Green</option>
-                  <option value="#0000FF">Blue</option>
-                  <option value="#FFFF00">Yellow</option>
-                  <option value="#FF00FF">Magenta</option>
-                  <option value="#00FFFF">Cyan</option>
-                  <option value="#000000">Black</option>
-                  <option value="#FFFFFF">White</option>
-                </optgroup>
-                <optgroup label="Brown Tones">
-                  <option value="#8B4513">Saddle Brown</option>
-                  <option value="#A0522D">Sienna</option>
-                  <option value="#CD853F">Peru</option>
-                  <option value="#DEB887">Burlywood</option>
-                  <option value="#F5DEB3">Wheat</option>
-                  <option value="#D2691E">Chocolate</option>
-                  <option value="#BC8F8F">Rosy Brown</option>
-                </optgroup>
-                <optgroup label="Gray Tones">
-                  <option value="#696969">Dim Gray</option>
-                  <option value="#708090">Slate Gray</option>
-                  <option value="#778899">Light Slate Gray</option>
-                  <option value="#A9A9A9">Dark Gray</option>
-                  <option value="#C0C0C0">Silver</option>
-                  <option value="#D3D3D3">Light Gray</option>
-                </optgroup>
-              </select>
-            </div>
-          )}
-
-          {inputMethod === 'preset' && colorProperty.presets && (
+            
+            {/* Preset Colors */}
             <div className="color-picker__presets">
-              <div className="color-picker__preset-grid">
-                {colorProperty.presets.map((preset, index) => (
-                  <div
+              <div className="color-picker__presets-label">Preset Colors</div>
+              <div className="color-picker__presets-grid">
+                {presets.map((preset, index) => (
+                  <button
                     key={index}
-                    className={`color-picker__preset ${preset.value === tempColor ? 'color-picker__preset--active' : ''}`}
-                    style={{ backgroundColor: preset.value }}
-                    onClick={() => handleColorChange(preset.value)}
-                    title={`${preset.name}${preset.description ? ': ' + preset.description : ''}`}
-                  >
-                    <span className="color-picker__preset-name">{preset.name}</span>
-                  </div>
+                    className={`color-picker__preset ${
+                      normalizeHex(preset) === normalizeHex(hexInput)
+                        ? 'color-picker__preset--active'
+                        : ''
+                    }`}
+                    style={{ backgroundColor: preset }}
+                    onClick={() => handlePresetClick(preset)}
+                    title={preset}
+                    aria-label={`Preset color ${preset}`}
+                    type="button"
+                  />
                 ))}
               </div>
             </div>
-          )}
-
-          {/* Action buttons */}
-          <div className="color-picker__actions">
+          </div>
+          
+          <div className="dialog__footer">
             <button
-              onClick={() => {
-                onChange(tempColor);
-                setShowPicker(false);
-              }}
-              className="color-picker__button color-picker__button--primary"
+              className="designer-button"
+              onClick={onClose}
+              type="button"
             >
-              Apply
-            </button>
-            <button
-              onClick={() => {
-                setTempColor(colorProperty.value);
-                setShowPicker(false);
-              }}
-              className="color-picker__button color-picker__button--secondary"
-            >
-              Cancel
+              Done
             </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
-};
+}

@@ -1,244 +1,305 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import type { Theme } from '../../shared/design-tokens';
-import { themeManager, createDefaultTheme } from '../../shared/design-tokens';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import type { Theme, WallTypeDefinition } from '../types';
 import { useApiClient } from './useApiClient';
 
-export interface ThemeManagerState {
-  themes: Theme[];
-  activeTheme: Theme | null;
-  isDirty: boolean;
-  isLoading: boolean;
-  error: string | null;
-  lastSaved: Date | null;
+// Type for timeout to avoid NodeJS namespace dependency
+type TimeoutId = ReturnType<typeof setTimeout>;
+
+interface HistoryEntry {
+  action: string;
+  timestamp: number;
+  previousState: Theme;
+  newState: Theme;
 }
 
-export const useThemeManager = () => {
+interface ThemeManagerState {
+  activeTheme: Theme | null;
+  availableThemes: Theme[];
+  isDirty: boolean;
+  history: HistoryEntry[];
+  historyIndex: number;
+  isLoading: boolean;
+  error: string | null;
+}
+
+interface UseThemeManagerReturn {
+  // State
+  activeTheme: Theme | null;
+  availableThemes: Theme[];
+  isDirty: boolean;
+  canUndo: boolean;
+  canRedo: boolean;
+  isLoading: boolean;
+  error: string | null;
+  
+  // Theme operations
+  loadTheme: (themeId: string) => Promise<void>;
+  loadAllThemes: () => Promise<void>;
+  createTheme: (name: string, basedOn?: string) => Promise<void>;
+  saveTheme: () => Promise<void>;
+  deleteTheme: (themeId: string) => Promise<void>;
+  
+  // Property updates
+  updateProperty: (path: string, value: any) => void;
+  updateWallType: (wallTypeId: string, updates: Partial<WallTypeDefinition>) => void;
+  addWallType: (name: string, basedOn?: string) => void;
+  
+  // History operations
+  undo: () => void;
+  redo: () => void;
+  
+  // Utility
+  clearError: () => void;
+  resetDirtyState: () => void;
+}
+
+const MAX_HISTORY_ENTRIES = 50;
+const DEBOUNCE_DELAY = 300;
+
+export const useThemeManager = (): UseThemeManagerReturn => {
+  const apiClient = useApiClient();
+  
   const [state, setState] = useState<ThemeManagerState>({
-    themes: [],
     activeTheme: null,
+    availableThemes: [],
     isDirty: false,
+    history: [],
+    historyIndex: -1,
     isLoading: false,
     error: null,
-    lastSaved: null,
   });
 
-  const apiClient = useApiClient();
-  const autoSaveTimeoutRef = useRef<number | undefined>(undefined);
-  const changeHistoryRef = useRef<Theme[]>([]);
-  const currentHistoryIndexRef = useRef(-1);
+  // Debounce timer ref
+  const debounceTimerRef = useRef<TimeoutId | null>(null);
+  
+  // Pending updates ref for debouncing
+  const pendingUpdatesRef = useRef<Map<string, any>>(new Map());
 
-  // Initialize theme system
-  useEffect(() => {
-    initializeThemes();
-  }, []);
+  /**
+   * Validate theme structure and data
+   */
+  const validateTheme = useCallback((theme: Theme): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
 
-  // Set up auto-save
-  useEffect(() => {
-    if (state.isDirty && state.activeTheme) {
-      // Clear existing timeout
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-
-      // Set new timeout for auto-save (5 seconds)
-      autoSaveTimeoutRef.current = setTimeout(() => {
-        if (state.activeTheme && state.isDirty) {
-          saveTheme();
-        }
-      }, 5000);
+    if (!theme.id || theme.id.trim() === '') {
+      errors.push('Theme must have a valid id');
     }
 
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
+    if (!theme.name || theme.name.trim() === '') {
+      errors.push('Theme must have a valid name');
+    }
+
+    if (!theme.version || !theme.version.match(/^\d+\.\d+\.\d+$/)) {
+      errors.push('Theme must have a valid semantic version (x.y.z)');
+    }
+
+    if (!theme.wallTypes || Object.keys(theme.wallTypes).length === 0) {
+      errors.push('Theme must define at least one wall type');
+    } else {
+      // Validate each wall type
+      for (const [wallTypeId, wallType] of Object.entries(theme.wallTypes)) {
+        if (!wallType.id || wallType.id.trim() === '') {
+          errors.push(`Wall type '${wallTypeId}' must have a valid id`);
+        }
+        if (!wallType.displayName || wallType.displayName.trim() === '') {
+          errors.push(`Wall type '${wallTypeId}' must have a display name`);
+        }
+        if (!wallType.colors) {
+          errors.push(`Wall type '${wallTypeId}' must have a color scheme`);
+        }
       }
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
     };
-  }, [state.isDirty, state.activeTheme]);
+  }, []);
 
-  const initializeThemes = useCallback(async () => {
+  /**
+   * Add entry to history stack
+   */
+  const addToHistory = useCallback((action: string, previousTheme: Theme, newTheme: Theme) => {
+    setState(prev => {
+      // Remove any entries after current index (when undoing then making new changes)
+      const newHistory = prev.history.slice(0, prev.historyIndex + 1);
+      
+      // Add new entry
+      newHistory.push({
+        action,
+        timestamp: Date.now(),
+        previousState: previousTheme,
+        newState: newTheme,
+      });
+
+      // Limit history size
+      if (newHistory.length > MAX_HISTORY_ENTRIES) {
+        newHistory.shift();
+      }
+
+      return {
+        ...prev,
+        history: newHistory,
+        historyIndex: newHistory.length - 1,
+      };
+    });
+  }, []);
+
+  /**
+   * Load all available themes
+   */
+  const loadAllThemes = useCallback(async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
-
+    
     try {
-      // Load default theme
-      const defaultTheme = createDefaultTheme();
-      themeManager.registerTheme(defaultTheme);
-
-      // Load themes from server
-      const serverThemes = await apiClient.getThemes();
-      if (serverThemes) {
-        serverThemes.forEach(theme => {
-          if (theme.id !== 'default') {
-            themeManager.registerTheme(theme);
-          }
-        });
+      const themes = await apiClient.getThemes();
+      
+      if (themes) {
+        setState(prev => ({
+          ...prev,
+          availableThemes: themes,
+          isLoading: false,
+        }));
+      } else {
+        throw new Error('Failed to load themes');
       }
-
-      const allThemes = themeManager.getAllThemes();
-      const activeTheme = themeManager.getActiveTheme() || defaultTheme;
-
-      setState(prev => ({
-        ...prev,
-        themes: allThemes,
-        activeTheme,
-        isLoading: false,
-      }));
-
-      // Initialize change history
-      if (activeTheme) {
-        changeHistoryRef.current = [{ ...activeTheme }];
-        currentHistoryIndexRef.current = 0;
-      }
-
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to initialize themes';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load themes';
       setState(prev => ({
         ...prev,
-        isLoading: false,
         error: errorMessage,
+        isLoading: false,
       }));
     }
   }, [apiClient]);
 
-  const setActiveTheme = useCallback((themeId: string) => {
-    const theme = themeManager.getTheme(themeId);
-    if (theme) {
-      themeManager.setActiveTheme(themeId);
+  /**
+   * Load a specific theme
+   */
+  const loadTheme = useCallback(async (themeId: string) => {
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    
+    try {
+      const theme = await apiClient.getTheme(themeId);
+      
+      if (theme) {
+        // Validate theme before loading
+        const validation = validateTheme(theme);
+        if (!validation.isValid) {
+          throw new Error(`Invalid theme: ${validation.errors.join(', ')}`);
+        }
+
+        setState(prev => ({
+          ...prev,
+          activeTheme: theme,
+          isDirty: false,
+          history: [],
+          historyIndex: -1,
+          isLoading: false,
+        }));
+      } else {
+        throw new Error(`Theme '${themeId}' not found`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load theme';
       setState(prev => ({
         ...prev,
-        activeTheme: theme,
-        isDirty: false,
+        error: errorMessage,
+        isLoading: false,
       }));
-
-      // Reset change history
-      changeHistoryRef.current = [{ ...theme }];
-      currentHistoryIndexRef.current = 0;
     }
-  }, []);
+  }, [apiClient, validateTheme]);
 
-  const updateThemeProperty = useCallback((path: string, value: any) => {
-    console.log('🌎 useThemeManager: updateThemeProperty called', { path, value, activeTheme: state.activeTheme?.id });
+  /**
+   * Create a new theme
+   */
+  const createTheme = useCallback(async (name: string, basedOn?: string) => {
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    
+    try {
+      let baseTheme: Theme | null = null;
+      
+      if (basedOn) {
+        baseTheme = await apiClient.getTheme(basedOn);
+        if (!baseTheme) {
+          throw new Error(`Base theme '${basedOn}' not found`);
+        }
+      }
+
+      const newTheme: Theme = {
+        id: `custom-${Date.now()}`,
+        name,
+        version: '1.0.0',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        basedOn,
+        wallTypes: baseTheme ? { ...baseTheme.wallTypes } : {},
+      };
+
+      const createdTheme = await apiClient.createTheme(newTheme);
+      
+      if (createdTheme) {
+        setState(prev => ({
+          ...prev,
+          activeTheme: createdTheme,
+          availableThemes: [...prev.availableThemes, createdTheme],
+          isDirty: false,
+          history: [],
+          historyIndex: -1,
+          isLoading: false,
+        }));
+      } else {
+        throw new Error('Failed to create theme');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create theme';
+      setState(prev => ({
+        ...prev,
+        error: errorMessage,
+        isLoading: false,
+      }));
+    }
+  }, [apiClient]);
+
+  /**
+   * Save the active theme
+   */
+  const saveTheme = useCallback(async () => {
     if (!state.activeTheme) {
-      console.warn('⚠️ useThemeManager: No active theme - cannot update property');
+      setState(prev => ({ ...prev, error: 'No active theme to save' }));
       return;
     }
 
-    try {
-      console.log('🌎 useThemeManager: Attempting to update token...');
-      // Update the theme in memory
-      themeManager.updateToken(
-        {
-          themeId: state.activeTheme.id,
-          wallTypeId: path.split('.')[0], // Extract wall type from path
-          tokenPath: path.substring(path.indexOf('.') + 1), // Remove wall type from path
-        },
-        value
-      );
-      console.log('🌎 useThemeManager: Token update successful');
-
-      const updatedTheme = themeManager.getActiveTheme();
-      if (updatedTheme) {
-        console.log('🌎 useThemeManager: Setting updated theme', updatedTheme.id);
-        setState(prev => ({
-          ...prev,
-          activeTheme: updatedTheme,
-          isDirty: true,
-        }));
-
-        // Add to change history
-        addToHistory(updatedTheme);
-        console.log('🌎 useThemeManager: Theme update complete');
-      } else {
-        console.error('❌ useThemeManager: Failed to get updated theme');
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update property';
-      console.error('❌ useThemeManager: Error updating property:', error);
-      setState(prev => ({ ...prev, error: errorMessage }));
-    }
-  }, [state.activeTheme]);
-
-  const addToHistory = useCallback((theme: Theme) => {
-    // Remove any future history if we're not at the end
-    if (currentHistoryIndexRef.current < changeHistoryRef.current.length - 1) {
-      changeHistoryRef.current = changeHistoryRef.current.slice(0, currentHistoryIndexRef.current + 1);
-    }
-
-    // Add new state
-    changeHistoryRef.current.push({ ...theme });
-    currentHistoryIndexRef.current = changeHistoryRef.current.length - 1;
-
-    // Limit history size to prevent memory issues
-    if (changeHistoryRef.current.length > 50) {
-      changeHistoryRef.current.shift();
-      currentHistoryIndexRef.current--;
-    }
-  }, []);
-
-  const undo = useCallback(() => {
-    if (currentHistoryIndexRef.current > 0) {
-      currentHistoryIndexRef.current--;
-      const previousTheme = changeHistoryRef.current[currentHistoryIndexRef.current];
-      
-      themeManager.registerTheme(previousTheme);
-      themeManager.setActiveTheme(previousTheme.id);
-
+    // Validate before saving
+    const validation = validateTheme(state.activeTheme);
+    if (!validation.isValid) {
       setState(prev => ({
         ...prev,
-        activeTheme: previousTheme,
-        isDirty: true,
+        error: `Cannot save invalid theme: ${validation.errors.join(', ')}`,
       }));
+      return;
     }
-  }, []);
-
-  const redo = useCallback(() => {
-    if (currentHistoryIndexRef.current < changeHistoryRef.current.length - 1) {
-      currentHistoryIndexRef.current++;
-      const nextTheme = changeHistoryRef.current[currentHistoryIndexRef.current];
-      
-      themeManager.registerTheme(nextTheme);
-      themeManager.setActiveTheme(nextTheme.id);
-
-      setState(prev => ({
-        ...prev,
-        activeTheme: nextTheme,
-        isDirty: true,
-      }));
-    }
-  }, []);
-
-  const canUndo = currentHistoryIndexRef.current > 0;
-  const canRedo = currentHistoryIndexRef.current < changeHistoryRef.current.length - 1;
-
-  const saveTheme = useCallback(async () => {
-    if (!state.activeTheme) return false;
 
     setState(prev => ({ ...prev, isLoading: true, error: null }));
-
+    
     try {
-      let result;
-      if (state.activeTheme.id === 'default') {
-        // Create a copy of default theme with new ID
-        const newTheme = {
-          ...state.activeTheme,
-          id: `custom-${Date.now()}`,
-          name: `${state.activeTheme.name} (Custom)`,
-          created: new Date(),
-          modified: new Date(),
-        };
-        result = await apiClient.createTheme(newTheme);
-      } else {
-        result = await apiClient.updateTheme(state.activeTheme.id, state.activeTheme);
-      }
+      const updatedTheme = {
+        ...state.activeTheme,
+        updatedAt: new Date().toISOString(),
+      };
 
-      if (result) {
+      const savedTheme = await apiClient.updateTheme(state.activeTheme.id, updatedTheme);
+      
+      if (savedTheme) {
         setState(prev => ({
           ...prev,
-          activeTheme: result,
+          activeTheme: savedTheme,
+          availableThemes: prev.availableThemes.map(t => 
+            t.id === savedTheme.id ? savedTheme : t
+          ),
           isDirty: false,
           isLoading: false,
-          lastSaved: new Date(),
         }));
-        return true;
       } else {
         throw new Error('Failed to save theme');
       }
@@ -246,192 +307,355 @@ export const useThemeManager = () => {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save theme';
       setState(prev => ({
         ...prev,
-        isLoading: false,
         error: errorMessage,
+        isLoading: false,
       }));
-      return false;
     }
-  }, [state.activeTheme, apiClient]);
+  }, [state.activeTheme, apiClient, validateTheme]);
 
-  const createNewTheme = useCallback(async (basedOn?: string) => {
-    const baseTheme = basedOn ? themeManager.getTheme(basedOn) : createDefaultTheme();
-    if (!baseTheme) return null;
-
-    const newTheme: Theme = {
-      ...baseTheme,
-      id: `theme-${Date.now()}`,
-      name: `New Theme ${new Date().toLocaleDateString()}`,
-      description: 'Custom theme created in Designer Mode',
-      author: 'Designer Mode',
-      created: new Date(),
-      modified: new Date(),
-    };
-
-    try {
-      const result = await apiClient.createTheme(newTheme);
-      if (result) {
-        themeManager.registerTheme(result);
-        setState(prev => ({
-          ...prev,
-          themes: [...prev.themes, result],
-        }));
-        return result;
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create theme';
-      setState(prev => ({ ...prev, error: errorMessage }));
-    }
-    return null;
-  }, [apiClient]);
-
+  /**
+   * Delete a theme
+   */
   const deleteTheme = useCallback(async (themeId: string) => {
     if (themeId === 'default') {
       setState(prev => ({ ...prev, error: 'Cannot delete default theme' }));
-      return false;
-    }
-
-    try {
-      const success = await apiClient.deleteTheme(themeId);
-      if (success) {
-        themeManager.removeTheme(themeId);
-        setState(prev => ({
-          ...prev,
-          themes: prev.themes.filter(t => t.id !== themeId),
-        }));
-
-        // If deleted theme was active, switch to default
-        if (state.activeTheme?.id === themeId) {
-          setActiveTheme('default');
-        }
-        return true;
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete theme';
-      setState(prev => ({ ...prev, error: errorMessage }));
-    }
-    return false;
-  }, [apiClient, state.activeTheme, setActiveTheme]);
-
-  const resetTheme = useCallback(() => {
-    if (!state.activeTheme) return;
-
-    const originalTheme = changeHistoryRef.current[0];
-    if (originalTheme) {
-      themeManager.registerTheme(originalTheme);
-      themeManager.setActiveTheme(originalTheme.id);
-
-      setState(prev => ({
-        ...prev,
-        activeTheme: originalTheme,
-        isDirty: false,
-      }));
-
-      // Reset history
-      changeHistoryRef.current = [{ ...originalTheme }];
-      currentHistoryIndexRef.current = 0;
-    }
-  }, [state.activeTheme]);
-
-  const importTheme = useCallback(async (file: File, overwrite: boolean = false) => {
-    try {
-      const result = await apiClient.importThemeFromFile(file, overwrite);
-      if (result) {
-        themeManager.registerTheme(result);
-        setState(prev => ({
-          ...prev,
-          themes: prev.themes.some(t => t.id === result.id)
-            ? prev.themes.map(t => t.id === result.id ? result : t)
-            : [...prev.themes, result],
-        }));
-        return result;
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to import theme';
-      setState(prev => ({ ...prev, error: errorMessage }));
-    }
-    return null;
-  }, [apiClient]);
-
-  const exportTheme = useCallback(async (themeId: string, format: 'json' | 'css' = 'json') => {
-    try {
-      await apiClient.downloadTheme(themeId, format);
-      return true;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to export theme';
-      setState(prev => ({ ...prev, error: errorMessage }));
-      return false;
-    }
-  }, [apiClient]);
-
-  const addWallTypeToTheme = useCallback((wallType: any) => {
-    if (!state.activeTheme) {
-      console.warn('⚠️ useThemeManager: No active theme - cannot add wall type');
       return;
     }
 
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    
     try {
-      console.log('🏗️ useThemeManager: Adding new wall type:', wallType.id);
+      const success = await apiClient.deleteTheme(themeId);
       
-      // Create a new theme with the added wall type
-      const updatedTheme = {
-        ...state.activeTheme,
-        wallTypes: {
-          ...state.activeTheme.wallTypes,
-          [wallType.id]: wallType
-        },
-        modified: new Date()
-      };
-      
-      // Register the updated theme
-      themeManager.registerTheme(updatedTheme);
-      themeManager.setActiveTheme(updatedTheme.id);
-      
+      if (success) {
+        setState(prev => {
+          const newState = {
+            ...prev,
+            availableThemes: prev.availableThemes.filter(t => t.id !== themeId),
+            isLoading: false,
+          };
+
+          // If deleted theme was active, clear it
+          if (prev.activeTheme?.id === themeId) {
+            newState.activeTheme = null;
+            newState.isDirty = false;
+            newState.history = [];
+            newState.historyIndex = -1;
+          }
+
+          return newState;
+        });
+      } else {
+        throw new Error('Failed to delete theme');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete theme';
       setState(prev => ({
         ...prev,
-        activeTheme: updatedTheme,
-        isDirty: true,
+        error: errorMessage,
+        isLoading: false,
       }));
-      
-      // Add to change history
-      addToHistory(updatedTheme);
-      console.log('🏗️ useThemeManager: Wall type added successfully');
-      
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to add wall type';
-      console.error('❌ useThemeManager: Error adding wall type:', error);
-      setState(prev => ({ ...prev, error: errorMessage }));
     }
+  }, [apiClient]);
+
+  /**
+   * Update a property in the active theme with debouncing
+   */
+  const updateProperty = useCallback((path: string, value: any) => {
+    if (!state.activeTheme) {
+      return;
+    }
+
+    // Store pending update
+    pendingUpdatesRef.current.set(path, value);
+
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Set new timer
+    debounceTimerRef.current = setTimeout(() => {
+      setState(prev => {
+        if (!prev.activeTheme) {
+          return prev;
+        }
+
+        const previousTheme = { ...prev.activeTheme };
+        const newTheme = { ...prev.activeTheme };
+
+        // Apply all pending updates
+        pendingUpdatesRef.current.forEach((updateValue, updatePath) => {
+          const parts = updatePath.split('.');
+          let current: any = newTheme;
+
+          // Navigate to the parent object
+          for (let i = 0; i < parts.length - 1; i++) {
+            if (current && typeof current === 'object' && parts[i] in current) {
+              // Create a copy to avoid mutation
+              current[parts[i]] = { ...current[parts[i]] };
+              current = current[parts[i]];
+            } else {
+              console.error(`Invalid property path: ${updatePath}`);
+              return;
+            }
+          }
+
+          // Update the final property
+          const finalKey = parts[parts.length - 1];
+          if (current && typeof current === 'object') {
+            if (typeof current[finalKey] === 'object' && current[finalKey] !== null && 'value' in current[finalKey]) {
+              current[finalKey] = { ...current[finalKey], value: updateValue };
+            } else {
+              current[finalKey] = updateValue;
+            }
+          }
+        });
+
+        // Clear pending updates
+        pendingUpdatesRef.current.clear();
+
+        // Add to history
+        addToHistory('Update property', previousTheme, newTheme);
+
+        return {
+          ...prev,
+          activeTheme: newTheme,
+          isDirty: true,
+        };
+      });
+    }, DEBOUNCE_DELAY);
   }, [state.activeTheme, addToHistory]);
 
+  /**
+   * Update an entire wall type
+   */
+  const updateWallType = useCallback((wallTypeId: string, updates: Partial<WallTypeDefinition>) => {
+    if (!state.activeTheme) {
+      return;
+    }
+
+    setState(prev => {
+      if (!prev.activeTheme || !prev.activeTheme.wallTypes[wallTypeId]) {
+        return prev;
+      }
+
+      const previousTheme = { ...prev.activeTheme };
+      const newTheme = {
+        ...prev.activeTheme,
+        wallTypes: {
+          ...prev.activeTheme.wallTypes,
+          [wallTypeId]: {
+            ...prev.activeTheme.wallTypes[wallTypeId],
+            ...updates,
+          },
+        },
+      };
+
+      // Add to history
+      addToHistory(`Update wall type: ${wallTypeId}`, previousTheme, newTheme);
+
+      return {
+        ...prev,
+        activeTheme: newTheme,
+        isDirty: true,
+      };
+    });
+  }, [state.activeTheme, addToHistory]);
+
+  /**
+   * Add a new wall type to the active theme
+   */
+  const addWallType = useCallback((name: string, basedOn?: string) => {
+    if (!state.activeTheme) {
+      return;
+    }
+
+    setState(prev => {
+      if (!prev.activeTheme) {
+        return prev;
+      }
+
+      const previousTheme = { ...prev.activeTheme };
+      
+      // Generate unique ID
+      const id = name.toLowerCase().replace(/\s+/g, '-');
+      
+      // Get base wall type if specified
+      let baseWallType: WallTypeDefinition | null = null;
+      if (basedOn && prev.activeTheme.wallTypes[basedOn]) {
+        baseWallType = prev.activeTheme.wallTypes[basedOn];
+      }
+
+      // Create new wall type
+      const newWallType: WallTypeDefinition = baseWallType
+        ? {
+            ...baseWallType,
+            id,
+            displayName: name,
+            description: `Custom wall type based on ${baseWallType.displayName}`,
+          }
+        : {
+            id,
+            displayName: name,
+            description: 'Custom wall type',
+            colors: {
+              primary: { value: '#808080', displayName: 'Primary Color' },
+              secondary: { value: '#606060', displayName: 'Secondary Color' },
+              accent: { value: '#a0a0a0', displayName: 'Accent Color' },
+              shadow: { value: '#404040', displayName: 'Shadow Color' },
+              highlight: { value: '#c0c0c0', displayName: 'Highlight Color' },
+            },
+            dimensions: {
+              width: { value: 64, min: 32, max: 128, step: 1, unit: 'px' },
+              height: { value: 64, min: 32, max: 128, step: 1, unit: 'px' },
+              spacing: { value: 2, min: 0, max: 10, step: 1, unit: 'px' },
+              borderWidth: { value: 1, min: 0, max: 5, step: 1, unit: 'px' },
+            },
+            texture: {
+              pattern: 'SOLID',
+              intensity: { value: 1, min: 0, max: 2, step: 0.1 },
+              blendMode: 'NORMAL',
+              procedural: true,
+            },
+            effects: {
+              shadow: {
+                enabled: false,
+                color: { value: '#000000', displayName: 'Shadow Color' },
+                offset: { value: 2, min: 0, max: 10, step: 1, unit: 'px' },
+                blur: { value: 4, min: 0, max: 20, step: 1, unit: 'px' },
+              },
+              highlight: {
+                enabled: false,
+                color: { value: '#ffffff', displayName: 'Highlight Color' },
+                intensity: { value: 0.5, min: 0, max: 1, step: 0.1 },
+              },
+              gradient: {
+                enabled: false,
+                type: 'linear',
+                colors: [
+                  { value: '#808080', displayName: 'Gradient Start' },
+                  { value: '#606060', displayName: 'Gradient End' },
+                ],
+              },
+            },
+            legacyMapping: {},
+          };
+
+      const newTheme = {
+        ...prev.activeTheme,
+        wallTypes: {
+          ...prev.activeTheme.wallTypes,
+          [id]: newWallType,
+        },
+      };
+
+      // Add to history
+      addToHistory(`Add wall type: ${name}`, previousTheme, newTheme);
+
+      return {
+        ...prev,
+        activeTheme: newTheme,
+        isDirty: true,
+      };
+    });
+  }, [state.activeTheme, addToHistory]);
+
+  /**
+   * Undo last change
+   */
+  const undo = useCallback(() => {
+    setState(prev => {
+      if (prev.historyIndex < 0) {
+        return prev;
+      }
+
+      const entry = prev.history[prev.historyIndex];
+      
+      return {
+        ...prev,
+        activeTheme: entry.previousState,
+        historyIndex: prev.historyIndex - 1,
+        isDirty: true,
+      };
+    });
+  }, []);
+
+  /**
+   * Redo last undone change
+   */
+  const redo = useCallback(() => {
+    setState(prev => {
+      if (prev.historyIndex >= prev.history.length - 1) {
+        return prev;
+      }
+
+      const entry = prev.history[prev.historyIndex + 1];
+      
+      return {
+        ...prev,
+        activeTheme: entry.newState,
+        historyIndex: prev.historyIndex + 1,
+        isDirty: true,
+      };
+    });
+  }, []);
+
+  /**
+   * Clear error state
+   */
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
+  /**
+   * Reset dirty state
+   */
+  const resetDirtyState = useCallback(() => {
+    setState(prev => ({ ...prev, isDirty: false }));
+  }, []);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Computed values
+  const canUndo = state.historyIndex >= 0;
+  const canRedo = state.historyIndex < state.history.length - 1;
+
   return {
     // State
-    ...state,
+    activeTheme: state.activeTheme,
+    availableThemes: state.availableThemes,
+    isDirty: state.isDirty,
     canUndo,
     canRedo,
-
-    // Theme management
-    setActiveTheme,
-    updateThemeProperty,
+    isLoading: state.isLoading || apiClient.loading,
+    error: state.error || apiClient.error,
+    
+    // Theme operations
+    loadTheme,
+    loadAllThemes,
+    createTheme,
     saveTheme,
-    createNewTheme,
     deleteTheme,
-    resetTheme,
-    addWallTypeToTheme,
-
-    // History
+    
+    // Property updates
+    updateProperty,
+    updateWallType,
+    addWallType,
+    
+    // History operations
     undo,
     redo,
-
-    // Import/Export
-    importTheme,
-    exportTheme,
-
+    
     // Utility
     clearError,
-    refreshThemes: initializeThemes,
+    resetDirtyState,
   };
 };

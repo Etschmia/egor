@@ -1,44 +1,114 @@
-// Designer Mode Component Types
-import type { Theme, WallTypeDefinition, ColorProperty, NumberProperty } from '../shared/design-tokens';
+// Designer-specific TypeScript interfaces
+
+export type AssetType = 'wallTypes' | 'objects' | 'pictures' | 'lights' | 'enemies';
+
+export interface Theme {
+  id: string;
+  name: string;
+  version: string;
+  createdAt: string;
+  updatedAt: string;
+  basedOn?: string;
+  wallTypes: Record<string, WallTypeDefinition>;
+}
+
+export interface WallTypeDefinition {
+  id: string;
+  displayName: string;
+  description: string;
+  colors: ColorScheme;
+  dimensions: DimensionSettings;
+  texture: TextureProperties;
+  effects: VisualEffects;
+  legacyMapping: Record<string, any>;
+}
+
+export interface ColorScheme {
+  primary: ColorProperty;
+  secondary: ColorProperty;
+  accent: ColorProperty;
+  shadow: ColorProperty;
+  highlight: ColorProperty;
+}
+
+export interface ColorProperty {
+  value: string;
+  displayName: string;
+  presets?: string[];
+}
+
+export interface DimensionSettings {
+  width: NumberProperty;
+  height: NumberProperty;
+  spacing: NumberProperty;
+  borderWidth: NumberProperty;
+}
+
+export interface NumberProperty {
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  unit?: string;
+}
+
+export interface TextureProperties {
+  pattern: PatternType;
+  intensity: NumberProperty;
+  blendMode: BlendMode;
+  procedural: boolean;
+}
+
+export type PatternType = 'SOLID' | 'GRADIENT' | 'BRICK' | 'WOOD_GRAIN' | 'STONE_BLOCKS' | 'METAL';
+export type BlendMode = 'NORMAL' | 'MULTIPLY' | 'OVERLAY' | 'SOFT_LIGHT';
+
+export interface VisualEffects {
+  shadow: ShadowEffect;
+  highlight: HighlightEffect;
+  gradient: GradientEffect;
+}
+
+export interface ShadowEffect {
+  enabled: boolean;
+  color: ColorProperty;
+  offset: NumberProperty;
+  blur: NumberProperty;
+}
+
+export interface HighlightEffect {
+  enabled: boolean;
+  color: ColorProperty;
+  intensity: NumberProperty;
+}
+
+export interface GradientEffect {
+  enabled: boolean;
+  type: 'linear' | 'radial';
+  colors: ColorProperty[];
+}
 
 export interface DesignerState {
+  selectedAssetType: AssetType;
+  selectedAssetId: string | null;
   activeTheme: Theme | null;
-  selectedWallType: string | null;
-  previewDimensions: {
-    width: number;
-    height: number;
-  };
+  availableThemes: Theme[];
   isDirty: boolean;
+  history: HistoryEntry[];
+  historyIndex: number;
+  sidebarCollapsed: boolean;
+  showShortcuts: boolean;
   isLoading: boolean;
   error: string | null;
 }
 
-export interface PropertyEditorProps {
-  wallType: WallTypeDefinition;
-  onPropertyChange: (path: string, value: any) => void;
-  onReset: () => void;
+export interface HistoryEntry {
+  action: string;
+  timestamp: number;
+  previousState: any;
+  newState: any;
 }
 
-export interface ColorPickerProps {
-  colorProperty: ColorProperty;
-  onChange: (value: string) => void;
-  label?: string;
-  showPresets?: boolean;
-}
-
-export interface NumberSliderProps {
-  numberProperty: NumberProperty;
-  onChange: (value: number) => void;
-  label?: string;
-}
-
-export interface WallTypeSelectorProps {
-  availableWallTypes: WallTypeDefinition[];
-  selectedWallType: string | null;
-  onWallTypeChange: (wallTypeId: string) => void;
-  onCreateNewWallType?: (wallType: WallTypeDefinition) => void;
-}
-
+// Component Props Interfaces
 export interface LivePreviewProps {
   wallTypeId: string;
   themeId: string;
@@ -47,134 +117,21 @@ export interface LivePreviewProps {
   scale?: number;
 }
 
-export interface ThemeActionsProps {
-  theme: Theme;
-  onSave: () => void;
-  onLoad: () => void;
-  onExport: () => void;
-  onImport: (file: File) => void;
+export interface NumberSliderProps {
+  numberProperty: NumberProperty;
+  label: string;
+  onChange: (value: number) => void;
+}
+
+export interface PropertyEditorProps {
+  wallType: WallTypeDefinition;
+  onPropertyChange: (path: string, value: any) => void;
   onReset: () => void;
-  isDirty: boolean;
 }
 
-export interface ColorPreset {
-  name: string;
-  value: string;
-  description?: string;
-}
-
-export interface ColorPickerState {
-  currentColor: string;
-  showPicker: boolean;
-  showPresets: boolean;
-  customColors: string[];
-}
-
-// Color picker input methods
-export type ColorInputMethod = 'picker' | 'hex' | 'rgb' | 'hsl' | 'named' | 'preset';
-
-export interface ColorInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  method: ColorInputMethod;
-  presets?: ColorPreset[];
-}
-
-// Theme validation and feedback
-export interface ValidationFeedback {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-}
-
-export interface ThemeValidationProps {
-  theme: Theme;
-  onValidationChange: (feedback: ValidationFeedback) => void;
-}
-
-// Designer layout and panels
-export interface DesignerLayoutProps {
-  children: React.ReactNode;
-  sidebarContent: React.ReactNode;
-  previewContent: React.ReactNode;
-  actionsContent: React.ReactNode;
-}
-
-export interface PanelProps {
-  title: string;
-  children: React.ReactNode;
-  collapsible?: boolean;
-  defaultExpanded?: boolean;
-  className?: string;
-}
-
-// Theme management
-export interface ThemeManagerProps {
-  onThemeSelect: (themeId: string) => void;
-  onThemeCreate: () => void;
-  onThemeDelete: (themeId: string) => void;
-  activeThemeId: string | null;
-}
-
-// File operations
-export interface FileOperationResult {
-  success: boolean;
-  message: string;
-  data?: any;
-}
-
-export type FileOperation = 'save' | 'load' | 'export' | 'import';
-
-export interface FileOperationProps {
-  operation: FileOperation;
-  data?: any;
-  onComplete: (result: FileOperationResult) => void;
-}
-
-// Responsive breakpoints for designer interface
-export interface DesignerBreakpoints {
-  mobile: number;
-  tablet: number;
-  desktop: number;
-  wide: number;
-}
-
-export const DEFAULT_BREAKPOINTS: DesignerBreakpoints = {
-  mobile: 768,
-  tablet: 1024,
-  desktop: 1440,
-  wide: 1920
-};
-
-// Keyboard shortcuts
-export interface KeyboardShortcut {
-  key: string;
-  ctrl?: boolean;
-  shift?: boolean;
-  alt?: boolean;
-  action: () => void;
-  description: string;
-}
-
-export interface KeyboardShortcutsProps {
-  shortcuts: KeyboardShortcut[];
-}
-
-// Undo/Redo system
-export interface HistoryState {
-  past: Theme[];
-  present: Theme;
-  future: Theme[];
-}
-
-export interface HistoryAction {
-  type: 'UNDO' | 'REDO' | 'PUSH' | 'CLEAR';
-  theme?: Theme;
-}
-
-export interface UndoRedoProps {
-  onUndo: () => void;
-  onRedo: () => void;
-  canUndo: boolean;
-  canRedo: boolean;
+export interface WallTypeSelectorProps {
+  availableWallTypes: any[];
+  selectedWallType: string | null;
+  onWallTypeChange: (wallTypeId: string) => void;
+  onCreateNewWallType: (wallType: any) => void;
 }
