@@ -243,7 +243,7 @@
   - Test error scenarios
   - _Requirements: All_
 
-- [-] 29. Update documentation
+- [x] 29. Update documentation
   - Add Designer Mode section to README
   - Document keyboard shortcuts
   - Document theme file format

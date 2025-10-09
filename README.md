@@ -180,112 +180,102 @@ Der Editor öffnet sich unter `http://localhost:3000` mit einem Backend-Server a
 
 **Hinweis**: Der Editor ist von Produktions-Builds ausgeschlossen und läuft nur in der Entwicklung.
 
-## Designer Modus (Nur in der Entwicklung)
+## Designer Mode (Nur in der Entwicklung)
 
-Das Projekt enthält einen fortschrittlichen Designer Modus für die visuelle Erstellung und Anpassung von Wand-Texturen und Themes.
+Der Designer Mode ist ein visueller Theme-Editor zur Erstellung und Anpassung von Wand-Texturen und visuellen Themes für das Spiel. Er bietet eine intuitive Benutzeroberfläche ohne Code-Kenntnisse zu benötigen.
 
-### Designer Modus starten
-
-```bash
-npm run designer:frontend
-npm run designer:backend
-```
-
-Oder beide Server gleichzeitig:
+### Schnellstart
 
 ```bash
+# Beide Server gleichzeitig starten
 npm run designer
+
+# Oder separat starten
+npm run designer:frontend  # Port 3002
+npm run designer:backend   # Port 3003
 ```
 
-Der Designer öffnet sich unter `http://localhost:3000` mit einem Backend-Server auf Port 3002.
+Öffne dann: `http://localhost:3002/designer.html`
 
-### Features
+### Hauptfunktionen
 
-#### Wand-Textur-Design
-- **Echtzeit-Vorschau**: Sofortige Visualisierung von Textur-Änderungen
-- **Interaktive Eigenschaften-Editoren**: 
-  - Farbauswahl mit Hex-, RGB-, HSL- und Preset-Modi
-  - Zahlen-Schieberegler für Dimensionen und Intensitäten
-  - Wand-Typ-Auswahl (Ziegel, Holz, Stein, Türen)
-- **Theme-System**: Verwaltung mehrerer Wand-Themes
-- **Live-Textur-Generierung**: Prozedurale Textur-Erstellung basierend auf Design-Tokens
+- **Echtzeit-Vorschau**: Sofortige Visualisierung aller Änderungen
+- **Theme-Verwaltung**: Erstellen, speichern und wechseln zwischen mehreren Themes
+- **Visuelle Editoren**: Intuitive Steuerelemente für Farben, Dimensionen und Effekte
+- **Undo/Redo**: Vollständige Historie mit bis zu 50 Schritten
+- **Import/Export**: Themes als JSON oder CSS teilen
+- **Tastenkürzel**: Effiziente Workflows mit Tastatur-Navigation
+- **Responsive Design**: Funktioniert auf verschiedenen Bildschirmgrößen
+- **Barrierefreiheit**: Vollständige Tastatur-Navigation und Screen-Reader-Unterstützung
 
-#### Design-Token-System
-- **Hierarchische Eigenschaften**: Strukturierte Farbschemata, Dimensionen und Effekte
-- **Token-Resolution**: Automatische Auflösung von Design-Token-Referenzen
-- **Validierung**: Eingebaute Validierung für Theme-Konsistenz
-- **Migration**: Automatische Migration zwischen Theme-Versionen
+### Wand-Typen
 
-#### Wand-Typen
+Der Designer Mode unterstützt die Bearbeitung von vier Wand-Typen:
+
 1. **Ziegel-Wände**: Traditionelle Ziegelstein-Textur mit Mörtel
-   - Primärfarbe (Mörtel), Sekundärfarbe (Ziegel), Akzentfarbe (Fugen)
-   - Anpassbare Ziegelbreite, -höhe und Fugenbreite
-   - Schatten- und Highlight-Effekte für 3D-Tiefe
-
 2. **Holz-Wände**: Vertikale Holzpaneele mit natürlicher Maserung
-   - Basis-Holzfarbe, Plankenfarbe, Maserungsfarbe
-   - Plankenbreite und Abstand zwischen Planken
-   - Holzmaserung-Intensität und Mischmodius
-
 3. **Stein-Wände**: Steinblock-Textur mit natürlicher Variation
-   - Steinfarbe, Mörtelfarbe, Variationsfarbe
-   - Blockgröße und Mörtelbreite
-   - Steinblock-Muster mit zufälliger Variation
-
 4. **Tür-Texturen**: Spezielle Texturen für interaktive Türen
-   - Holzmaserung mit Metallbeschlägen
-   - Türrahmen und Panel-Details
-   - Spezielle Farbgebung für verschiedene Tür-Typen
 
-#### Benutzeroberfläche
-- **Eigenschaften-Panel**: Detaillierte Kontrolle über alle Textur-Parameter
-- **Live-Vorschau**: Gekachelte Vorschau der Textur in verschiedenen Zoom-Stufen
-- **Performance-Statistiken**: Generierungszeit und Cache-Informationen
-- **Export-Funktionen**: Texturen als PNG exportieren
-- **Tastenkürzel**: Vollständige Tastatur-Navigation und -steuerung
+Jeder Typ hat anpassbare Eigenschaften:
+- **Farben**: Primär, Sekundär, Akzent, Schatten, Highlight
+- **Dimensionen**: Breite, Höhe, Abstand, Rahmenbreite
+- **Textur**: Muster, Intensität, Mischmodus
+- **Effekte**: Schatten, Highlights, Verläufe
 
-### Technische Implementierung
+### Tastenkürzel
 
-#### Frontend-Architektur
-- **React-Komponenten** mit TypeScript für Type-Safety
-- **Design-Token-Integration** für konsistente Gestaltung
-- **Echtzeit-Rendering** mit Canvas-basierter Textur-Generierung
-- **State-Management** mit React Hooks
+| Kürzel | Aktion |
+|--------|--------|
+| `Strg+S` | Theme speichern |
+| `Strg+Z` | Rückgängig |
+| `Strg+Y` | Wiederholen |
+| `Strg+N` | Neues Theme |
+| `F1` | Tastenkürzel anzeigen |
+| `Escape` | Dialog schließen |
 
-#### Backend-System
-- **Theme-Manager**: Zentrale Verwaltung von Design-Themes
-- **Token-Resolution-Engine**: Intelligente Auflösung von Design-Token-Referenzen
-- **Validierungs-System**: Automatische Überprüfung der Theme-Integrität
-- **Migrations-Framework**: Nahtlose Updates zwischen Theme-Versionen
+Siehe [vollständige Tastenkürzel-Referenz](docs/DESIGNER-MODE-KEYBOARD-SHORTCUTS.md) für alle Shortcuts.
 
-#### Projektstruktur
+### Dokumentation
+
+- **[Vollständiger Guide](docs/DESIGNER-MODE-README.md)** - Umfassende Anleitung mit Workflows und Best Practices
+- **[Tastenkürzel](docs/DESIGNER-MODE-KEYBOARD-SHORTCUTS.md)** - Komplette Referenz aller Tastenkombinationen
+- **[Theme-Dateiformat](docs/DESIGNER-MODE-THEME-FORMAT.md)** - Spezifikation der Theme-Struktur
+- **[Fehlerbehebung](docs/DESIGNER-MODE-TROUBLESHOOTING.md)** - Häufige Probleme und Lösungen
+
+### Architektur
+
 ```
-src/
-├── designer/
-│   ├── components/          # React-Komponenten für Designer-UI
-│   │   ├── ColorPicker.tsx  # Farb-Auswahl-Komponente
-│   │   ├── LivePreview.tsx  # Echtzeit-Textur-Vorschau
-│   │   ├── NumberSlider.tsx # Zahlen-Eingabe mit Schieberegler
-│   │   └── PropertyEditor.tsx # Eigenschaften-Editor
-│   ├── hooks/               # React Hooks für State-Management
-│   └── types.ts             # TypeScript-Definitionen
-├── shared/
-│   ├── design-tokens/       # Design-Token-System
-│   │   ├── ThemeManager.ts  # Theme-Verwaltung
-│   │   ├── defaultTheme.ts  # Standard-Theme-Definition
-│   │   └── types.ts         # Token-Type-Definitionen
-│   └── texture-generation/  # Textur-Generierungs-Engine
-│       └── TextureGenerator.ts
-└── designer-server.mjs      # Backend-Server (Port 3002)
+src/designer/
+├── components/          # React-Komponenten für UI
+│   ├── Header.tsx       # Theme-Auswahl und Aktionen
+│   ├── Sidebar.tsx      # Asset-Liste
+│   ├── PropertyPanel.tsx # Eigenschaften-Editor
+│   ├── LivePreview.tsx  # Echtzeit-Vorschau
+│   └── ...
+├── hooks/               # React Hooks für State-Management
+│   ├── useThemeManager.ts
+│   ├── useApiClient.ts
+│   └── ...
+└── utils/               # Hilfsfunktionen
+    ├── themeValidator.ts
+    ├── exportUtils.ts
+    └── ...
+
+designer-server.mjs      # Backend-API (Port 3003)
+themes/                  # Theme-Dateien
+├── default.json         # Standard-Theme
+└── custom-themes/       # Benutzerdefinierte Themes
 ```
 
 ### Anwendungsfälle
+
 - **Spiel-Artists**: Erstellen neuer Wand-Texturen ohne Code-Kenntnisse
 - **Level-Designer**: Anpassen der visuellen Atmosphäre verschiedener Level
 - **Entwickler**: Schnelle Prototyp-Erstellung für neue Textur-Konzepte
 - **Theme-Entwicklung**: Konsistente Gestaltungs-Systeme für das gesamte Spiel
 
-**Hinweis**: Der Designer Modus ist nur in der Entwicklungsumgebung verfügbar und wird nicht in Produktions-Builds eingeschlossen.
+**Hinweis**: Der Designer Mode ist nur in der Entwicklungsumgebung verfügbar und wird nicht in Produktions-Builds eingeschlossen.
 
 ## Entwickelt von
 
