@@ -18,22 +18,106 @@ app.use(express.json({ limit: '10mb' }));
 // Theme validation utilities
 function validateTheme(theme) {
   const errors = [];
+  const warnings = [];
   
-  if (!theme.name || typeof theme.name !== 'string') {
+  // Basic structure validation
+  if (!theme || typeof theme !== 'object') {
+    errors.push('Theme must be a valid object');
+    return { valid: false, errors, warnings };
+  }
+  
+  // Required fields
+  if (!theme.id || typeof theme.id !== 'string' || theme.id.trim() === '') {
+    errors.push('Theme must have a valid id');
+  }
+  
+  if (!theme.name || typeof theme.name !== 'string' || theme.name.trim() === '') {
     errors.push('Theme must have a valid name');
   }
   
   if (!theme.version || typeof theme.version !== 'string') {
     errors.push('Theme must have a valid version');
+  } else if (!/^\d+\.\d+\.\d+$/.test(theme.version)) {
+    warnings.push('Version should follow semantic versioning (x.y.z)');
   }
   
+  // Validate wallTypes
   if (!theme.wallTypes || typeof theme.wallTypes !== 'object') {
     errors.push('Theme must have wallTypes object');
+  } else {
+    const wallTypeIds = Object.keys(theme.wallTypes);
+    
+    if (wallTypeIds.length === 0) {
+      warnings.push('Theme has no wall types defined');
+    }
+    
+    // Validate each wall type
+    wallTypeIds.forEach(wallTypeId => {
+      const wallType = theme.wallTypes[wallTypeId];
+      
+      if (!wallType || typeof wallType !== 'object') {
+        errors.push(`Wall type '${wallTypeId}' must be a valid object`);
+        return;
+      }
+      
+      // Required wall type fields
+      if (!wallType.id || typeof wallType.id !== 'string') {
+        errors.push(`Wall type '${wallTypeId}' must have a valid id`);
+      }
+      
+      if (!wallType.displayName || typeof wallType.displayName !== 'string') {
+        errors.push(`Wall type '${wallTypeId}' must have a displayName`);
+      }
+      
+      if (!wallType.colors || typeof wallType.colors !== 'object') {
+        errors.push(`Wall type '${wallTypeId}' must have a colors object`);
+      } else {
+        // Validate required colors
+        const requiredColors = ['primary', 'secondary', 'accent', 'shadow', 'highlight'];
+        requiredColors.forEach(colorName => {
+          if (!wallType.colors[colorName]) {
+            errors.push(`Wall type '${wallTypeId}' is missing required color '${colorName}'`);
+          } else if (!wallType.colors[colorName].value || typeof wallType.colors[colorName].value !== 'string') {
+            errors.push(`Wall type '${wallTypeId}' color '${colorName}' must have a valid value`);
+          } else if (!/^#([0-9A-Fa-f]{3}){1,2}$/.test(wallType.colors[colorName].value)) {
+            errors.push(`Wall type '${wallTypeId}' color '${colorName}' value must be a valid hex color`);
+          }
+        });
+      }
+      
+      if (!wallType.dimensions || typeof wallType.dimensions !== 'object') {
+        errors.push(`Wall type '${wallTypeId}' must have a dimensions object`);
+      }
+      
+      if (!wallType.texture || typeof wallType.texture !== 'object') {
+        errors.push(`Wall type '${wallTypeId}' must have a texture object`);
+      } else {
+        const validPatterns = ['SOLID', 'GRADIENT', 'BRICK', 'WOOD_GRAIN', 'STONE_BLOCKS', 'METAL'];
+        if (wallType.texture.pattern && !validPatterns.includes(wallType.texture.pattern)) {
+          errors.push(`Wall type '${wallTypeId}' has invalid texture pattern '${wallType.texture.pattern}'`);
+        }
+      }
+      
+      if (!wallType.effects || typeof wallType.effects !== 'object') {
+        errors.push(`Wall type '${wallTypeId}' must have an effects object`);
+      }
+    });
+  }
+  
+  // Backward compatibility check
+  if (theme.wallTypes && typeof theme.wallTypes === 'object') {
+    Object.keys(theme.wallTypes).forEach(wallTypeId => {
+      const wallType = theme.wallTypes[wallTypeId];
+      if (!wallType.legacyMapping) {
+        warnings.push(`Wall type '${wallTypeId}' is missing legacy mapping for backward compatibility`);
+      }
+    });
   }
   
   return {
     valid: errors.length === 0,
-    errors
+    errors,
+    warnings
   };
 }
 
@@ -208,6 +292,11 @@ app.post('/api/themes', async (req, res) => {
       });
     }
     
+    // Log warnings if any
+    if (validation.warnings.length > 0) {
+      console.warn('[Theme Creation Warnings]', validation.warnings);
+    }
+    
     const themeId = `custom-${Date.now()}`;
     const newTheme = {
       ...theme,
@@ -254,6 +343,11 @@ app.put('/api/themes/:id', async (req, res) => {
         error: 'Invalid theme structure',
         details: validation.errors 
       });
+    }
+    
+    // Log warnings if any
+    if (validation.warnings.length > 0) {
+      console.warn('[Theme Update Warnings]', validation.warnings);
     }
     
     const themePath = path.join(CUSTOM_THEMES_DIR, `${id}.json`);
@@ -355,14 +449,14 @@ app.post('/api/themes/:id/export', async (req, res) => {
 // POST /api/themes/import - Import a theme from JSON
 app.post('/api/themes/import', async (req, res) => {
   try {
-    const { theme } = req.body;
+    const { themeData, overwrite } = req.body;
     
-    if (!theme) {
+    if (!themeData) {
       return res.status(400).json({ success: false, error: 'Theme data required' });
     }
     
     // Validate theme structure
-    const validation = validateTheme(theme);
+    const validation = validateTheme(themeData);
     if (!validation.valid) {
       return res.status(400).json({ 
         success: false, 
@@ -371,11 +465,23 @@ app.post('/api/themes/import', async (req, res) => {
       });
     }
     
-    const themeId = `custom-${Date.now()}`;
+    // Log warnings if any
+    if (validation.warnings.length > 0) {
+      console.warn('[Theme Import Warnings]', validation.warnings);
+    }
+    
+    // Generate new ID for imported theme (unless overwriting)
+    const themeId = overwrite && themeData.id ? sanitizeThemeId(themeData.id) : `custom-${Date.now()}`;
+    
+    // Prevent overwriting default theme
+    if (themeId === 'default') {
+      return res.status(403).json({ success: false, error: 'Cannot overwrite default theme' });
+    }
+    
     const importedTheme = {
-      ...theme,
+      ...themeData,
       id: themeId,
-      createdAt: new Date().toISOString(),
+      createdAt: themeData.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     

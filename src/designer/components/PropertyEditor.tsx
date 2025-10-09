@@ -1,7 +1,7 @@
 import React from 'react';
 import type { PropertyEditorProps } from '../types';
 // import ColorPicker from './ColorPicker';
-import { NumberSlider } from './NumberSlider';
+import NumberSlider from './NumberSlider';
 
 /**
  * NOTE: This component was created in an earlier task and expects a different
@@ -82,27 +82,27 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({
         <h3 className="property-editor__section-title">Dimensions</h3>
         <div className="property-editor__section-content">
           <NumberSlider
-            numberProperty={wallType.dimensions.width}
-            onChange={(value: number) => handleDimensionChange('width', value)}
+            property={wallType.dimensions.width}
             label="Width"
+            onChange={(value: number) => handleDimensionChange('width', value)}
           />
 
           <NumberSlider
-            numberProperty={wallType.dimensions.height}
-            onChange={(value: number) => handleDimensionChange('height', value)}
+            property={wallType.dimensions.height}
             label="Height"
+            onChange={(value: number) => handleDimensionChange('height', value)}
           />
 
           <NumberSlider
-            numberProperty={wallType.dimensions.spacing}
-            onChange={(value: number) => handleDimensionChange('spacing', value)}
+            property={wallType.dimensions.spacing}
             label="Spacing"
+            onChange={(value: number) => handleDimensionChange('spacing', value)}
           />
 
           <NumberSlider
-            numberProperty={wallType.dimensions.borderWidth}
-            onChange={(value: number) => handleDimensionChange('borderWidth', value)}
+            property={wallType.dimensions.borderWidth}
             label="Border Width"
+            onChange={(value: number) => handleDimensionChange('borderWidth', value)}
           />
         </div>
       </div>
@@ -128,9 +128,9 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({
           </div>
 
           <NumberSlider
-            numberProperty={wallType.texture.intensity}
-            onChange={(value: number) => handleTextureChange('intensity.value', value)}
+            property={wallType.texture.intensity}
             label="Pattern Intensity"
+            onChange={(value: number) => handleTextureChange('intensity.value', value)}
           />
 
           <div className="property-editor__field">

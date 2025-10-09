@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Export Utils Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #ffffff;
+    }
+    
+    h1 {
+      color: #4CAF50;
+    }
+    
+    .section {
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 14px;
+    }
+    
+    button:hover {
+      background: #45a049;
+    }
+    
+    pre {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 15px;
+      overflow-x: auto;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    code {
+      color: #4CAF50;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+    
+    .success {
+      color: #4CAF50;
+    }
+    
+    .error {
+      color: #f44336;
+    }
+    
+    .info {
+      color: #2196F3;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Export Utils Demo</h1>
+  
+  <div class="section">
+    <h2>Mock Theme Data</h2>
+    <pre><code id="themeData"></code></pre>
+  </div>
+  
+  <div class="section">
+    <h2>Export Actions</h2>
+    <button onclick="testJSONExport()">Export as JSON</button>
+    <button onclick="testJSONExportMinified()">Export as JSON (Minified)</button>
+    <button onclick="testCSSExport()">Export as CSS</button>
+    <button onclick="testCSSExportMinified()">Export as CSS (Minified)</button>
+    <button onclick="testValidation()">Test Validation</button>
+  </div>
+  
+  <div class="section">
+    <h2>Results</h2>
+    <div id="results"></div>
+  </div>
+
+  <script type="module">
+    // Mock theme data
+    const mockTheme = {
+      id: 'demo-theme',
+      name: 'Demo Theme',
+      version: '1.0.0',
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+      wallTypes: {
+        brick: {
+          id: 'brick',
+          displayName: 'Brick Wall',
+          description: 'Traditional brick masonry',
+          colors: {
+            primary: { value: '#8B4513', displayName: 'Mortar Color' },
+            secondary: { value: '#D3D3D3', displayName: 'Brick Color' },
+            accent: { value: '#A0522D', displayName: 'Joint Color' },
+            shadow: { value: '#5A3D1A', displayName: 'Shadow Color' },
+            highlight: { value: '#B85A2A', displayName: 'Highlight Color' }
+          },
+          dimensions: {
+            width: { value: 16, displayName: 'Width', min: 8, max: 32, step: 1, unit: 'px' },
+            height: { value: 4, displayName: 'Height', min: 2, max: 8, step: 1, unit: 'px' },
+            spacing: { value: 8, displayName: 'Spacing', min: 4, max: 16, step: 1, unit: 'px' },
+            borderWidth: { value: 1, displayName: 'Border', min: 1, max: 3, step: 1, unit: 'px' }
+          },
+          texture: {
+            pattern: 'BRICK',
+            intensity: { value: 1.0, displayName: 'Intensity', min: 0.1, max: 2.0, step: 0.1 },
+            blendMode: 'NORMAL',
+            procedural: true
+          },
+          effects: {
+            shadow: {
+              enabled: true,
+              color: { value: '#5A3D1A', displayName: 'Shadow Color' },
+              offset: { value: 1, displayName: 'Offset', min: 0, max: 5, step: 1, unit: 'px' },
+              blur: { value: 0, displayName: 'Blur', min: 0, max: 10, step: 1, unit: 'px' }
+            },
+            highlight: {
+              enabled: true,
+              color: { value: '#B85A2A', displayName: 'Highlight Color' },
+              intensity: { value: 0.5, displayName: 'Intensity', min: 0, max: 1, step: 0.1 }
+            },
+            gradient: {
+              enabled: false,
+              type: 'linear',
+              colors: []
+            }
+          },
+          legacyMapping: {}
+        },
+        wood: {
+          id: 'wood',
+          displayName: 'Wood Paneling',
+          description: 'Vertical wood planks',
+          colors: {
+            primary: { value: '#8B4513', displayName: 'Base Wood' },
+            secondary: { value: '#654321', displayName: 'Plank Color' },
+            accent: { value: '#4A4A4A', displayName: 'Gap Color' },
+            shadow: { value: '#5D4037', displayName: 'Grain Color' },
+            highlight: { value: '#A0522D', displayName: 'Highlight' }
+          },
+          dimensions: {
+            width: { value: 4, displayName: 'Width', min: 2, max: 8, step: 1, unit: 'px' },
+            height: { value: 32, displayName: 'Height', min: 16, max: 64, step: 1, unit: 'px' },
+            spacing: { value: 8, displayName: 'Spacing', min: 4, max: 16, step: 1, unit: 'px' },
+            borderWidth: { value: 1, displayName: 'Border', min: 1, max: 3, step: 1, unit: 'px' }
+          },
+          texture: {
+            pattern: 'WOOD_GRAIN',
+            intensity: { value: 1.0, displayName: 'Intensity', min: 0.1, max: 2.0, step: 0.1 },
+            blendMode: 'NORMAL',
+            procedural: true
+          },
+          effects: {
+            shadow: {
+              enabled: true,
+              color: { value: '#3D2914', displayName: 'Shadow Color' },
+              offset: { value: 1, displayName: 'Offset', min: 0, max: 5, step: 1, unit: 'px' },
+              blur: { value: 0, displayName: 'Blur', min: 0, max: 10, step: 1, unit: 'px' }
+            },
+            highlight: {
+              enabled: true,
+              color: { value: '#A0522D', displayName: 'Highlight Color' },
+              intensity: { value: 0.3, displayName: 'Intensity', min: 0, max: 1, step: 0.1 }
+            },
+            gradient: {
+              enabled: false,
+              type: 'linear',
+              colors: []
+            }
+          },
+          legacyMapping: {}
+        }
+      }
+    };
+
+    // Display theme data
+    document.getElementById('themeData').textContent = JSON.stringify(mockTheme, null, 2);
+
+    // Export utility functions (inline for demo)
+    function exportTheme(theme, options) {
+      try {
+        switch (options.format) {
+          case 'json':
+            return exportAsJSON(theme, options);
+          case 'css':
+            return exportAsCSS(theme, options);
+          default:
+            return {
+              success: false,
+              content: '',
+              filename: '',
+              mimeType: '',
+              error: `Unsupported format: ${options.format}`
+            };
+        }
+      } catch (error) {
+        return {
+          success: false,
+          content: '',
+          filename: '',
+          mimeType: '',
+          error: error.message
+        };
+      }
+    }
+
+    function exportAsJSON(theme, options) {
+      const content = options.minify
+        ? JSON.stringify(theme)
+        : JSON.stringify(theme, null, 2);
+      
+      return {
+        success: true,
+        content,
+        filename: `${sanitizeFilename(theme.name)}-${theme.version}.json`,
+        mimeType: 'application/json'
+      };
+    }
+
+    function exportAsCSS(theme, options) {
+      const lines = [];
+      const indent = options.minify ? '' : '  ';
+      const newline = options.minify ? '' : '\n';
+
+      if (!options.minify) {
+        lines.push(`/**`);
+        lines.push(` * Theme: ${theme.name}`);
+        lines.push(` * Version: ${theme.version}`);
+        lines.push(` * Generated: ${new Date().toISOString()}`);
+        lines.push(` */`);
+        lines.push('');
+      }
+
+      lines.push(':root {');
+
+      Object.entries(theme.wallTypes).forEach(([wallTypeId, wallType]) => {
+        if (!options.minify) {
+          lines.push(`${indent}/* ${wallType.displayName} */`);
+        }
+
+        // Colors
+        Object.entries(wallType.colors).forEach(([key, prop]) => {
+          lines.push(`${indent}--wall-${wallTypeId}-color-${key}: ${prop.value};`);
+        });
+
+        // Dimensions
+        Object.entries(wallType.dimensions).forEach(([key, prop]) => {
+          lines.push(`${indent}--wall-${wallTypeId}-${key}: ${prop.value}${prop.unit || ''};`);
+        });
+
+        // Texture
+        lines.push(`${indent}--wall-${wallTypeId}-texture-pattern: "${wallType.texture.pattern}";`);
+        lines.push(`${indent}--wall-${wallTypeId}-texture-intensity: ${wallType.texture.intensity.value};`);
+        lines.push(`${indent}--wall-${wallTypeId}-texture-blend-mode: "${wallType.texture.blendMode}";`);
+
+        if (!options.minify) {
+          lines.push('');
+        }
+      });
+
+      lines.push('}');
+
+      return {
+        success: true,
+        content: lines.join(newline),
+        filename: `${sanitizeFilename(theme.name)}-${theme.version}.css`,
+        mimeType: 'text/css'
+      };
+    }
+
+    function sanitizeFilename(name) {
+      return name.toLowerCase().replace(/[^a-z0-9-_]/g, '-').replace(/-+/g, '-');
+    }
+
+    function validateTheme(theme) {
+      const errors = [];
+      
+      if (!theme.id) errors.push('Missing theme ID');
+      if (!theme.name) errors.push('Missing theme name');
+      if (!theme.version) errors.push('Missing theme version');
+      if (!theme.wallTypes || Object.keys(theme.wallTypes).length === 0) {
+        errors.push('No wall types defined');
+      }
+
+      return { valid: errors.length === 0, errors };
+    }
+
+    function showResult(title, result) {
+      const resultsDiv = document.getElementById('results');
+      const resultHTML = `
+        <div style="margin: 20px 0; padding: 15px; background: #1a1a1a; border-radius: 4px;">
+          <h3 class="info">${title}</h3>
+          ${result.success !== undefined ? `<p class="${result.success ? 'success' : 'error'}">
+            Status: ${result.success ? '✓ Success' : '✗ Failed'}
+          </p>` : ''}
+          ${result.error ? `<p class="error">Error: ${result.error}</p>` : ''}
+          ${result.filename ? `<p>Filename: <code>${result.filename}</code></p>` : ''}
+          ${result.mimeType ? `<p>MIME Type: <code>${result.mimeType}</code></p>` : ''}
+          ${result.content ? `<p>Content Length: ${result.content.length} characters</p>` : ''}
+          ${result.content ? `<pre><code>${result.content.substring(0, 500)}${result.content.length > 500 ? '...' : ''}</code></pre>` : ''}
+          ${result.errors ? `<p class="error">Errors: ${result.errors.join(', ')}</p>` : ''}
+        </div>
+      `;
+      resultsDiv.innerHTML = resultHTML + resultsDiv.innerHTML;
+    }
+
+    // Test functions
+    window.testJSONExport = function() {
+      const result = exportTheme(mockTheme, { format: 'json' });
+      showResult('JSON Export', result);
+    };
+
+    window.testJSONExportMinified = function() {
+      const result = exportTheme(mockTheme, { format: 'json', minify: true });
+      showResult('JSON Export (Minified)', result);
+    };
+
+    window.testCSSExport = function() {
+      const result = exportTheme(mockTheme, { format: 'css' });
+      showResult('CSS Export', result);
+    };
+
+    window.testCSSExportMinified = function() {
+      const result = exportTheme(mockTheme, { format: 'css', minify: true });
+      showResult('CSS Export (Minified)', result);
+    };
+
+    window.testValidation = function() {
+      const result = validateTheme(mockTheme);
+      showResult('Theme Validation', result);
+    };
+  </script>
+</body>
+</html>

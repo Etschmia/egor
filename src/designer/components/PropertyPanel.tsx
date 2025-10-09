@@ -1,5 +1,6 @@
 import type { WallTypeDefinition } from '../types';
 import PropertyGroup from './PropertyGroup';
+import NumberSlider from './NumberSlider';
 
 interface PropertyPanelProps {
   asset: WallTypeDefinition | null;
@@ -9,7 +10,7 @@ interface PropertyPanelProps {
 
 export default function PropertyPanel({
   asset,
-  onPropertyChange: _onPropertyChange,
+  onPropertyChange,
   onReset,
 }: PropertyPanelProps) {
   if (!asset) {
@@ -75,23 +76,16 @@ export default function PropertyPanel({
         <PropertyGroup title="Dimensions">
           <div className="property-panel__group-content">
             {Object.entries(asset.dimensions).map(([key, numProp]) => (
-              <div key={key} className="property-panel__property">
-                <label className="property-panel__property-label">
-                  {key.charAt(0).toUpperCase() + key.slice(1)}
-                </label>
-                <div className="property-panel__number-display">
-                  <span className="property-panel__number-value">
-                    {numProp.value}
-                    {numProp.unit && ` ${numProp.unit}`}
-                  </span>
-                  <span className="property-panel__number-range">
-                    ({numProp.min} - {numProp.max})
-                  </span>
-                </div>
-                <div className="property-panel__property-hint">
-                  Slider control coming in next task
-                </div>
-              </div>
+              <NumberSlider
+                key={key}
+                property={numProp}
+                label={key.charAt(0).toUpperCase() + key.slice(1)}
+                onChange={(value) => {
+                  if (onPropertyChange) {
+                    onPropertyChange(`dimensions.${key}`, value);
+                  }
+                }}
+              />
             ))}
           </div>
         </PropertyGroup>
@@ -105,15 +99,15 @@ export default function PropertyPanel({
                 {asset.texture.pattern}
               </div>
             </div>
-            <div className="property-panel__property">
-              <label className="property-panel__property-label">Intensity</label>
-              <div className="property-panel__number-display">
-                <span className="property-panel__number-value">
-                  {asset.texture.intensity.value}
-                  {asset.texture.intensity.unit && ` ${asset.texture.intensity.unit}`}
-                </span>
-              </div>
-            </div>
+            <NumberSlider
+              property={asset.texture.intensity}
+              label="Intensity"
+              onChange={(value) => {
+                if (onPropertyChange) {
+                  onPropertyChange('texture.intensity', value);
+                }
+              }}
+            />
             <div className="property-panel__property">
               <label className="property-panel__property-label">Blend Mode</label>
               <div className="property-panel__text-value">
@@ -154,20 +148,24 @@ export default function PropertyPanel({
                       </span>
                     </div>
                   </div>
-                  <div className="property-panel__property">
-                    <label className="property-panel__property-label">Offset</label>
-                    <span className="property-panel__number-value">
-                      {asset.effects.shadow.offset.value}
-                      {asset.effects.shadow.offset.unit}
-                    </span>
-                  </div>
-                  <div className="property-panel__property">
-                    <label className="property-panel__property-label">Blur</label>
-                    <span className="property-panel__number-value">
-                      {asset.effects.shadow.blur.value}
-                      {asset.effects.shadow.blur.unit}
-                    </span>
-                  </div>
+                  <NumberSlider
+                    property={asset.effects.shadow.offset}
+                    label="Offset"
+                    onChange={(value) => {
+                      if (onPropertyChange) {
+                        onPropertyChange('effects.shadow.offset', value);
+                      }
+                    }}
+                  />
+                  <NumberSlider
+                    property={asset.effects.shadow.blur}
+                    label="Blur"
+                    onChange={(value) => {
+                      if (onPropertyChange) {
+                        onPropertyChange('effects.shadow.blur', value);
+                      }
+                    }}
+                  />
                 </div>
               )}
             </div>
@@ -194,13 +192,15 @@ export default function PropertyPanel({
                       </span>
                     </div>
                   </div>
-                  <div className="property-panel__property">
-                    <label className="property-panel__property-label">Intensity</label>
-                    <span className="property-panel__number-value">
-                      {asset.effects.highlight.intensity.value}
-                      {asset.effects.highlight.intensity.unit}
-                    </span>
-                  </div>
+                  <NumberSlider
+                    property={asset.effects.highlight.intensity}
+                    label="Intensity"
+                    onChange={(value) => {
+                      if (onPropertyChange) {
+                        onPropertyChange('effects.highlight.intensity', value);
+                      }
+                    }}
+                  />
                 </div>
               )}
             </div>

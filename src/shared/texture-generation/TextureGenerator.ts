@@ -8,23 +8,54 @@ export interface TextureGenerationOptions {
   themeId?: string;
 }
 
+export interface CacheStatistics {
+  size: number;
+  maxSize: number;
+  hits: number;
+  misses: number;
+  hitRate: number;
+  evictions: number;
+}
+
 export class TextureGenerator {
   private cache: Map<string, HTMLCanvasElement>;
   private maxCacheSize: number;
+  private cacheHits: number;
+  private cacheMisses: number;
+  private cacheEvictions: number;
+  private currentThemeId: string | null;
 
-  constructor(maxCacheSize: number = 100) {
+  constructor(maxCacheSize: number = 50) {
     this.cache = new Map();
     this.maxCacheSize = maxCacheSize;
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
+    this.cacheEvictions = 0;
+    this.currentThemeId = null;
   }
 
   // Main texture generation method
   public generateTexture(options: TextureGenerationOptions): HTMLCanvasElement {
+    const themeId = options.themeId || themeManager.getActiveTheme()?.id || 'default';
+    
+    // Invalidate cache if theme has changed
+    if (this.currentThemeId !== null && this.currentThemeId !== themeId) {
+      this.invalidateThemeCache(this.currentThemeId);
+    }
+    this.currentThemeId = themeId;
+    
     const cacheKey = this.createCacheKey(options);
     
     if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey)!;
+      // LRU: Move accessed item to end (most recently used)
+      const texture = this.cache.get(cacheKey)!;
+      this.cache.delete(cacheKey);
+      this.cache.set(cacheKey, texture);
+      this.cacheHits++;
+      return texture;
     }
 
+    this.cacheMisses++;
     const texture = this.createTexture(options);
     this.addToCache(cacheKey, texture);
     
@@ -324,21 +355,76 @@ export class TextureGenerator {
 
   private addToCache(key: string, texture: HTMLCanvasElement): void {
     if (this.cache.size >= this.maxCacheSize) {
-      // Remove oldest entry (LRU)
+      // Remove least recently used entry (first entry in Map)
       const firstKey = this.cache.keys().next().value;
       if (firstKey) {
         this.cache.delete(firstKey);
+        this.cacheEvictions++;
       }
     }
     this.cache.set(key, texture);
   }
 
-  public clearCache(): void {
-    this.cache.clear();
+  /**
+   * Invalidate all cache entries for a specific theme
+   */
+  public invalidateThemeCache(themeId: string): void {
+    const keysToDelete: string[] = [];
+    
+    for (const key of this.cache.keys()) {
+      if (key.startsWith(`${themeId}:`)) {
+        keysToDelete.push(key);
+      }
+    }
+    
+    keysToDelete.forEach(key => {
+      this.cache.delete(key);
+      this.cacheEvictions++;
+    });
   }
 
+  /**
+   * Clear entire cache and reset statistics
+   */
+  public clearCache(): void {
+    this.cache.clear();
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
+    this.cacheEvictions = 0;
+    this.currentThemeId = null;
+  }
+
+  /**
+   * Get current cache size
+   */
   public getCacheSize(): number {
     return this.cache.size;
+  }
+
+  /**
+   * Get detailed cache statistics
+   */
+  public getCacheStatistics(): CacheStatistics {
+    const totalRequests = this.cacheHits + this.cacheMisses;
+    const hitRate = totalRequests > 0 ? (this.cacheHits / totalRequests) * 100 : 0;
+    
+    return {
+      size: this.cache.size,
+      maxSize: this.maxCacheSize,
+      hits: this.cacheHits,
+      misses: this.cacheMisses,
+      hitRate: Math.round(hitRate * 100) / 100,
+      evictions: this.cacheEvictions,
+    };
+  }
+
+  /**
+   * Reset cache statistics without clearing cache
+   */
+  public resetStatistics(): void {
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
+    this.cacheEvictions = 0;
   }
 
   // Color variant support (for backward compatibility)

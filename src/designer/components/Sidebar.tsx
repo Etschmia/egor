@@ -8,6 +8,8 @@ interface SidebarProps {
   selectedAssetId: string | null;
   onAssetSelect: (assetId: string) => void;
   onAddNew: () => void;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export default function Sidebar({
@@ -16,11 +18,20 @@ export default function Sidebar({
   selectedAssetId,
   onAssetSelect,
   onAddNew,
+  collapsed: externalCollapsed,
+  onToggleCollapse: externalToggle,
 }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
 
+  // Use external collapsed state if provided, otherwise use internal
+  const collapsed = externalCollapsed !== undefined ? externalCollapsed : internalCollapsed;
+  
   const handleToggleCollapse = () => {
-    setCollapsed(!collapsed);
+    if (externalToggle) {
+      externalToggle();
+    } else {
+      setInternalCollapsed(!internalCollapsed);
+    }
   };
 
   // Render content based on asset type

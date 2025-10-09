@@ -4,13 +4,20 @@
   "version": "1.0.0",
   "description": "Default wall theme based on original hardcoded values",
   "author": "EGOR Game Engine",
-  "created": "2024-10-07T00:00:00.000Z",
-  "modified": "2024-10-07T00:00:00.000Z",
+  "createdAt": "2024-10-07T00:00:00.000Z",
+  "updatedAt": "2024-10-07T00:00:00.000Z",
   "wallTypes": {
     "brick": {
       "id": "brick",
       "displayName": "Brick Wall",
       "description": "Traditional brick masonry with mortar joints",
+      "legacyMapping": {
+        "wallType": 1,
+        "colorMapping": {
+          "primary": "mortarColor",
+          "secondary": "brickColor"
+        }
+      },
       "colors": {
         "primary": {
           "value": "#8B4513",
@@ -130,6 +137,13 @@
       "id": "wood",
       "displayName": "Wood Paneling",
       "description": "Vertical wood planks with natural grain texture",
+      "legacyMapping": {
+        "wallType": 2,
+        "colorMapping": {
+          "primary": "baseColor",
+          "secondary": "plankColor"
+        }
+      },
       "colors": {
         "primary": {
           "value": "#8B4513",
@@ -249,6 +263,13 @@
       "id": "stone",
       "displayName": "Stone Blocks",
       "description": "Large stone blocks with natural variations",
+      "legacyMapping": {
+        "wallType": 3,
+        "colorMapping": {
+          "primary": "baseStoneColor",
+          "secondary": "stoneVariant"
+        }
+      },
       "colors": {
         "primary": {
           "value": "#708090",
@@ -368,6 +389,13 @@
       "id": "door",
       "displayName": "Wooden Door",
       "description": "Detailed wooden door with metal hardware",
+      "legacyMapping": {
+        "wallType": 4,
+        "colorMapping": {
+          "primary": "doorWoodColor",
+          "accent": "handleColor"
+        }
+      },
       "colors": {
         "primary": {
           "value": "#654321",

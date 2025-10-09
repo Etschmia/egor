@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Designer Mode - Responsive Layout Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #ffffff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #4CAF50;
+      margin-bottom: 30px;
+    }
+
+    .section {
+      background: #252525;
+      border: 1px solid #333333;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      color: #4CAF50;
+      margin-top: 0;
+      font-size: 18px;
+    }
+
+    .test-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      margin: 5px 0;
+      background: #2a2a2a;
+      border-radius: 4px;
+    }
+
+    .test-item.pass {
+      border-left: 3px solid #4CAF50;
+    }
+
+    .test-item.pending {
+      border-left: 3px solid #ff9800;
+    }
+
+    .status {
+      margin-right: 10px;
+      font-size: 20px;
+    }
+
+    .breakpoint-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .breakpoint-card {
+      background: #2a2a2a;
+      border: 1px solid #333333;
+      border-radius: 4px;
+      padding: 15px;
+    }
+
+    .breakpoint-card h3 {
+      margin: 0 0 10px 0;
+      color: #4CAF50;
+      font-size: 16px;
+    }
+
+    .breakpoint-card ul {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      color: #cccccc;
+    }
+
+    .breakpoint-card li {
+      margin: 5px 0;
+    }
+
+    .current-size {
+      background: #4CAF50;
+      color: #1e1e1e;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-weight: bold;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .instructions {
+      background: #2a2a2a;
+      border: 1px solid #4CAF50;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 20px 0;
+    }
+
+    .instructions h3 {
+      margin-top: 0;
+      color: #4CAF50;
+    }
+
+    .instructions ol {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin: 8px 0;
+      line-height: 1.5;
+    }
+
+    code {
+      background: #1e1e1e;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      color: #4CAF50;
+    }
+
+    .link {
+      color: #4CAF50;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Designer Mode - Responsive Layout Test</h1>
+
+    <div class="current-size" id="currentSize">
+      Current Window Size: <span id="sizeDisplay">Loading...</span>
+    </div>
+
+    <div class="instructions">
+      <h3>📋 Testing Instructions</h3>
+      <ol>
+        <li>Start the Designer Mode: <code>npm run designer</code></li>
+        <li>Open <a href="http://localhost:3002/designer.html" class="link" target="_blank">http://localhost:3002/designer.html</a></li>
+        <li>Open browser DevTools (F12)</li>
+        <li>Toggle device toolbar (Ctrl+Shift+M or Cmd+Shift+M)</li>
+        <li>Test at different screen sizes using the breakpoints below</li>
+        <li>Verify all features work as expected at each breakpoint</li>
+      </ol>
+    </div>
+
+    <div class="section">
+      <h2>📱 Responsive Breakpoints</h2>
+      <div class="breakpoint-info">
+        <div class="breakpoint-card">
+          <h3>Desktop (> 1200px)</h3>
+          <ul>
+            <li>Sidebar: 280px width</li>
+            <li>Property Panel: 320px width</li>
+            <li>Preview: 512x512px</li>
+            <li>Full header layout</li>
+            <li>All text visible</li>
+          </ul>
+        </div>
+
+        <div class="breakpoint-card">
+          <h3>Tablet (768px - 1200px)</h3>
+          <ul>
+            <li>Sidebar: 240px width</li>
+            <li>Property Panel: 280px width</li>
+            <li>Reduced spacing</li>
+            <li>Smaller buttons</li>
+            <li>Compact layout</li>
+          </ul>
+        </div>
+
+        <div class="breakpoint-card">
+          <h3>Mobile (< 768px)</h3>
+          <ul>
+            <li>Sidebar: Overlay mode</li>
+            <li>Property Panel: Overlay</li>
+            <li>Preview: 300x300px</li>
+            <li>FAB button visible</li>
+            <li>Icons only (no text)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>✅ Implementation Checklist</h2>
+      
+      <div class="test-item pass">
+        <span class="status">✅</span>
+        <span>Media queries for < 1200px (narrower sidebar)</span>
+      </div>
+      
+      <div class="test-item pass">
+        <span class="status">✅</span>
+        <span>Media queries for < 768px (collapsible sidebar)</span>
+      </div>
+      
+      <div class="test-item pass">
+        <span class="status">✅</span>
+        <span>Sidebar overlay mode for mobile</span>
+      </div>
+      
+      <div class="test-item pass">
+        <span class="status">✅</span>
+        <span>Preview size adjustments for small screens</span>
+      </div>
+      
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Manual testing on different screen sizes</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🎯 Features to Test</h2>
+      
+      <h3 style="color: #4CAF50; margin-top: 20px;">Desktop (> 1200px)</h3>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Sidebar visible at 280px width</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Property panel visible at 320px width</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Preview shows 512x512 canvas</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Header in single row with all text</span>
+      </div>
+
+      <h3 style="color: #4CAF50; margin-top: 20px;">Tablet (768px - 1200px)</h3>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Sidebar reduced to 240px</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Property panel reduced to 280px</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Compact button layout</span>
+      </div>
+
+      <h3 style="color: #4CAF50; margin-top: 20px;">Mobile (< 768px)</h3>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Sidebar starts collapsed</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Sidebar toggle button visible</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Sidebar slides in as overlay</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Backdrop appears when sidebar open</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>FAB button visible when asset selected</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Property panel slides in from right</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Close button on property panel works</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Preview reduced to 300x300</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Header wraps to multiple rows</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Button text hidden (icons only)</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🔄 Interaction Tests</h2>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Sidebar toggle works on mobile</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Clicking backdrop closes sidebar</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>FAB opens property panel</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Close button closes property panel</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Clicking backdrop closes property panel</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Selecting asset auto-opens property panel on mobile</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Resize from desktop to mobile works smoothly</span>
+      </div>
+      <div class="test-item pending">
+        <span class="status">⏳</span>
+        <span>Resize from mobile to desktop works smoothly</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📊 Test Results Summary</h2>
+      <p style="color: #cccccc; line-height: 1.6;">
+        The responsive layout implementation is complete with all CSS media queries and JavaScript logic in place.
+        All features have been implemented according to the requirements. Manual testing is required to verify
+        the implementation works correctly across different devices and screen sizes.
+      </p>
+      <p style="color: #4CAF50; font-weight: bold; margin-top: 15px;">
+        Status: ✅ Implementation Complete - Ready for Manual Testing
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function updateSize() {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      let breakpoint = '';
+      
+      if (width > 1200) {
+        breakpoint = 'Desktop';
+      } else if (width > 768) {
+        breakpoint = 'Tablet';
+      } else {
+        breakpoint = 'Mobile';
+      }
+      
+      document.getElementById('sizeDisplay').textContent = 
+        `${width}px × ${height}px (${breakpoint})`;
+    }
+
+    updateSize();
+    window.addEventListener('resize', updateSize);
+  </script>
+</body>
+</html>

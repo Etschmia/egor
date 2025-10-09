@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Theme, WallTypeDefinition } from '../types';
 import { useApiClient } from './useApiClient';
+import { textureGenerator } from '../../shared/texture-generation/TextureGenerator';
+import { validateTheme, validateBackwardCompatibility, quickValidate } from '../utils/themeValidator';
 
 // Type for timeout to avoid NodeJS namespace dependency
 type TimeoutId = ReturnType<typeof setTimeout>;
@@ -38,6 +40,7 @@ interface UseThemeManagerReturn {
   createTheme: (name: string, basedOn?: string) => Promise<void>;
   saveTheme: () => Promise<void>;
   deleteTheme: (themeId: string) => Promise<void>;
+  importTheme: (themeData: any) => Promise<boolean>;
   
   // Property updates
   updateProperty: (path: string, value: any) => void;
@@ -76,42 +79,23 @@ export const useThemeManager = (): UseThemeManagerReturn => {
   const pendingUpdatesRef = useRef<Map<string, any>>(new Map());
 
   /**
-   * Validate theme structure and data
+   * Validate theme structure and data using comprehensive validator
    */
-  const validateTheme = useCallback((theme: Theme): { isValid: boolean; errors: string[] } => {
-    const errors: string[] = [];
-
-    if (!theme.id || theme.id.trim() === '') {
-      errors.push('Theme must have a valid id');
-    }
-
-    if (!theme.name || theme.name.trim() === '') {
-      errors.push('Theme must have a valid name');
-    }
-
-    if (!theme.version || !theme.version.match(/^\d+\.\d+\.\d+$/)) {
-      errors.push('Theme must have a valid semantic version (x.y.z)');
-    }
-
-    if (!theme.wallTypes || Object.keys(theme.wallTypes).length === 0) {
-      errors.push('Theme must define at least one wall type');
-    } else {
-      // Validate each wall type
-      for (const [wallTypeId, wallType] of Object.entries(theme.wallTypes)) {
-        if (!wallType.id || wallType.id.trim() === '') {
-          errors.push(`Wall type '${wallTypeId}' must have a valid id`);
-        }
-        if (!wallType.displayName || wallType.displayName.trim() === '') {
-          errors.push(`Wall type '${wallTypeId}' must have a display name`);
-        }
-        if (!wallType.colors) {
-          errors.push(`Wall type '${wallTypeId}' must have a color scheme`);
-        }
-      }
+  const validateThemeData = useCallback((theme: Theme): { isValid: boolean; errors: string[] } => {
+    const result = validateTheme(theme);
+    
+    // Convert validation errors to simple string array
+    const errors = result.errors.map(err => `${err.path}: ${err.message}`);
+    
+    // Add warnings as informational messages
+    if (result.warnings.length > 0) {
+      result.warnings.forEach(warn => {
+        console.warn(`[Theme Validation Warning] ${warn.path}: ${warn.message}`);
+      });
     }
 
     return {
-      isValid: errors.length === 0,
+      isValid: result.isValid,
       errors,
     };
   }, []);
@@ -184,19 +168,32 @@ export const useThemeManager = (): UseThemeManagerReturn => {
       
       if (theme) {
         // Validate theme before loading
-        const validation = validateTheme(theme);
+        const validation = validateThemeData(theme);
         if (!validation.isValid) {
           throw new Error(`Invalid theme: ${validation.errors.join(', ')}`);
         }
+        
+        // Check backward compatibility
+        const compatibilityCheck = validateBackwardCompatibility(theme);
+        if (compatibilityCheck.warnings.length > 0) {
+          console.warn('[Theme Compatibility]', compatibilityCheck.warnings);
+        }
 
-        setState(prev => ({
-          ...prev,
-          activeTheme: theme,
-          isDirty: false,
-          history: [],
-          historyIndex: -1,
-          isLoading: false,
-        }));
+        // Invalidate cache for previous theme if switching themes
+        setState(prev => {
+          if (prev.activeTheme && prev.activeTheme.id !== themeId) {
+            textureGenerator.invalidateThemeCache(prev.activeTheme.id);
+          }
+          
+          return {
+            ...prev,
+            activeTheme: theme,
+            isDirty: false,
+            history: [],
+            historyIndex: -1,
+            isLoading: false,
+          };
+        });
       } else {
         throw new Error(`Theme '${themeId}' not found`);
       }
@@ -271,7 +268,7 @@ export const useThemeManager = (): UseThemeManagerReturn => {
     }
 
     // Validate before saving
-    const validation = validateTheme(state.activeTheme);
+    const validation = validateThemeData(state.activeTheme);
     if (!validation.isValid) {
       setState(prev => ({
         ...prev,
@@ -359,6 +356,70 @@ export const useThemeManager = (): UseThemeManagerReturn => {
   }, [apiClient]);
 
   /**
+   * Import a theme from external data
+   */
+  const importTheme = useCallback(async (themeData: any): Promise<boolean> => {
+    setState(prev => ({ ...prev, isLoading: true, error: null }));
+    
+    try {
+      // Quick validation first
+      if (!quickValidate(themeData)) {
+        const errorMessage = 'Invalid theme structure: Missing required fields (id, name, version, or wallTypes)';
+        setState(prev => ({
+          ...prev,
+          error: errorMessage,
+          isLoading: false,
+        }));
+        return false;
+      }
+      
+      // Comprehensive validation
+      const validation = validateThemeData(themeData);
+      if (!validation.isValid) {
+        const errorMessage = `Invalid theme structure: ${validation.errors.join(', ')}`;
+        setState(prev => ({
+          ...prev,
+          error: errorMessage,
+          isLoading: false,
+        }));
+        return false;
+      }
+      
+      // Check backward compatibility
+      const compatibilityCheck = validateBackwardCompatibility(themeData);
+      if (compatibilityCheck.warnings.length > 0) {
+        console.warn('[Theme Import Compatibility]', compatibilityCheck.warnings);
+      }
+
+      // Import via API
+      const importedTheme = await apiClient.importTheme(themeData, false);
+      
+      if (importedTheme) {
+        setState(prev => ({
+          ...prev,
+          activeTheme: importedTheme,
+          availableThemes: [...prev.availableThemes, importedTheme],
+          isDirty: false,
+          history: [],
+          historyIndex: -1,
+          isLoading: false,
+        }));
+        return true;
+      } else {
+        throw new Error('Failed to import theme');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to import theme';
+      setState(prev => ({
+        ...prev,
+        error: errorMessage,
+        isLoading: false,
+      }));
+      return false;
+    }
+  }, [apiClient, validateTheme]);
+
+  /**
    * Update a property in the active theme with debouncing
    */
   const updateProperty = useCallback((path: string, value: any) => {
@@ -415,6 +476,11 @@ export const useThemeManager = (): UseThemeManagerReturn => {
         // Clear pending updates
         pendingUpdatesRef.current.clear();
 
+        // Invalidate cache for the current theme since properties changed
+        if (prev.activeTheme) {
+          textureGenerator.invalidateThemeCache(prev.activeTheme.id);
+        }
+
         // Add to history
         addToHistory('Update property', previousTheme, newTheme);
 
@@ -451,6 +517,9 @@ export const useThemeManager = (): UseThemeManagerReturn => {
           },
         },
       };
+
+      // Invalidate cache for the current theme since wall type changed
+      textureGenerator.invalidateThemeCache(prev.activeTheme.id);
 
       // Add to history
       addToHistory(`Update wall type: ${wallTypeId}`, previousTheme, newTheme);
@@ -572,6 +641,11 @@ export const useThemeManager = (): UseThemeManagerReturn => {
 
       const entry = prev.history[prev.historyIndex];
       
+      // Invalidate cache when undoing changes
+      if (prev.activeTheme) {
+        textureGenerator.invalidateThemeCache(prev.activeTheme.id);
+      }
+      
       return {
         ...prev,
         activeTheme: entry.previousState,
@@ -591,6 +665,11 @@ export const useThemeManager = (): UseThemeManagerReturn => {
       }
 
       const entry = prev.history[prev.historyIndex + 1];
+      
+      // Invalidate cache when redoing changes
+      if (prev.activeTheme) {
+        textureGenerator.invalidateThemeCache(prev.activeTheme.id);
+      }
       
       return {
         ...prev,
@@ -644,6 +723,7 @@ export const useThemeManager = (): UseThemeManagerReturn => {
     createTheme,
     saveTheme,
     deleteTheme,
+    importTheme,
     
     // Property updates
     updateProperty,

@@ -82,8 +82,8 @@ export function AssetTypeSelector({ selectedType, onTypeChange }: AssetTypeSelec
 
       {isOpen && (
         <>
-          <div 
-            className="asset-type-selector__backdrop" 
+          <div
+            className="asset-type-selector__backdrop"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
@@ -91,11 +91,9 @@ export function AssetTypeSelector({ selectedType, onTypeChange }: AssetTypeSelec
             {ASSET_TYPE_OPTIONS.map((option) => (
               <button
                 key={option.value}
-                className={`asset-type-selector__item ${
-                  option.value === selectedType ? 'asset-type-selector__item--active' : ''
-                } ${
-                  !option.implemented ? 'asset-type-selector__item--disabled' : ''
-                }`}
+                className={`asset-type-selector__item ${option.value === selectedType ? 'asset-type-selector__item--active' : ''
+                  } ${!option.implemented ? 'asset-type-selector__item--disabled' : ''
+                  }`}
                 onClick={() => handleSelect(option)}
                 disabled={!option.implemented}
                 role="option"

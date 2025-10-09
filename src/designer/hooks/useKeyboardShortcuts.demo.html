@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keyboard Shortcuts Demo</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1e1e1e;
+      color: #ffffff;
+      padding: 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #4CAF50;
+      margin-bottom: 30px;
+    }
+
+    .shortcuts-list {
+      background: #252525;
+      border: 1px solid #333333;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #333333;
+    }
+
+    .shortcut-item:last-child {
+      border-bottom: none;
+    }
+
+    .shortcut-key {
+      background: #2a2a2a;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-weight: bold;
+      color: #4CAF50;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .shortcut-description {
+      flex: 1;
+      margin-left: 20px;
+      color: #cccccc;
+    }
+
+    .shortcut-category {
+      font-size: 12px;
+      color: #888888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .test-area {
+      background: #252525;
+      border: 1px solid #333333;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .test-input {
+      width: 100%;
+      padding: 12px;
+      background: #2a2a2a;
+      border: 1px solid #333333;
+      border-radius: 4px;
+      color: #ffffff;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .test-input:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+
+    .log {
+      background: #1a1a1a;
+      border: 1px solid #333333;
+      border-radius: 4px;
+      padding: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+    }
+
+    .log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid #252525;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .log-time {
+      color: #888888;
+      margin-right: 10px;
+    }
+
+    .log-action {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+
+    .note {
+      background: #2a2a2a;
+      border-left: 3px solid #ff9800;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 4px;
+    }
+
+    .note-title {
+      color: #ff9800;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎹 Keyboard Shortcuts Demo</h1>
+
+  <div class="shortcuts-list">
+    <div class="shortcut-category">File Operations</div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">Ctrl+S / ⌘S</span>
+      <span class="shortcut-description">Save current theme</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">Ctrl+N / ⌘N</span>
+      <span class="shortcut-description">Create new theme</span>
+    </div>
+
+    <div class="shortcut-category">Editing</div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">Ctrl+Z / ⌘Z</span>
+      <span class="shortcut-description">Undo last change</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">Ctrl+Y / ⌘Y</span>
+      <span class="shortcut-description">Redo last undone change</span>
+    </div>
+
+    <div class="shortcut-category">Help</div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">F1</span>
+      <span class="shortcut-description">Show keyboard shortcuts</span>
+    </div>
+
+    <div class="shortcut-category">Navigation</div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">Escape</span>
+      <span class="shortcut-description">Close dialogs and modals</span>
+    </div>
+  </div>
+
+  <div class="test-area">
+    <h3>Interactive Test Area</h3>
+    <p style="color: #cccccc; margin-bottom: 15px;">
+      Try pressing the keyboard shortcuts above. The log below will show which shortcuts are triggered.
+    </p>
+    
+    <input 
+      type="text" 
+      class="test-input" 
+      placeholder="Type here to test input field behavior (most shortcuts disabled except Escape and F1)"
+    />
+
+    <div class="log" id="log">
+      <div class="log-entry">
+        <span class="log-time">Ready</span>
+        <span class="log-action">Waiting for keyboard input...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <div class="note-title">📝 Note</div>
+    <div>
+      When you focus the input field above, most keyboard shortcuts will be disabled to prevent 
+      conflicts with typing. However, <strong>Escape</strong> and <strong>F1</strong> will still work 
+      even when the input is focused.
+    </div>
+  </div>
+
+  <script>
+    const log = document.getElementById('log');
+    const input = document.querySelector('.test-input');
+
+    function addLogEntry(action, details = '') {
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `
+        <span class="log-time">${time}</span>
+        <span class="log-action">${action}</span>
+        ${details ? `<span style="color: #888888;"> - ${details}</span>` : ''}
+      `;
+      log.insertBefore(entry, log.firstChild);
+
+      // Keep only last 20 entries
+      while (log.children.length > 20) {
+        log.removeChild(log.lastChild);
+      }
+    }
+
+    function isInputFocused() {
+      const activeElement = document.activeElement;
+      if (!activeElement) return false;
+      const tagName = activeElement.tagName.toLowerCase();
+      return tagName === 'input' || tagName === 'textarea' || tagName === 'select';
+    }
+
+    window.addEventListener('keydown', (event) => {
+      const { key, ctrlKey, metaKey } = event;
+      const isModifier = ctrlKey || metaKey;
+      const inputFocused = isInputFocused();
+
+      // Escape always works
+      if (key === 'Escape') {
+        event.preventDefault();
+        addLogEntry('Escape pressed', inputFocused ? 'Works even in input field' : '');
+        return;
+      }
+
+      // F1 always works
+      if (key === 'F1') {
+        event.preventDefault();
+        addLogEntry('F1 pressed', inputFocused ? 'Works even in input field' : 'Show shortcuts modal');
+        return;
+      }
+
+      // Other shortcuts disabled in input fields
+      if (inputFocused) {
+        if (isModifier && ['s', 'z', 'y', 'n'].includes(key.toLowerCase())) {
+          addLogEntry(`${key.toUpperCase()} pressed`, '⚠️ Disabled in input field');
+        }
+        return;
+      }
+
+      // Ctrl+S / Cmd+S
+      if (isModifier && key.toLowerCase() === 's') {
+        event.preventDefault();
+        addLogEntry('Save triggered', 'Ctrl+S / ⌘S');
+        return;
+      }
+
+      // Ctrl+Z / Cmd+Z
+      if (isModifier && key.toLowerCase() === 'z') {
+        event.preventDefault();
+        addLogEntry('Undo triggered', 'Ctrl+Z / ⌘Z');
+        return;
+      }
+
+      // Ctrl+Y / Cmd+Y
+      if (isModifier && key.toLowerCase() === 'y') {
+        event.preventDefault();
+        addLogEntry('Redo triggered', 'Ctrl+Y / ⌘Y');
+        return;
+      }
+
+      // Ctrl+N / Cmd+N
+      if (isModifier && key.toLowerCase() === 'n') {
+        event.preventDefault();
+        addLogEntry('New Theme triggered', 'Ctrl+N / ⌘N');
+        return;
+      }
+    });
+
+    // Log input focus/blur
+    input.addEventListener('focus', () => {
+      addLogEntry('Input focused', 'Most shortcuts now disabled');
+    });
+
+    input.addEventListener('blur', () => {
+      addLogEntry('Input blurred', 'All shortcuts now enabled');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+{
+  "name": "Test Import Theme",
+  "version": "1.0.0",
+  "wallTypes": {
+    "test-brick": {
+      "id": "test-brick",
+      "displayName": "Test Brick",
+      "description": "A test brick wall type",
+      "colors": {
+        "primary": {
+          "value": "#8B4513",
+          "displayName": "Primary Color"
+        },
+        "secondary": {
+          "value": "#654321",
+          "displayName": "Secondary Color"
+        },
+        "accent": {
+          "value": "#A0522D",
+          "displayName": "Accent Color"
+        },
+        "shadow": {
+          "value": "#3E2723",
+          "displayName": "Shadow Color"
+        },
+        "highlight": {
+          "value": "#D2691E",
+          "displayName": "Highlight Color"
+        }
+      },
+      "dimensions": {
+        "width": {
+          "value": 64,
+          "min": 32,
+          "max": 128,
+          "step": 1,
+          "unit": "px"
+        },
+        "height": {
+          "value": 64,
+          "min": 32,
+          "max": 128,
+          "step": 1,
+          "unit": "px"
+        },
+        "spacing": {
+          "value": 2,
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 1,
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "unit": "px"
+        }
+      },
+      "texture": {
+        "pattern": "BRICK",
+        "intensity": {
+          "value": 1,
+          "min": 0,
+          "max": 2,
+          "step": 0.1
+        },
+        "blendMode": "NORMAL",
+        "procedural": true
+      },
+      "effects": {
+        "shadow": {
+          "enabled": false,
+          "color": {
+            "value": "#000000",
+            "displayName": "Shadow Color"
+          },
+          "offset": {
+            "value": 2,
+            "min": 0,
+            "max": 10,
+            "step": 1,
+            "unit": "px"
+          },
+          "blur": {
+            "value": 4,
+            "min": 0,
+            "max": 20,
+            "step": 1,
+            "unit": "px"
+          }
+        },
+        "highlight": {
+          "enabled": false,
+          "color": {
+            "value": "#ffffff",
+            "displayName": "Highlight Color"
+          },
+          "intensity": {
+            "value": 0.5,
+            "min": 0,
+            "max": 1,
+            "step": 0.1
+          }
+        },
+        "gradient": {
+          "enabled": false,
+          "type": "linear",
+          "colors": [
+            {
+              "value": "#8B4513",
+              "displayName": "Gradient Start"
+            },
+            {
+              "value": "#654321",
+              "displayName": "Gradient End"
+            }
+          ]
+        }
+      },
+      "legacyMapping": {}
+    }
+  }
+}
