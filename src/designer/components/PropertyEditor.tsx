@@ -32,30 +32,13 @@ export const PropertyEditor: React.FC<PropertyEditorProps> = ({
   onPropertyChange,
   onReset
 }) => {
-  console.log('🏗️ PropertyEditor: Rendering with wallType:', wallType.id, wallType);
-  console.log('🏗️ PropertyEditor: onPropertyChange callback:', typeof onPropertyChange);
-  
-  // Disabled until ColorPicker API is updated
-  // const handleColorChange = (colorKey: string, value: string) => {
-  //   console.log('🎨 PropertyEditor: Color change requested', { colorKey, value, wallType: wallType.id });
-  //   onPropertyChange(`colors.${colorKey}.value`, value);
-  // };
-
   const handleDimensionChange = (dimensionKey: string, value: number) => {
-    console.log('📏 PropertyEditor: Dimension change requested', { dimensionKey, value, wallType: wallType.id });
     onPropertyChange(`dimensions.${dimensionKey}.value`, value);
   };
 
   const handleTextureChange = (path: string, value: any) => {
-    console.log('🎨 PropertyEditor: Texture change requested', { path, value, wallType: wallType.id });
     onPropertyChange(`texture.${path}`, value);
   };
-
-  // Disabled until ColorPicker API is updated
-  // const handleEffectChange = (path: string, value: any) => {
-  //   console.log('✨ PropertyEditor: Effect change requested', { path, value, wallType: wallType.id });
-  //   onPropertyChange(`effects.${path}`, value);
-  // };
 
   return (
     <div className="property-editor">

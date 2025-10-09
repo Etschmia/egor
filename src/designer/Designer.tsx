@@ -244,7 +244,7 @@ export default function Designer() {
       setShowNewWallTypeDialog(true);
     } else {
       // TODO: Handle other asset types in future tasks
-      console.log('Add new asset dialog - to be implemented for', state.selectedAssetType);
+      toast.info('Coming soon: ' + state.selectedAssetType);
     }
   };
 

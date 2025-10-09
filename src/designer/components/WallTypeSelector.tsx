@@ -67,8 +67,6 @@ export const WallTypeSelector: React.FC<WallTypeSelectorProps> = ({
 
   const handleCreateNewWallType = () => {
     if (newWallTypeName.trim() && onCreateNewWallType) {
-      console.log('🏗️ Creating new wall type:', { name: newWallTypeName, basedOn: basedOnType });
-      
       // Create a new wall type based on the selected base type
       const baseWallType = availableWallTypes.find((wt: any) => wt.id === basedOnType);
       if (baseWallType) {

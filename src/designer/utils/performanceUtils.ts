@@ -100,8 +100,10 @@ export class PerformanceMark {
   }
 
   log(): void {
-    const duration = this.getDuration();
-    console.log(`[Performance] ${this.name}: ${duration.toFixed(2)}ms`);
+    if (import.meta.env.DEV) {
+      const duration = this.getDuration();
+      console.log(`[Performance] ${this.name}: ${duration.toFixed(2)}ms`);
+    }
   }
 }
 
