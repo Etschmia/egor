@@ -63,7 +63,7 @@ export default function KeyboardShortcuts({ isOpen, onClose }: KeyboardShortcuts
     }
     acc[shortcut.category].push(shortcut);
     return acc;
-  }, {} as Record<string, typeof KEYBOARD_SHORTCUTS>);
+  }, {} as Record<string, Array<typeof KEYBOARD_SHORTCUTS[number]>>);
 
   return (
     <>

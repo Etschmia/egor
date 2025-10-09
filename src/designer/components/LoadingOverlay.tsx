@@ -1,4 +1,4 @@
-import React from 'react';
+// LoadingOverlay component
 
 export interface LoadingOverlayProps {
   message?: string;

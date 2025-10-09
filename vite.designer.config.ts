@@ -35,14 +35,8 @@ export default defineConfig({
     },
     // Optimize chunk size
     chunkSizeWarningLimit: 1000,
-    // Enable minification
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true, // Remove console.log in production
-        drop_debugger: true,
-      }
-    }
+    // Enable minification (using esbuild instead of terser to avoid extra dependency)
+    minify: 'esbuild',
   },
   server: {
     port: 3002,
