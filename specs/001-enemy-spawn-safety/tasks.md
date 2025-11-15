@@ -17,9 +17,9 @@
 **Purpose**: Gemeinsame Typen und Konstanten bereitstellen, bevor User Stories starten.  
 **⚠️ CRITICAL**: Diese Aufgaben müssen abgeschlossen sein, bevor US1 oder US2 umgesetzt wird.
 
-- [ ] T003 Erweitere `src/types.ts` um `PathDistanceResult`, `ValidationResult`, `ValidationViolation` sowie das optionale Feld `GameState.levelStartTime`.
-- [ ] T004 Ergänze `src/levels.ts` um einen `getAllLevelVariants()`-Helper, der alle Level-Varianten inklusive Metadaten für Validatoren liefert.
-- [ ] T005 Definiere `ENEMY_SAFETY_RULES` (3 Sekunden Mindestdistanz, 2 Sekunden Bewegungsverzögerung, Türöffnungszeit) zentral in `src/gameEngine.ts` und exportiere sie für Laufzeit- und Tool-Code.
+- [x] T003 Erweitere `src/types.ts` um `PathDistanceResult`, `ValidationResult`, `ValidationViolation` sowie das optionale Feld `GameState.levelStartTime`.
+- [x] T004 Ergänze `src/levels.ts` um einen `getAllLevelVariants()`-Helper, der alle Level-Varianten inklusive Metadaten für Validatoren liefert.
+- [x] T005 Definiere `ENEMY_SAFETY_RULES` (3 Sekunden Mindestdistanz, 2 Sekunden Bewegungsverzögerung, Türöffnungszeit) zentral in `src/gameEngine.ts` und exportiere sie für Laufzeit- und Tool-Code.
 
 ---
 

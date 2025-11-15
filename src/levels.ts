@@ -87,3 +87,41 @@ export {
   LEVEL_6_VARIANT_1, LEVEL_6_VARIANT_2, LEVEL_6_VARIANT_3, LEVEL_6_VARIANT_4, LEVEL_6_VARIANT_5,
   LEVEL_7_VARIANT_1, LEVEL_7_VARIANT_2, LEVEL_7_VARIANT_3, LEVEL_7_VARIANT_4, LEVEL_7_VARIANT_5
 };
+
+// Gegner-Spawn-Sicherheit: Helper für Level-Validierung
+
+export interface LevelVariantMetadata {
+  levelNumber: number;
+  variantNumber: number;
+  level: GameMap;
+}
+
+/**
+ * Gibt alle Level-Varianten inklusive Metadaten für Validatoren zurück.
+ * 
+ * @returns Array mit allen 35 Level-Varianten (7 Level × 5 Varianten)
+ *          Jedes Element enthält Level-Nummer, Varianten-Nummer und die GameMap
+ */
+export function getAllLevelVariants(): LevelVariantMetadata[] {
+  const result: LevelVariantMetadata[] = [];
+  
+  // Iteriere über alle Level (1-7)
+  for (let levelNum = 1; levelNum <= 7; levelNum++) {
+    const variants = LEVEL_VARIANTS[levelNum];
+    if (!variants) {
+      continue;
+    }
+    
+    // Iteriere über alle Varianten (1-5)
+    for (let variantNum = 1; variantNum <= variants.length; variantNum++) {
+      const level = variants[variantNum - 1]; // Array ist 0-indexiert
+      result.push({
+        levelNumber: levelNum,
+        variantNumber: variantNum,
+        level
+      });
+    }
+  }
+  
+  return result;
+}

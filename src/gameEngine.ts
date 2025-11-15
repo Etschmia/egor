@@ -5,6 +5,29 @@ import { WEAPONS } from './weapons.ts';
 import { soundSystem } from './soundSystem.ts';
 import { loadMapHistory, saveMapHistory, selectMapVariant, recordMapPlay, getMap } from './mapSelectionSystem.ts';
 
+// Gegner-Spawn-Sicherheit: Zentrale Sicherheitsregeln
+
+/**
+ * Sicherheitsregeln für Gegner-Positionierung und Bewegungsverzögerung.
+ * Diese Konstanten werden sowohl in der Laufzeit als auch im Validierungstool verwendet.
+ */
+export const ENEMY_SAFETY_RULES = {
+  /** Mindestdistanz in Sekunden: Jeder Gegner muss mindestens diese Zeit vom Spieler-Startpunkt entfernt sein */
+  MINIMUM_DISTANCE_SECONDS: 3,
+  
+  /** Bewegungsverzögerung in Millisekunden: Gegner dürfen sich erst nach dieser Zeit bewegen */
+  MOVEMENT_DELAY_MS: 2000,
+  
+  /** Bewegungsverzögerung in Sekunden (für Berechnungen) */
+  MOVEMENT_DELAY_SECONDS: 2,
+  
+  /** Türöffnungszeit in Sekunden: Geschätzte Zeit, die ein Gegner benötigt, um eine Tür zu öffnen */
+  DOOR_OPENING_TIME_SECONDS: 1,
+  
+  /** Fallback-Mindestdistanz in Sekunden: Wenn Level zu klein ist, wird diese als Minimum verwendet */
+  FALLBACK_MINIMUM_DISTANCE_SECONDS: 2
+} as const;
+
 export function createInitialPlayer(difficulty: Difficulty): Player {
   const maxHealthMap = {
     [Difficulty.EASY]: 150,

@@ -154,6 +154,7 @@ export interface GameState {
   totalItemsInLevel: number; // Gesamtanzahl der Items in diesem Level
   collectedItemsInLevel: number; // Anzahl der gesammelten Items in diesem Level
   gameStartTime: number;
+  levelStartTime?: number; // Zeitstempel des Level-Starts (Date.now()) für Bewegungsverzögerung
   lastItemNotification?: {
     message: string;
     timestamp: number;
@@ -174,4 +175,32 @@ export interface SaveGame {
   name: string;
   timestamp: number;
   gameState: GameState;
+}
+
+// Gegner-Spawn-Sicherheit: Typen für Distanzberechnung und Validierung
+
+export interface PathDistanceResult {
+  distance: number; // Distanz in Sekunden (kann Infinity sein)
+  pathLength: number; // Pfadlänge in Tiles
+  doorOpeningTime: number; // Gesamte Türöffnungszeit in Sekunden
+  hasPath: boolean; // Gibt es einen gültigen Pfad?
+  pathThroughDoors: boolean; // Muss der Gegner durch geschlossene Türen?
+}
+
+export interface ValidationViolation {
+  enemyId: string;
+  enemyType: EnemyType;
+  currentDistance: number; // Aktuelle Distanz in Sekunden
+  requiredDistance: number; // Erforderliche Distanz (3 Sekunden)
+  reason: string; // z.B. "Zu nah am Spieler-Startpunkt"
+  suggestedPosition?: { x: number; y: number }; // Vorschlag für neue Position
+}
+
+export interface ValidationResult {
+  levelNumber: number;
+  variantNumber: number;
+  isValid: boolean;
+  violations: ValidationViolation[];
+  adjustedEnemies?: Enemy[]; // Nur wenn Repositionierung nötig
+  warnings: string[];
 }
