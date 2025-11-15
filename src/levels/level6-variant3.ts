@@ -37,7 +37,7 @@ export const LEVEL_6_VARIANT_3: GameMap = {
     { id: 'e5', type: EnemyType.MONSTER, x: 12, y: 12, health: 400, maxHealth: 400, damage: 28, speed: 0.022, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 450 },
     { id: 'e6', type: EnemyType.ZOMBIE, x: 10, y: 18, health: 200, maxHealth: 200, damage: 20, speed: 0.037, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 650 },
     { id: 'e7', type: EnemyType.ZOMBIE, x: 14, y: 18, health: 200, maxHealth: 200, damage: 20, speed: 0.037, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 650 },
-    { id: 'e8', type: EnemyType.GHOST, x: 2, y: 2, health: 140, maxHealth: 140, damage: 18, speed: 0.048, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 850 },
+    { id: 'e8', type: EnemyType.GHOST, x: 8.5, y: 6.5, health: 140, maxHealth: 140, damage: 18, speed: 0.048, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 850 },
     { id: 'e9', type: EnemyType.GHOST, x: 22.5, y: 21.5, health: 140, maxHealth: 140, damage: 18, speed: 0.048, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 850 },
     { id: 'e10', type: EnemyType.MONSTER, x: 12, y: 8, health: 350, maxHealth: 350, damage: 22, speed: 0.027, state: 'alive', isAlive: true, direction: 0, lastAttackTime: 0, attackCooldown: 550 }
   ],

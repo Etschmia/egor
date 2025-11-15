@@ -136,8 +136,8 @@ export const LEVEL_5_VARIANT_3: GameMap = {
     {
       id: 'e8',
       type: EnemyType.GHOST,
-      x: 2,
-      y: 2,
+      x: 8.5,
+      y: 6.5,
       health: 120,
       maxHealth: 120,
       damage: 15,

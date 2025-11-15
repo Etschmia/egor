@@ -17,6 +17,21 @@ Diese Feature implementiert Sicherheitsregeln für Gegner-Positionierung und Bew
 npm run validate-levels
 ```
 
+**Mit automatischer Repositionierung**:
+```bash
+npm run validate-levels -- --auto-reposition
+```
+
+**Mit ausführlicher Ausgabe**:
+```bash
+npm run validate-levels -- --verbose
+```
+
+**Beide Optionen kombinieren**:
+```bash
+npm run validate-levels -- --auto-reposition --verbose
+```
+
 **Einzelnes Level prüfen** (in TypeScript):
 ```typescript
 import { validateLevelVariant } from './src/utils/levelValidator.ts';
@@ -33,6 +48,18 @@ if (!result.isValid) {
 const result = validateLevelVariant(LEVEL_1_VARIANT_1, 1, 1, true);
 if (result.adjustedEnemies) {
   // Verwende result.adjustedEnemies für angepasste Positionen
+}
+```
+
+**Alle Level validieren** (in TypeScript):
+```typescript
+import { validateAllLevels } from './src/utils/levelValidator.ts';
+
+const results = validateAllLevels(true); // true = automatische Repositionierung
+for (const result of results) {
+  if (!result.isValid) {
+    console.log(`Level ${result.levelNumber}-Variant ${result.variantNumber}: ${result.violations.length} Verstöße`);
+  }
 }
 ```
 

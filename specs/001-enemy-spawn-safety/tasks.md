@@ -46,9 +46,9 @@
 
 ### Implementation for User Story 2
 
-- [ ] T012 [P] [US2] Implementiere `validateLevelVariant()` und `validateAllLevels()` in `src/utils/levelValidator.ts` basierend auf `calculatePathDistance()` und `getAllLevelVariants()`.
-- [ ] T013 [US2] Ergänze `package.json` um das Skript `validate-levels` (z.B. via `tsx src/utils/levelValidator.ts`) und dokumentiere Ausführung/Optionen in `specs/001-enemy-spawn-safety/quickstart.md`.
-- [ ] T014 [US2] Führe das Validierungsskript aus und passe alle betroffenen Leveldefinitionen in `src/levels/*.ts` an (inkl. 2-Sekunden-Fallback + Warnhinweise in Konsolen-Output).
+- [x] T012 [P] [US2] Implementiere `validateLevelVariant()` und `validateAllLevels()` in `src/utils/levelValidator.ts` basierend auf `calculatePathDistance()` und `getAllLevelVariants()`.
+- [x] T013 [US2] Ergänze `package.json` um das Skript `validate-levels` (z.B. via `tsx src/utils/levelValidator.ts`) und dokumentiere Ausführung/Optionen in `specs/001-enemy-spawn-safety/quickstart.md`.
+- [x] T014 [US2] Führe das Validierungsskript aus und passe alle betroffenen Leveldefinitionen in `src/levels/*.ts` an (inkl. 2-Sekunden-Fallback + Warnhinweise in Konsolen-Output).
 - [ ] T015 [P] [US2] Aktualisiere `docs/enemy-spawn-safety.md` mit Validierungsberichten, bekannten Einschränkungen und Anweisungen zum Umgang mit 2-Sekunden-Fallbacks.
 - [ ] T016 [US2] Teste mehrere Levelvarianten hintereinander gemäß `specs/001-enemy-spawn-safety/quickstart.md` und bestätige konsistente Verzögerung sowie Distanz in der Dokumentation.
 
