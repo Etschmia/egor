@@ -262,7 +262,7 @@ function App() {
     const deltaTime = (now - lastTimeRef.current) / 16.67; // Normalisiert auf 60 FPS
     lastTimeRef.current = now;
 
-    let newState = { ...gameState };
+    const newState = { ...gameState };
 
     // Update Jump-Status
     newState.player = updateJump(newState.player);
@@ -821,7 +821,7 @@ function App() {
           </div>
         );
 
-      case 'load':
+      case 'load': {
         const saves = getAllSaveGames();
         return (
           <div className="menu-overlay">
@@ -864,6 +864,7 @@ function App() {
             </div>
           </div>
         );
+      }
 
       case 'help':
         return (

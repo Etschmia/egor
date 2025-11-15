@@ -155,6 +155,8 @@ The main logic is located in the `src/` directory.
 
 *   **`performanceMonitor.ts`**: Performance monitoring utilities for development and debugging.
 
+*   **`utils/levelValidator.ts`**: Level validation tool for enemy spawn safety. Validates all level variants against safety rules (minimum 3-second distance, 2-second movement delay). See [Enemy Spawn Safety Documentation](../docs/enemy-spawn-safety.md) for details.
+
 ## TypeScript Configuration
 
 ### Compiler Options (tsconfig.app.json)

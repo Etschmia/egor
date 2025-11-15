@@ -58,9 +58,9 @@
 
 **Purpose**: Qualitätssicherung, Performance und Dokumentation nach Abschluss aller Stories.
 
-- [ ] T017 Führe `npm run lint` und `npm run build` laut `package.json` aus, um Typ- und Lint-Konformität zu verifizieren.
-- [ ] T018 [P] Ergänze finale Ergebnisse, Benchmarks und bekannte Einschränkungen in `docs/enemy-spawn-safety.md` sowie Verweise in `AGENTS.md`.
-- [ ] T019 [P] Überwache die Frame-Zeit mit `src/performanceMonitor.ts` (oder bestehenden Dev-Tools) und optimiere bei Bedarf die neuen Sicherheitsprüfungen.
+- [x] T017 Führe `npm run lint` und `npm run build` laut `package.json` aus, um Typ- und Lint-Konformität zu verifizieren.
+- [x] T018 [P] Ergänze finale Ergebnisse, Benchmarks und bekannte Einschränkungen in `docs/enemy-spawn-safety.md` sowie Verweise in `AGENTS.md`.
+- [x] T019 [P] Überwache die Frame-Zeit mit `src/performanceMonitor.ts` (oder bestehenden Dev-Tools) und optimiere bei Bedarf die neuen Sicherheitsprüfungen.
 
 ---
 

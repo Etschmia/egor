@@ -6,8 +6,14 @@
  * - Automatische Repositionierung mit Fallback auf 2 Sekunden für sehr kleine Level
  */
 
+// Node.js environment type declaration for CLI usage
+declare const process: {
+  argv: string[];
+  exit: (code: number) => never;
+} | undefined;
+
 import type { GameMap, Enemy, ValidationResult, ValidationViolation, DecorativeObject } from '../types.ts';
-import { EnemyType, DecorativeObjectType } from '../types.ts';
+import { DecorativeObjectType } from '../types.ts';
 import { calculatePathDistance, ENEMY_SAFETY_RULES } from '../gameEngine.ts';
 import { getAllLevelVariants } from '../levels.ts';
 
