@@ -21,6 +21,12 @@ export const ENEMY_SAFETY_RULES = {
   /** Bewegungsverzögerung in Sekunden (für Berechnungen) */
   MOVEMENT_DELAY_SECONDS: 2,
   
+  /** Geschwindigkeits-Ramp-up-Zeit in Millisekunden: Zeit, die Gegner benötigen, um von langsamer zu normaler Geschwindigkeit zu beschleunigen */
+  SPEED_RAMP_UP_MS: 4000,
+  
+  /** Anfangsgeschwindigkeitsmultiplikator: Gegner starten mit diesem Multiplikator ihrer normalen Geschwindigkeit */
+  INITIAL_SPEED_MULTIPLIER: 0.05,
+  
   /** Türöffnungszeit in Sekunden: Geschätzte Zeit, die ein Gegner benötigt, um eine Tür zu öffnen */
   DOOR_OPENING_TIME_SECONDS: 1,
   
@@ -206,6 +212,51 @@ export function shouldEnemyMove(
     return true; // Fallback: Wenn levelStartTime nicht gesetzt ist, erlaube Bewegung
   }
   return currentTime - levelStartTime >= ENEMY_SAFETY_RULES.MOVEMENT_DELAY_MS;
+}
+
+/**
+ * Berechnet den Geschwindigkeitsmultiplikator für Gegner basierend auf der verstrichenen Zeit.
+ * Gegner starten sehr langsam und beschleunigen sanft über 4 Sekunden auf ihre normale Geschwindigkeit.
+ * 
+ * @param levelStartTime Zeitpunkt des Levelstarts in Millisekunden
+ * @param currentTime Aktuelle Zeit in Millisekunden (Standard: Date.now())
+ * @returns Geschwindigkeitsmultiplikator zwischen INITIAL_SPEED_MULTIPLIER (0.05) und 1.0
+ */
+export function getEnemySpeedMultiplier(
+  levelStartTime: number,
+  currentTime: number = Date.now()
+): number {
+  if (levelStartTime <= 0) {
+    return 1.0; // Fallback: Volle Geschwindigkeit wenn levelStartTime nicht gesetzt ist
+  }
+  
+  const elapsed = currentTime - levelStartTime;
+  
+  // Vor der Bewegungsverzögerung: Keine Bewegung (Multiplikator 0)
+  if (elapsed < ENEMY_SAFETY_RULES.MOVEMENT_DELAY_MS) {
+    return 0;
+  }
+  
+  // Nach der Bewegungsverzögerung: Berechne Ramp-up
+  const timeSinceMovementStart = elapsed - ENEMY_SAFETY_RULES.MOVEMENT_DELAY_MS;
+  
+  // Wenn Ramp-up-Zeit abgelaufen: Volle Geschwindigkeit
+  if (timeSinceMovementStart >= ENEMY_SAFETY_RULES.SPEED_RAMP_UP_MS) {
+    return 1.0;
+  }
+  
+  // Während der Ramp-up-Zeit: Interpoliere zwischen INITIAL_SPEED_MULTIPLIER und 1.0
+  const rampProgress = timeSinceMovementStart / ENEMY_SAFETY_RULES.SPEED_RAMP_UP_MS;
+  const initialMultiplier = ENEMY_SAFETY_RULES.INITIAL_SPEED_MULTIPLIER;
+  
+  // Ease-in-out Interpolation für sanftere Beschleunigung
+  // Verwendet eine kubische Easing-Funktion für natürlichere Bewegung
+  const easedProgress = rampProgress < 0.5
+    ? 2 * rampProgress * rampProgress * rampProgress
+    : 1 - Math.pow(-2 * rampProgress + 2, 3) / 2;
+  
+  // Interpoliere von initialMultiplier zu 1.0 mit eased progress
+  return initialMultiplier + (1.0 - initialMultiplier) * easedProgress;
 }
 
 export function createInitialPlayer(difficulty: Difficulty): Player {
@@ -701,9 +752,14 @@ export function updateEnemies(
         updatedTiles = pathResult.tilesUpdated;
       }
       
-      // Bewege den Gegner
-      const moveX = pathResult.moveX * multiplier * deltaTime;
-      const moveY = pathResult.moveY * multiplier * deltaTime;
+      // Berechne Geschwindigkeitsmultiplikator für sanfte Beschleunigung
+      const speedMultiplier = levelStartTime 
+        ? getEnemySpeedMultiplier(levelStartTime)
+        : 1.0;
+      
+      // Bewege den Gegner mit Geschwindigkeitsrampe
+      const moveX = pathResult.moveX * multiplier * speedMultiplier * deltaTime;
+      const moveY = pathResult.moveY * multiplier * speedMultiplier * deltaTime;
 
       if (moveX !== 0 && !checkCollision(enemy.x + moveX, enemy.y, updatedTiles) && !checkDecorativeObjectCollision(enemy.x + moveX, enemy.y, decorativeObjects)) {
         enemy.x += moveX;
