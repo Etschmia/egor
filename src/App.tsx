@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import type { GameState, WallPicture, Enemy, Item, DecorativeObject } from './types.ts';
 import { Difficulty, WeaponType, WallPictureType, EnemyType, ItemType, DecorativeObjectType } from './types.ts';
 import { loadTextures } from './textures.ts';
+import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 import {
   createInitialGameState,
@@ -1250,6 +1251,7 @@ function App() {
       {renderStatsPanel()}
       {renderMenu()}
       {renderGameStatus()}
+      <Analytics />
     </div>
   );
 }
