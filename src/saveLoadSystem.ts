@@ -26,7 +26,14 @@ export function loadGame(saveName: string): GameState | null {
     }
 
     const saveGame: SaveGame = JSON.parse(saveData);
-    return saveGame.gameState;
+    const gameState = saveGame.gameState;
+    
+    // Gegner-Spawn-Sicherheit: Setze levelStartTime wenn nicht vorhanden (Migration für alte Spielstände)
+    if (!gameState.levelStartTime) {
+      gameState.levelStartTime = Date.now();
+    }
+    
+    return gameState;
   } catch (error) {
     console.error('Fehler beim Laden:', error);
     return null;

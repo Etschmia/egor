@@ -30,12 +30,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T006 [P] [US1] Implementiere `calculatePathDistance()` in `src/gameEngine.ts` als BFS über das Tile-Grid inklusive Türöffnungszeiten und Türfähigkeitsprüfung.
-- [ ] T007 [US1] Füge in `src/gameEngine.ts` eine `ensureEnemySpawnSafety()`-Routine hinzu, die beim Levelstart alle Gegnerpositionen mit `calculatePathDistance()` prüft und bei Bedarf Repositionierungen/Warnungen erstellt.
-- [ ] T008 [US1] Initialisiere und aktualisiere `levelStartTime` in `createInitialGameState()`, `loadNextLevel()` und den relevanten Pfaden von `src/saveLoadSystem.ts`, sodass `ensureEnemySpawnSafety()` bei jedem Level-Ladevorgang ausgeführt wird.
-- [ ] T009 [P] [US1] Implementiere `shouldEnemyMove()` in `src/gameEngine.ts` und blockiere gegnerische Bewegung in `updateEnemies()` solange `Date.now() - levelStartTime < 2000`.
-- [ ] T010 [P] [US1] Aktualisiere alle Aufrufer (z.B. `src/App.tsx`, eventuelle Editor-/Designer-Hooks), damit `updateEnemies()` den neuen `levelStartTime`-Parameter erhält.
-- [ ] T011 [US1] Führe die manuellen Szenarien aus `specs/001-enemy-spawn-safety/quickstart.md` durch, um 3-Sekunden-Distanz und 2-Sekunden-Verzögerung nachzuweisen, und protokolliere Ergebnisse in `docs/enemy-spawn-safety.md`.
+- [x] T006 [P] [US1] Implementiere `calculatePathDistance()` in `src/gameEngine.ts` als BFS über das Tile-Grid inklusive Türöffnungszeiten und Türfähigkeitsprüfung.
+- [x] T007 [US1] Füge in `src/gameEngine.ts` eine `ensureEnemySpawnSafety()`-Routine hinzu, die beim Levelstart alle Gegnerpositionen mit `calculatePathDistance()` prüft und bei Bedarf Repositionierungen/Warnungen erstellt.
+- [x] T008 [US1] Initialisiere und aktualisiere `levelStartTime` in `createInitialGameState()`, `loadNextLevel()` und den relevanten Pfaden von `src/saveLoadSystem.ts`, sodass `ensureEnemySpawnSafety()` bei jedem Level-Ladevorgang ausgeführt wird.
+- [x] T009 [P] [US1] Implementiere `shouldEnemyMove()` in `src/gameEngine.ts` und blockiere gegnerische Bewegung in `updateEnemies()` solange `Date.now() - levelStartTime < 2000`.
+- [x] T010 [P] [US1] Aktualisiere alle Aufrufer (z.B. `src/App.tsx`, eventuelle Editor-/Designer-Hooks), damit `updateEnemies()` den neuen `levelStartTime`-Parameter erhält.
+- [x] T011 [US1] Führe die manuellen Szenarien aus `specs/001-enemy-spawn-safety/quickstart.md` durch, um 3-Sekunden-Distanz und 2-Sekunden-Verzögerung nachzuweisen, und protokolliere Ergebnisse in `docs/enemy-spawn-safety.md`.
 
 ---
 

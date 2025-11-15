@@ -357,7 +357,8 @@ function App() {
       newState.currentMap.tiles,
       deltaTime,
       newState.difficulty,
-      newState.currentMap.decorativeObjects
+      newState.currentMap.decorativeObjects,
+      newState.levelStartTime // Gegner-Spawn-Sicherheit: Bewegungsverzögerung
     );
     newState.enemies = enemyUpdate.enemies;
 

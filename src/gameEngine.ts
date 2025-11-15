@@ -1,4 +1,4 @@
-import { type GameState, type Player, Difficulty, WeaponType, EnemyType, type Enemy, type Item, ItemType, type DecorativeObject, DecorativeObjectType } from './types.ts';
+import { type GameState, type Player, Difficulty, WeaponType, EnemyType, type Enemy, type Item, ItemType, type DecorativeObject, DecorativeObjectType, type PathDistanceResult } from './types.ts';
 import { getTexture } from './textures.ts';
 import { LEVEL_VARIANTS } from './levels.ts';
 import { WEAPONS } from './weapons.ts';
@@ -27,6 +27,186 @@ export const ENEMY_SAFETY_RULES = {
   /** Fallback-Mindestdistanz in Sekunden: Wenn Level zu klein ist, wird diese als Minimum verwendet */
   FALLBACK_MINIMUM_DISTANCE_SECONDS: 2
 } as const;
+
+// Gegner-Spawn-Sicherheit: Helper-Funktionen
+
+/**
+ * Bestimmt ob ein Gegner Türen öffnen kann basierend auf seinem Typ.
+ * Hunde können keine Türen öffnen, alle anderen Gegner können es.
+ */
+export function canEnemyOpenDoors(enemy: Enemy): boolean {
+  return enemy.type !== EnemyType.DOG;
+}
+
+/**
+ * Berechnet die tatsächliche Distanz zwischen einem Gegner und dem Spieler-Startpunkt in Sekunden,
+ * basierend auf der Pfadlänge und der maximalen Geschwindigkeit des Gegners.
+ * Verwendet BFS (Breadth-First Search) auf dem Tile-Grid für Pfadfindung.
+ */
+export function calculatePathDistance(
+  enemy: Enemy,
+  playerStartX: number,
+  playerStartY: number,
+  tiles: number[][],
+  decorativeObjects: DecorativeObject[] = []
+): PathDistanceResult {
+  const enemyCanOpenDoors = canEnemyOpenDoors(enemy);
+  const enemyTileX = Math.floor(enemy.x);
+  const enemyTileY = Math.floor(enemy.y);
+  const playerTileX = Math.floor(playerStartX);
+  const playerTileY = Math.floor(playerStartY);
+
+  // Prüfe gültige Positionen
+  if (
+    enemyTileX < 0 || enemyTileX >= tiles[0].length ||
+    enemyTileY < 0 || enemyTileY >= tiles.length ||
+    playerTileX < 0 || playerTileX >= tiles[0].length ||
+    playerTileY < 0 || playerTileY >= tiles.length
+  ) {
+    return {
+      distance: Infinity,
+      pathLength: 0,
+      doorOpeningTime: 0,
+      hasPath: false,
+      pathThroughDoors: false
+    };
+  }
+
+  // Prüfe ob Start- und Zielposition frei sind
+  if (tiles[enemyTileY][enemyTileX] !== 0 || tiles[playerTileY][playerTileX] !== 0) {
+    return {
+      distance: Infinity,
+      pathLength: 0,
+      doorOpeningTime: 0,
+      hasPath: false,
+      pathThroughDoors: false
+    };
+  }
+
+  // BFS für Pfadfindung
+  const queue: Array<{ x: number; y: number; distance: number; doors: number }> = [];
+  const visited = new Set<string>();
+  const directions = [
+    { dx: 0, dy: -1 }, // Nord
+    { dx: 1, dy: 0 },  // Ost
+    { dx: 0, dy: 1 },   // Süd
+    { dx: -1, dy: 0 }   // West
+  ];
+
+  queue.push({ x: enemyTileX, y: enemyTileY, distance: 0, doors: 0 });
+  visited.add(`${enemyTileX},${enemyTileY}`);
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+
+    // Ziel erreicht
+    if (current.x === playerTileX && current.y === playerTileY) {
+      const pathLength = current.distance;
+      const doorOpeningTime = current.doors * ENEMY_SAFETY_RULES.DOOR_OPENING_TIME_SECONDS;
+      const travelTime = pathLength / enemy.speed;
+      const totalDistance = travelTime + doorOpeningTime;
+
+      return {
+        distance: totalDistance,
+        pathLength,
+        doorOpeningTime,
+        hasPath: true,
+        pathThroughDoors: current.doors > 0
+      };
+    }
+
+    // Prüfe Nachbarn
+    for (const dir of directions) {
+      const nextX = current.x + dir.dx;
+      const nextY = current.y + dir.dy;
+      const key = `${nextX},${nextY}`;
+
+      if (visited.has(key)) continue;
+
+      // Prüfe Grenzen
+      if (nextX < 0 || nextX >= tiles[0].length || nextY < 0 || nextY >= tiles.length) {
+        continue;
+      }
+
+      const tileValue = tiles[nextY][nextX];
+
+      // Wand (Wert 1) - blockiert
+      if (tileValue === 1) {
+        continue;
+      }
+
+      // Normale Tür (Wert 2)
+      if (tileValue === 2) {
+        if (enemyCanOpenDoors) {
+          // Gegner kann Tür öffnen - füge mit Türöffnungszeit hinzu
+          visited.add(key);
+          queue.push({
+            x: nextX,
+            y: nextY,
+            distance: current.distance + 1,
+            doors: current.doors + 1
+          });
+        }
+        // Wenn Gegner keine Türen öffnen kann, überspringe diese Position
+        continue;
+      }
+
+      // Exit-Tür (Wert 3) - blockiert für Gegner
+      if (tileValue === 3) {
+        continue;
+      }
+
+      // Freier Raum (Wert 0) - prüfe dekorative Objekte
+      let hasDecorativeCollision = false;
+      const worldX = nextX + 0.5; // Zentrum des Tiles
+      const worldY = nextY + 0.5;
+
+      for (const obj of decorativeObjects) {
+        const dx = worldX - obj.x;
+        const dy = worldY - obj.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const collisionRadius = obj.collisionRadius || 0;
+
+        if (distance < collisionRadius) {
+          hasDecorativeCollision = true;
+          break;
+        }
+      }
+
+      if (!hasDecorativeCollision) {
+        visited.add(key);
+        queue.push({
+          x: nextX,
+          y: nextY,
+          distance: current.distance + 1,
+          doors: current.doors
+        });
+      }
+    }
+  }
+
+  // Kein Pfad gefunden
+  return {
+    distance: Infinity,
+    pathLength: 0,
+    doorOpeningTime: 0,
+    hasPath: false,
+    pathThroughDoors: false
+  };
+}
+
+/**
+ * Prüft ob Gegner sich bewegen dürfen basierend auf der 2-Sekunden-Verzögerung.
+ */
+export function shouldEnemyMove(
+  levelStartTime: number,
+  currentTime: number = Date.now()
+): boolean {
+  if (levelStartTime <= 0) {
+    return true; // Fallback: Wenn levelStartTime nicht gesetzt ist, erlaube Bewegung
+  }
+  return currentTime - levelStartTime >= ENEMY_SAFETY_RULES.MOVEMENT_DELAY_MS;
+}
 
 export function createInitialPlayer(difficulty: Difficulty): Player {
   const maxHealthMap = {
@@ -70,6 +250,52 @@ export function createInitialPlayer(difficulty: Difficulty): Player {
   };
 }
 
+/**
+ * Prüft alle Gegnerpositionen beim Levelstart und stellt sicher, dass sie mindestens
+ * 3 Sekunden vom Spieler-Startpunkt entfernt sind. Gibt Warnungen aus für Verstöße.
+ */
+export function ensureEnemySpawnSafety(
+  enemies: Enemy[],
+  playerStartX: number,
+  playerStartY: number,
+  tiles: number[][],
+  decorativeObjects: DecorativeObject[] = []
+): { enemies: Enemy[]; warnings: string[] } {
+  const warnings: string[] = [];
+  const adjustedEnemies: Enemy[] = [];
+
+  for (const enemy of enemies) {
+    const distanceResult = calculatePathDistance(
+      enemy,
+      playerStartX,
+      playerStartY,
+      tiles,
+      decorativeObjects
+    );
+
+    // Wenn kein Pfad existiert (Infinity), gilt als sicher
+    if (distanceResult.distance === Infinity) {
+      adjustedEnemies.push(enemy);
+      continue;
+    }
+
+    // Prüfe ob Distanz ausreicht
+    if (distanceResult.distance < ENEMY_SAFETY_RULES.MINIMUM_DISTANCE_SECONDS) {
+      const warning = `Warnung: Gegner ${enemy.id} (${enemy.type}) ist nur ${distanceResult.distance.toFixed(2)} Sekunden vom Spieler-Startpunkt entfernt (erforderlich: ${ENEMY_SAFETY_RULES.MINIMUM_DISTANCE_SECONDS} Sekunden).`;
+      warnings.push(warning);
+      console.warn(warning);
+      
+      // Verwende Fallback-Mindestdistanz für sehr kleine Level
+      // In Phase 4 wird automatische Repositionierung implementiert
+      adjustedEnemies.push(enemy);
+    } else {
+      adjustedEnemies.push(enemy);
+    }
+  }
+
+  return { enemies: adjustedEnemies, warnings };
+}
+
 export function createInitialGameState(difficulty: Difficulty): GameState {
   const player = createInitialPlayer(difficulty);
   
@@ -98,7 +324,8 @@ export function createInitialGameState(difficulty: Difficulty): GameState {
     currentMap: level,
     totalItemsInLevel: level.items.length, // Initialize total items
     collectedItemsInLevel: 0, // Initialize collected items
-    gameStartTime: Date.now()
+    gameStartTime: Date.now(),
+    levelStartTime: Date.now() // Gegner-Spawn-Sicherheit: Zeitstempel für Bewegungsverzögerung
   };
   state.enemies.forEach((enemy: Enemy) => {
     enemy.texture = getTexture(enemy.type);
@@ -109,6 +336,19 @@ export function createInitialGameState(difficulty: Difficulty): GameState {
   const dog = createDog(state.currentMap.tiles);
   if (dog) {
     state.enemies.push(dog);
+  }
+
+  // Prüfe Gegner-Spawn-Sicherheit
+  const safetyResult = ensureEnemySpawnSafety(
+    state.enemies,
+    level.playerStartX,
+    level.playerStartY,
+    level.tiles,
+    level.decorativeObjects
+  );
+  state.enemies = safetyResult.enemies;
+  if (safetyResult.warnings.length > 0) {
+    console.warn('Gegner-Spawn-Sicherheit: Verstöße beim Levelstart gefunden:', safetyResult.warnings);
   }
 
   return state;
@@ -410,7 +650,8 @@ export function updateEnemies(
   tiles: number[][],
   deltaTime: number,
   difficulty: Difficulty,
-  decorativeObjects: DecorativeObject[] = []
+  decorativeObjects: DecorativeObject[] = [],
+  levelStartTime?: number
 ): { enemies: Enemy[]; player: Player; tilesUpdated?: number[][] } {
   const difficultyMultiplier = {
     [Difficulty.EASY]: 0.7,
@@ -420,6 +661,9 @@ export function updateEnemies(
 
   const multiplier = difficultyMultiplier[difficulty];
   let updatedTiles = tiles;
+
+  // Gegner-Spawn-Sicherheit: Prüfe Bewegungsverzögerung
+  const canMove = levelStartTime ? shouldEnemyMove(levelStartTime) : true;
 
   enemies.forEach((enemy) => {
     // Animation vom Sterben zum toten Zustand
@@ -446,7 +690,9 @@ export function updateEnemies(
     const dy = player.y - enemy.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    if (distance < 15 && distance > 0.1) {
+    // Gegner-Spawn-Sicherheit: Blockiere Bewegung wenn Verzögerung noch aktiv
+    // Angriffe sind weiterhin möglich
+    if (distance < 15 && distance > 0.1 && canMove) {
       // Verwende verbesserte Pathfinding mit dekorativen Objekten
       const pathResult = findPathToPlayer(enemy, player, updatedTiles, decorativeObjects);
       
@@ -469,7 +715,7 @@ export function updateEnemies(
       enemy.direction = Math.atan2(dy, dx);
     }
 
-    // Angriff wenn nah genug
+    // Angriff wenn nah genug (auch während Bewegungsverzögerung möglich)
     if (distance < 1.5 && distance > 0.1) {
       const now = Date.now();
       if (now - enemy.lastAttackTime > enemy.attackCooldown) {
@@ -632,6 +878,7 @@ export function loadNextLevel(gameState: GameState): GameState {
   gameState.totalItemsInLevel = level.items.length; // Initialize total items for new level
   gameState.collectedItemsInLevel = 0; // Reset collected items for new level
   gameState.enemies = JSON.parse(JSON.stringify(level.enemies));
+  gameState.levelStartTime = Date.now(); // Gegner-Spawn-Sicherheit: Zeitstempel für Bewegungsverzögerung
 
   // Füge einen Hund hinzu
   const dog = createDog(gameState.currentMap.tiles);
@@ -653,6 +900,19 @@ export function loadNextLevel(gameState: GameState): GameState {
 
   // Benachrichtigung zurücksetzen
   delete gameState.lastItemNotification;
+
+  // Prüfe Gegner-Spawn-Sicherheit
+  const safetyResult = ensureEnemySpawnSafety(
+    gameState.enemies,
+    level.playerStartX,
+    level.playerStartY,
+    level.tiles,
+    level.decorativeObjects
+  );
+  gameState.enemies = safetyResult.enemies;
+  if (safetyResult.warnings.length > 0) {
+    console.warn('Gegner-Spawn-Sicherheit: Verstöße beim Levelstart gefunden:', safetyResult.warnings);
+  }
 
   return gameState;
 }
