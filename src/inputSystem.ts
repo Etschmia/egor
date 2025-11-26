@@ -196,7 +196,7 @@ export class InputSystem {
 
   public resetCustomToDefaults(): void {
     this.profiles[InputProfileType.CUSTOM].bindings = { ...DEFAULT_MODERN_PROFILE.bindings };
-    this.settings.customBindings = {};
+    this.settings.customBindings = { ...DEFAULT_MODERN_PROFILE.bindings };
     this.saveSettings();
   }
 
