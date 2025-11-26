@@ -204,3 +204,49 @@ export interface ValidationResult {
   adjustedEnemies?: Enemy[]; // Nur wenn Repositionierung nötig
   warnings: string[];
 }
+
+// Input System Interfaces
+
+export enum ActionType {
+  MOVE_FORWARD = 'MOVE_FORWARD',
+  MOVE_BACKWARD = 'MOVE_BACKWARD',
+  STRAFE_LEFT = 'STRAFE_LEFT',
+  STRAFE_RIGHT = 'STRAFE_RIGHT',
+  TURN_LEFT = 'TURN_LEFT',
+  TURN_RIGHT = 'TURN_RIGHT',
+  SHOOT = 'SHOOT',
+  OPEN_DOOR = 'OPEN_DOOR',
+  JUMP = 'JUMP',
+  PAUSE = 'PAUSE',
+  TOGGLE_STATS = 'TOGGLE_STATS',
+  TOGGLE_MAP = 'TOGGLE_MAP',
+  WEAPON_1 = 'WEAPON_1',
+  WEAPON_2 = 'WEAPON_2',
+  WEAPON_3 = 'WEAPON_3',
+  WEAPON_4 = 'WEAPON_4',
+  WEAPON_5 = 'WEAPON_5',
+  WEAPON_6 = 'WEAPON_6'
+}
+
+export enum InputProfileType {
+  MODERN = 'modern',
+  CLASSIC = 'classic',
+  CUSTOM = 'custom'
+}
+
+export type KeyBinding = string[];
+
+export interface ControlProfile {
+  id: InputProfileType;
+  name: string;
+  description: string;
+  bindings: Record<ActionType, KeyBinding>;
+  isEditable: boolean;
+}
+
+export interface InputSettings {
+  activeProfileId: InputProfileType;
+  customBindings: Record<ActionType, KeyBinding>;
+  mouseSensitivity?: number;
+  invertY?: boolean;
+}

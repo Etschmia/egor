@@ -25,14 +25,18 @@ import { soundSystem } from './soundSystem.ts';
 import { getTexture, getWallTexture, getItemTexture, getCorpseTexture, getDecorativeTexture } from './textures.ts';
 import MiniMap from './MiniMap.tsx';
 
-type GameMode = 'menu' | 'playing' | 'paused' | 'help' | 'save' | 'load' | 'difficulty' | 'levelComplete';
+import { ConfigMenu } from './components/ConfigMenu.tsx';
+import { inputSystem } from './inputSystem.ts';
+import { ActionType } from './types.ts';
+
+type GameMode = 'menu' | 'playing' | 'paused' | 'help' | 'save' | 'load' | 'difficulty' | 'levelComplete' | 'config';
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [gameMode, setGameMode] = useState<GameMode>('menu');
   const [saveName, setSaveName] = useState('spielstand1');
-  const [keys, setKeys] = useState<Record<string, boolean>>({});
+  // keys state removed, using inputSystem
   const [showStats, setShowStats] = useState(false);
   const [texturesLoaded, setTexturesLoaded] = useState(false);
   const animationFrameRef = useRef<number>(0);
@@ -48,6 +52,11 @@ function App() {
       console.error('Failed to load textures:', err);
       setTexturesLoaded(true); // Proceed with fallbacks
     });
+
+    inputSystem.initialize();
+    return () => {
+      inputSystem.cleanup();
+    };
   }, []);
 
   const screenWidth = 800;
@@ -129,32 +138,39 @@ function App() {
   // Tastatur-Eingaben
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      setKeys((prev) => ({ ...prev, [e.key.toLowerCase()]: true }));
-
       // Prüfe ob der Benutzer gerade in einem Input-Feld tippt
       const activeElement = document.activeElement;
       const isTypingInInput = activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA');
 
-      // Spezielle Tasten (nur wenn nicht in einem Input-Feld getippt wird)
-      if (!isTypingInInput && e.key.toLowerCase() === 'h') {
+      if (isTypingInInput) return;
+
+      const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      const isAction = (action: ActionType) => inputSystem.getBoundKeys(action).includes(key);
+
+      // Spezielle Tasten (Menü)
+      if (key === 'h') {
         setGameMode((prev) => (prev === 'help' ? 'playing' : 'help'));
         soundSystem.playMenuSelect();
-      } else if (!isTypingInInput && e.key.toLowerCase() === 'm') {
+      } else if (key === 'm') {
         setGameMode((prev) => prev === 'playing' ? 'save' : prev);
         soundSystem.playMenuSelect();
-      } else if (!isTypingInInput && e.key.toLowerCase() === 'l') {
+      } else if (key === 'l') {
         setGameMode((prev) => prev === 'playing' ? 'load' : prev);
         soundSystem.playMenuSelect();
-      } else if (!isTypingInInput && e.key.toLowerCase() === 'p') {
-        setGameMode((prev) => {
-          if (prev === 'playing') {
-            setGameState((state) => state ? { ...state, isPaused: !state.isPaused } : state);
-          }
-          return prev;
-        });
-      } else if (e.key === 'Escape') {
-        setGameMode((prev) => prev !== 'menu' ? 'playing' : prev);
-      } else if (!isTypingInInput && e.key.toLowerCase() === 'e') {
+      } else if (isAction(ActionType.PAUSE)) {
+        if (gameMode === 'playing') {
+          setGameMode('paused');
+          soundSystem.playMenuSelect();
+        } else if (gameMode === 'paused') {
+          setGameMode('playing');
+          soundSystem.playMenuSelect();
+        } else if (gameMode === 'config') {
+           setGameMode(gameState ? 'paused' : 'menu');
+           soundSystem.playMenuSelect();
+        } else if (gameMode !== 'menu') {
+          setGameMode((prev) => prev !== 'menu' ? 'playing' : prev);
+        }
+      } else if (isAction(ActionType.OPEN_DOOR)) {
         // Tür öffnen
         setGameState((prev) => {
           if (prev && gameMode === 'playing' && !prev.isPaused) {
@@ -184,11 +200,11 @@ function App() {
           }
           return prev;
         });
-      } else if (!isTypingInInput && e.key.toLowerCase() === 't') {
+      } else if (isAction(ActionType.TOGGLE_STATS)) {
         // Statistiken-Panel togglen
         setShowStats(prev => !prev);
         soundSystem.playMenuSelect();
-      } else if (!isTypingInInput && e.key.toLowerCase() === 'g') {
+      } else if (key === 'g') {
         // Debug: Zeige lebende Gegner
         setGameState((prev) => {
           if (prev && gameMode === 'playing' && !prev.isPaused) {
@@ -201,7 +217,7 @@ function App() {
           }
           return prev;
         });
-      } else if (!isTypingInInput && e.key.toLowerCase() === 'f') {
+      } else if (isAction(ActionType.JUMP)) {
         // Springen
         setGameState((prev) => {
           if (prev && gameMode === 'playing' && !prev.isPaused) {
@@ -212,11 +228,19 @@ function App() {
         });
       }
 
-      // Waffen wechseln (1-6) (nur wenn nicht in einem Input-Feld getippt wird)
-      if (!isTypingInInput) {
-        const weaponKeys = ['1', '2', '3', '4', '5', '6'];
-        const keyIndex = weaponKeys.indexOf(e.key);
-        if (keyIndex >= 0) {
+      // Waffen wechseln (1-6)
+      const weaponActions = [
+        ActionType.WEAPON_1,
+        ActionType.WEAPON_2,
+        ActionType.WEAPON_3,
+        ActionType.WEAPON_4,
+        ActionType.WEAPON_5,
+        ActionType.WEAPON_6
+      ];
+      
+      const triggeredWeaponIndex = weaponActions.findIndex(act => isAction(act));
+      
+      if (triggeredWeaponIndex >= 0) {
           const weaponTypes = [
             WeaponType.KNIFE,
             WeaponType.PISTOL,
@@ -225,27 +249,20 @@ function App() {
             WeaponType.ASSAULT_RIFLE,
             WeaponType.HEAVY_MG
           ];
-          const selectedWeapon = weaponTypes[keyIndex];
+          const selectedWeapon = weaponTypes[triggeredWeaponIndex];
           setGameState((prev) => {
             if (prev && prev.player.weapons.includes(selectedWeapon)) {
               return { ...prev, player: { ...prev.player, currentWeapon: selectedWeapon } };
             }
             return prev;
           });
-        }
       }
     };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      setKeys((prev) => ({ ...prev, [e.key.toLowerCase()]: false }));
-    };
-
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
     };
   }, [gameMode]);
 
@@ -276,7 +293,7 @@ function App() {
     const planeX = Math.cos(newState.player.direction + Math.PI / 2) * 0.66;
     const planeY = Math.sin(newState.player.direction + Math.PI / 2) * 0.66;
 
-    if (keys['w'] || keys['arrowup']) {
+    if (inputSystem.isActionActive(ActionType.MOVE_FORWARD)) {
       newState.player = movePlayer(
         newState.player,
         dirX * moveSpeed,
@@ -285,7 +302,7 @@ function App() {
         newState.currentMap.decorativeObjects
       );
     }
-    if (keys['s'] || keys['arrowdown']) {
+    if (inputSystem.isActionActive(ActionType.MOVE_BACKWARD)) {
       newState.player = movePlayer(
         newState.player,
         -dirX * moveSpeed,
@@ -294,7 +311,7 @@ function App() {
         newState.currentMap.decorativeObjects
       );
     }
-    if (keys['a']) {
+    if (inputSystem.isActionActive(ActionType.STRAFE_LEFT)) {
       newState.player = movePlayer(
         newState.player,
         -planeX * moveSpeed,
@@ -303,7 +320,7 @@ function App() {
         newState.currentMap.decorativeObjects
       );
     }
-    if (keys['d']) {
+    if (inputSystem.isActionActive(ActionType.STRAFE_RIGHT)) {
       newState.player = movePlayer(
         newState.player,
         planeX * moveSpeed,
@@ -312,15 +329,15 @@ function App() {
         newState.currentMap.decorativeObjects
       );
     }
-    if (keys['arrowleft']) {
+    if (inputSystem.isActionActive(ActionType.TURN_LEFT)) {
       newState.player = rotatePlayer(newState.player, -rotSpeed);
     }
-    if (keys['arrowright']) {
+    if (inputSystem.isActionActive(ActionType.TURN_RIGHT)) {
       newState.player = rotatePlayer(newState.player, rotSpeed);
     }
 
     // Schießen
-    if (keys[' ']) {
+    if (inputSystem.isActionActive(ActionType.SHOOT)) {
       const weapon = WEAPONS[newState.player.currentWeapon];
       const fireInterval = 1000 / weapon.fireRate;
 
@@ -405,7 +422,7 @@ function App() {
     }
 
     setGameState(newState);
-  }, [keys]);
+  }, []);
 
   // Hilfsfunktion zum Prüfen, ob auf einer Wand ein Bild ist
   const findWallPicture = (hitX: number, hitY: number, side: number, wallX: number, pictures: WallPicture[]) => {
@@ -769,8 +786,36 @@ function App() {
               <button className="menu-button" onClick={() => setGameMode('load')}>
                 Spiel Laden
               </button>
+              <button className="menu-button" onClick={() => setGameMode('config')}>
+                Konfiguration
+              </button>
               <button className="menu-button" onClick={() => setGameMode('help')}>
                 Hilfe
+              </button>
+            </div>
+          </div>
+        );
+
+      case 'config':
+        return <ConfigMenu onBack={() => setGameMode(gameState ? 'paused' : 'menu')} />;
+
+      case 'paused':
+        return (
+          <div className="menu-overlay">
+            <div className="menu-title">PAUSE</div>
+            <div className="menu-content">
+              <button className="menu-button" onClick={() => setGameMode('playing')}>
+                Weiter
+              </button>
+              <button className="menu-button" onClick={() => setGameMode('config')}>
+                Konfiguration
+              </button>
+              <button className="menu-button" onClick={() => {
+                setGameMode('menu');
+                setGameState(null);
+                soundSystem.playMenuSelect();
+              }}>
+                Hauptmenü
               </button>
             </div>
           </div>
@@ -866,7 +911,13 @@ function App() {
         );
       }
 
-      case 'help':
+      case 'help': {
+        const formatKeys = (action: ActionType) => {
+          const keys = inputSystem.getBoundKeys(action);
+          if (!keys.length) return '---';
+          return keys.map(k => k === ' ' ? 'SPACE' : k.toUpperCase()).join(' / ');
+        };
+
         return (
           <div className="menu-overlay">
             <div className="menu-title">Steuerung & Hilfe</div>
@@ -874,35 +925,35 @@ function App() {
               <div className="help-section">
                 <h3>Bewegung:</h3>
                 <div className="help-key">
-                  <span className="help-key-button">W / ↑</span>
+                  <span className="help-key-button">{formatKeys(ActionType.MOVE_FORWARD)}</span>
                   <span>Vorwärts</span>
                 </div>
                 <div className="help-key">
-                  <span className="help-key-button">S / ↓</span>
+                  <span className="help-key-button">{formatKeys(ActionType.MOVE_BACKWARD)}</span>
                   <span>Rückwärts</span>
                 </div>
                 <div className="help-key">
-                  <span className="help-key-button">A</span>
-                  <span>Links bewegen</span>
+                  <span className="help-key-button">{formatKeys(ActionType.STRAFE_LEFT)}</span>
+                  <span>Links strafen</span>
                 </div>
                 <div className="help-key">
-                  <span className="help-key-button">D</span>
-                  <span>Rechts bewegen</span>
+                  <span className="help-key-button">{formatKeys(ActionType.STRAFE_RIGHT)}</span>
+                  <span>Rechts strafen</span>
                 </div>
                 <div className="help-key">
-                  <span className="help-key-button">← →</span>
-                  <span>Umschauen</span>
+                  <span className="help-key-button">{formatKeys(ActionType.TURN_LEFT)} / {formatKeys(ActionType.TURN_RIGHT)}</span>
+                  <span>Drehen</span>
                 </div>
                 <div className="help-key">
-                  <span className="help-key-button">F</span>
-                  <span>Springen (über Hindernisse)</span>
+                  <span className="help-key-button">{formatKeys(ActionType.JUMP)}</span>
+                  <span>Springen</span>
                 </div>
               </div>
 
               <div className="help-section">
                 <h3>Kampf:</h3>
                 <div className="help-key">
-                  <span className="help-key-button">SPACE</span>
+                  <span className="help-key-button">{formatKeys(ActionType.SHOOT)}</span>
                   <span>Schießen / Angreifen</span>
                 </div>
                 <div className="help-key">
@@ -914,32 +965,28 @@ function App() {
               <div className="help-section">
                 <h3>Spiel:</h3>
                 <div className="help-key">
-                  <span className="help-key-button">E</span>
+                  <span className="help-key-button">{formatKeys(ActionType.OPEN_DOOR)}</span>
                   <span>Tür öffnen</span>
                 </div>
                 <div className="help-key">
-                  <span className="help-key-button">T</span>
-                  <span>Statistiken anzeigen/verbergen</span>
+                  <span className="help-key-button">{formatKeys(ActionType.TOGGLE_STATS)}</span>
+                  <span>Statistiken</span>
                 </div>
                 <div className="help-key">
                   <span className="help-key-button">M</span>
-                  <span>Spielstand speichern</span>
+                  <span>Speichern</span>
                 </div>
                 <div className="help-key">
                   <span className="help-key-button">L</span>
-                  <span>Spielstand laden</span>
+                  <span>Laden</span>
                 </div>
                 <div className="help-key">
                   <span className="help-key-button">H</span>
-                  <span>Diese Hilfe anzeigen/verbergen</span>
+                  <span>Hilfe</span>
                 </div>
                 <div className="help-key">
-                  <span className="help-key-button">P</span>
+                  <span className="help-key-button">{formatKeys(ActionType.PAUSE)}</span>
                   <span>Pause</span>
-                </div>
-                <div className="help-key">
-                  <span className="help-key-button">ESC</span>
-                  <span>Dialog schließen</span>
                 </div>
               </div>
 
@@ -949,6 +996,7 @@ function App() {
             </div>
           </div>
         );
+      }
 
       case 'levelComplete':
         return (

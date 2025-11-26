@@ -45,6 +45,7 @@ egor/
 │   ├── raycasting.ts        # 3D rendering engine (ray casting, sprites)
 │   ├── textures.ts          # Procedural texture generation
 │   ├── soundSystem.ts       # Procedural sound generation (Web Audio API)
+│   ├── inputSystem.ts       # NEW: Centralized input handling (keyboard/mouse)
 │   ├── weapons.ts           # Weapon definitions and properties
 │   ├── levels.ts            # Level management and variant system
 │   ├── mapSelectionSystem.ts # Dynamic level variant selection
@@ -114,7 +115,9 @@ The main logic is located in the `src/` directory.
 *   **`App.tsx`**: The main React component that orchestrates the game. It contains:
     *   The main game loop (`requestAnimationFrame`).
     *   Rendering of the game world, HUD, and menus.
-    *   Handling user input (keyboard and mouse).
+    *   Handling user input (now delegated to `inputSystem.ts`).
+
+*   **`inputSystem.ts`**: Centralized input management. Handles keyboard/mouse listeners, key bindings, and profiles (Modern/Classic). Use this for all input checks (e.g., `inputSystem.isActionActive(ActionType.MOVE_FORWARD)`) instead of direct event listeners or `App.tsx` state.
 
 *   **`types.ts`**: Defines all the core data structures and enums used throughout the application. Key types include `GameState`, `Player`, `Enemy`, `Item`, and enums like `EnemyType`, `ItemType`, and `WeaponType`.
 
@@ -322,7 +325,7 @@ This ensures they scale correctly with perspective and don't float toward the pl
 ### File Organization
 - **Game Logic**: `src/gameEngine.ts`, `src/raycasting.ts`, `src/weapons.ts`
 - **Data**: `src/types.ts`, `src/levels.ts`, `src/levels/*.ts`
-- **Systems**: `src/textures.ts`, `src/soundSystem.ts`, `src/saveLoadSystem.ts`
+- **Systems**: `src/textures.ts`, `src/soundSystem.ts`, `src/saveLoadSystem.ts`, `src/inputSystem.ts`
 - **Components**: `src/App.tsx`, `src/MiniMap.tsx`
 - **Shared Code**: `src/shared/` (used by main game, editor, and designer)
 
@@ -346,3 +349,4 @@ This ensures they scale correctly with perspective and don't float toward the pl
 - **textures.ts**: Texture changes affect visual appearance - test in game
 - **raycasting.ts**: Rendering changes affect performance - profile carefully
 - **levels.ts**: Level changes affect gameplay - verify all variants still work
+

@@ -46,7 +46,11 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
 
 ## Steuerung
 
-### Bewegung
+Das Spiel bietet anpassbare Steuerungs-Profile. Im Hauptmenü unter **Konfiguration** kannst du zwischen "Modern", "Klassisch" und einer benutzerdefinierten Belegung wählen.
+
+### Standard-Belegung (Modern)
+
+#### Bewegung
 - **W** / **↑**: Vorwärts
 - **S** / **↓**: Rückwärts
 - **A**: Links bewegen (seitwärts)
@@ -54,12 +58,12 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
 - **←** / **→**: Umschauen
 - **F**: Springen (über Hindernisse wie Tische und Stühle)
 
-### Interaktion
+#### Interaktion
 - **E**: Tür öffnen (wenn man davor steht)
 - **T**: Statistiken anzeigen/verbergen
 - **G**: Debug-Info (zeigt lebende Gegner in Konsole)
 
-### Kampf
+#### Kampf
 - **Leertaste**: Schießen / Angreifen
 - **1-6**: Waffe wechseln
   - 1: Messer
@@ -69,12 +73,19 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
   - 5: Sturmgewehr
   - 6: Schweres Maschinengewehr
 
-### Spiel-Menü
+#### Spiel-Menü
 - **M**: Spielstand speichern
 - **L**: Spielstand laden
 - **H**: Hilfe anzeigen/verbergen
-- **P**: Pause
-- **ESC**: Dialog schließen
+- **P**: Pause (öffnet Pausen-Menü)
+- **ESC**: Zurück / Pause
+
+### Klassische Steuerung (Wolfenstein 3D Stil)
+- **Pfeiltasten**: Bewegung und Drehen
+- **Z / C** (oder Komma/Punkt): Seitwärts laufen (Strafen)
+- **Strg**: Schießen
+- **Leertaste**: Tür öffnen
+
 
 ## Installation & Start
 
