@@ -30,3 +30,4 @@ if (inputSystem.isActionActive(ActionType.MOVE_FORWARD)) { ... }
 1. **Manual**: Open `test-input-system.html` (created during implementation) or run the game and switch profiles.
 2. **Verification**: Switch to "Classic", verify Spacebar opens doors and Ctrl shoots.
 
+
