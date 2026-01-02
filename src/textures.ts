@@ -1,4 +1,33 @@
 import { EnemyType, DecorativeObjectType } from './types.ts';
+import { TextureQuality } from './config/graphicsSettings.ts';
+
+// Helper functions for scaled drawing
+function scaledRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, scale: number) {
+  ctx.fillRect(x * scale, y * scale, w * scale, h * scale);
+}
+
+function scaledArc(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, scale: number, startAngle: number = 0, endAngle: number = Math.PI * 2) {
+  ctx.beginPath();
+  ctx.arc(x * scale, y * scale, r * scale, startAngle, endAngle);
+  ctx.fill();
+}
+
+// Helper for complex paths
+function scaledPath(ctx: CanvasRenderingContext2D, points: { x: number, y: number }[], scale: number) {
+  ctx.beginPath();
+  ctx.moveTo(points[0].x * scale, points[0].y * scale);
+  for (let i = 1; i < points.length; i++) {
+    ctx.lineTo(points[i].x * scale, points[i].y * scale);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function scaledEllipse(ctx: CanvasRenderingContext2D, x: number, y: number, radiusX: number, radiusY: number, rotation: number, startAngle: number, endAngle: number, scale: number) {
+  ctx.beginPath();
+  ctx.ellipse(x * scale, y * scale, radiusX * scale, radiusY * scale, rotation, startAngle, endAngle);
+  ctx.fill();
+}
 
 const textures: Partial<Record<EnemyType, CanvasImageSource>> = {};
 const corpseTextures: Partial<Record<EnemyType, CanvasImageSource>> = {};
@@ -10,40 +39,40 @@ const decorativeTextures: Partial<Record<DecorativeObjectType, CanvasImageSource
 const colorVariantCache = new Map<string, CanvasImageSource>();
 const MAX_CACHE_SIZE = 100; // Limit cache size to prevent memory issues
 
-export function loadTextures(): Promise<void[]> {
-  textures[EnemyType.ZOMBIE] = createZombieTexture();
-  textures[EnemyType.MONSTER] = createMonsterTexture();
-  textures[EnemyType.GHOST] = createGhostTexture();
-  textures[EnemyType.DOG] = createDogTexture();
+export function loadTextures(quality: number = TextureQuality.LOW): Promise<void[]> {
+  textures[EnemyType.ZOMBIE] = createZombieTexture(quality);
+  textures[EnemyType.MONSTER] = createMonsterTexture(quality);
+  textures[EnemyType.GHOST] = createGhostTexture(quality);
+  textures[EnemyType.DOG] = createDogTexture(quality);
 
-  corpseTextures[EnemyType.ZOMBIE] = createZombieCorpseTexture();
-  corpseTextures[EnemyType.MONSTER] = createMonsterCorpseTexture();
-  corpseTextures[EnemyType.GHOST] = createGhostCorpseTexture();
-  corpseTextures[EnemyType.DOG] = createDogCorpseTexture();
+  corpseTextures[EnemyType.ZOMBIE] = createZombieCorpseTexture(quality);
+  corpseTextures[EnemyType.MONSTER] = createMonsterCorpseTexture(quality);
+  corpseTextures[EnemyType.GHOST] = createGhostCorpseTexture(quality);
+  corpseTextures[EnemyType.DOG] = createDogCorpseTexture(quality);
 
   // Wandtexturen erstellen
-  wallTextures['brick'] = createBrickTexture();
-  wallTextures['wood'] = createWoodTexture();
-  wallTextures['stone'] = createStoneTexture();
-  wallTextures['door'] = createDoorTexture();
-  wallTextures['exitDoor'] = createExitDoorTexture();
+  wallTextures['brick'] = createBrickTexture(quality);
+  wallTextures['wood'] = createWoodTexture(quality);
+  wallTextures['stone'] = createStoneTexture(quality);
+  wallTextures['door'] = createDoorTexture(quality);
+  wallTextures['exitDoor'] = createExitDoorTexture(quality);
 
   // Item-Texturen erstellen
-  itemTextures['HEALTH_SMALL'] = createHealthSmallTexture();
-  itemTextures['HEALTH_LARGE'] = createHealthLargeTexture();
-  itemTextures['TREASURE'] = createTreasureTexture();
-  itemTextures['AMMO'] = createAmmoTexture();
-  itemTextures['WEAPON'] = createWeaponTexture();
+  itemTextures['HEALTH_SMALL'] = createHealthSmallTexture(quality);
+  itemTextures['HEALTH_LARGE'] = createHealthLargeTexture(quality);
+  itemTextures['TREASURE'] = createTreasureTexture(quality);
+  itemTextures['AMMO'] = createAmmoTexture(quality);
+  itemTextures['WEAPON'] = createWeaponTexture(quality);
 
   // Dekorative Objekt-Texturen erstellen
-  decorativeTextures[DecorativeObjectType.CEILING_LIGHT] = createLightTexture();
-  decorativeTextures[DecorativeObjectType.VASE] = createVaseTexture();
-  decorativeTextures[DecorativeObjectType.CRATE] = createCrateTexture();
-  decorativeTextures[DecorativeObjectType.BENCH] = createBenchTexture();
-  decorativeTextures[DecorativeObjectType.TABLE] = createTableTexture();
-  decorativeTextures[DecorativeObjectType.CHAIR] = createChairTexture();
-  decorativeTextures[DecorativeObjectType.WINE_BOTTLE] = createWineBottleTexture();
-  decorativeTextures[DecorativeObjectType.SKELETON] = createSkeletonTexture();
+  decorativeTextures[DecorativeObjectType.CEILING_LIGHT] = createLightTexture(quality);
+  decorativeTextures[DecorativeObjectType.VASE] = createVaseTexture(quality);
+  decorativeTextures[DecorativeObjectType.CRATE] = createCrateTexture(quality);
+  decorativeTextures[DecorativeObjectType.BENCH] = createBenchTexture(quality);
+  decorativeTextures[DecorativeObjectType.TABLE] = createTableTexture(quality);
+  decorativeTextures[DecorativeObjectType.CHAIR] = createChairTexture(quality);
+  decorativeTextures[DecorativeObjectType.WINE_BOTTLE] = createWineBottleTexture(quality);
+  decorativeTextures[DecorativeObjectType.SKELETON] = createSkeletonTexture(quality);
 
   return Promise.resolve([]);
 }
@@ -61,7 +90,7 @@ function createZombieTexture(size: number = 64): HTMLCanvasElement {
   ctx.fillStyle = '#4B3A26'; // Dunkelbraun
   ctx.fillRect(20 * scale, 52 * scale, 8 * scale, 12 * scale);
   ctx.fillRect(36 * scale, 52 * scale, 8 * scale, 12 * scale);
-  
+
   // Schuhe
   ctx.fillStyle = '#1A1A1A'; // Fast schwarz
   ctx.fillRect(18 * scale, 60 * scale, 10 * scale, 4 * scale);
@@ -74,13 +103,13 @@ function createZombieTexture(size: number = 64): HTMLCanvasElement {
   shirtGradient.addColorStop(1, '#5A0000'); // Sehr dunkelrot
   ctx.fillStyle = shirtGradient;
   ctx.fillRect(16 * scale, 28 * scale, 32 * scale, 24 * scale);
-  
+
   // Zerrissene Fetzen
   ctx.fillStyle = '#5A0000';
   ctx.fillRect(16 * scale, 50 * scale, 5 * scale, 5 * scale);
   ctx.fillRect(25 * scale, 48 * scale, 8 * scale, 8 * scale);
   ctx.fillRect(40 * scale, 50 * scale, 6 * scale, 6 * scale);
-  
+
   // Blutflecken auf der Kleidung
   ctx.fillStyle = 'rgba(90, 0, 0, 0.8)';
   ctx.beginPath();
@@ -131,7 +160,7 @@ function createZombieTexture(size: number = 64): HTMLCanvasElement {
   headGradient.addColorStop(1, '#2E8B57'); // Seegrün
   ctx.fillStyle = headGradient;
   ctx.fillRect(24 * scale, 8 * scale, 16 * scale, 16 * scale);
-  
+
   // Wunden und Verfärbungen
   ctx.fillStyle = '#5A0000';
   ctx.fillRect(35 * scale, 9 * scale, 4 * scale, 6 * scale);  // Große Wunde rechts
@@ -152,7 +181,7 @@ function createZombieTexture(size: number = 64): HTMLCanvasElement {
   ctx.beginPath();
   ctx.arc(28 * scale, 14 * scale, 3 * scale, 0, Math.PI * 2);
   ctx.fill();
-  
+
   const eyeGradient2 = ctx.createRadialGradient(36 * scale, 14 * scale, 0.5 * scale, 36 * scale, 14 * scale, 3 * scale);
   eyeGradient2.addColorStop(0, '#FFFF00');
   eyeGradient2.addColorStop(0.6, '#FFD700');
@@ -161,7 +190,7 @@ function createZombieTexture(size: number = 64): HTMLCanvasElement {
   ctx.beginPath();
   ctx.arc(36 * scale, 14 * scale, 3 * scale, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Pupillen
   ctx.fillStyle = '#000000';
   ctx.beginPath();
@@ -174,7 +203,7 @@ function createZombieTexture(size: number = 64): HTMLCanvasElement {
   // Mund mit sichtbaren Zähnen
   ctx.fillStyle = '#000000';
   ctx.fillRect(28 * scale, 20 * scale, 8 * scale, 3 * scale); // Mund geöffnet
-  
+
   // Zähne
   ctx.fillStyle = '#E0E0E0';
   ctx.fillRect(28 * scale, 20 * scale, 1.5 * scale, 2 * scale);  // Zahn 1
@@ -185,492 +214,382 @@ function createZombieTexture(size: number = 64): HTMLCanvasElement {
   return canvas;
 }
 
-function createMonsterTexture(): HTMLCanvasElement {
+function createMonsterTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // --- Detailliertes Monster mit muskulöser Struktur ---
 
   // Beine mit Muskelstruktur
-  const legGradient = ctx.createLinearGradient(16, 54, 28, 64);
+  const legGradient = ctx.createLinearGradient(16 * scale, 54 * scale, 28 * scale, 64 * scale);
   legGradient.addColorStop(0, '#DC143C'); // Crimson
   legGradient.addColorStop(0.5, '#8B0000'); // Dunkelrot
   legGradient.addColorStop(1, '#5A0000'); // Sehr dunkelrot
   ctx.fillStyle = legGradient;
-  ctx.fillRect(18, 54, 10, 10);
-  ctx.fillRect(36, 54, 10, 10);
-  
+  scaledRect(ctx, 18, 54, 10, 10, scale);
+  scaledRect(ctx, 36, 54, 10, 10, scale);
+
   // Muskelschattierungen an Beinen
   ctx.fillStyle = '#5A0000';
-  ctx.fillRect(20, 56, 2, 8); // Schatten links
-  ctx.fillRect(38, 56, 2, 8); // Schatten rechts
-  
+  scaledRect(ctx, 20, 56, 2, 8, scale);
+  scaledRect(ctx, 38, 56, 2, 8, scale);
+
   // Klauen an Füßen
   ctx.fillStyle = '#E0E0E0';
-  ctx.fillRect(16, 62, 2, 3); // Linker Fuß - Kralle 1
-  ctx.fillRect(19, 62, 2, 3); // Linker Fuß - Kralle 2
-  ctx.fillRect(22, 62, 2, 3); // Linker Fuß - Kralle 3
-  ctx.fillRect(34, 62, 2, 3); // Rechter Fuß - Kralle 1
-  ctx.fillRect(37, 62, 2, 3); // Rechter Fuß - Kralle 2
-  ctx.fillRect(40, 62, 2, 3); // Rechter Fuß - Kralle 3
+  scaledRect(ctx, 16, 62, 2, 3, scale);
+  scaledRect(ctx, 19, 62, 2, 3, scale);
+  scaledRect(ctx, 22, 62, 2, 3, scale);
+  scaledRect(ctx, 34, 62, 2, 3, scale);
+  scaledRect(ctx, 37, 62, 2, 3, scale);
+  scaledRect(ctx, 40, 62, 2, 3, scale);
 
   // Muskulöser Körper mit mehreren Rottönen
-  const bodyGradient = ctx.createRadialGradient(32, 38, 5, 32, 38, 22);
+  const bodyGradient = ctx.createRadialGradient(32 * scale, 38 * scale, 5 * scale, 32 * scale, 38 * scale, 22 * scale);
   bodyGradient.addColorStop(0, '#FF4500'); // Orangerot (Highlight)
   bodyGradient.addColorStop(0.4, '#DC143C'); // Crimson
   bodyGradient.addColorStop(0.7, '#8B0000'); // Dunkelrot
   bodyGradient.addColorStop(1, '#5A0000'); // Sehr dunkelrot (Schatten)
   ctx.fillStyle = bodyGradient;
-  ctx.fillRect(14, 24, 36, 30);
-  
+  scaledRect(ctx, 14, 24, 36, 30, scale);
+
   // Sichtbare Muskelstruktur durch Schattierungen
   ctx.fillStyle = '#5A0000';
   // Brustmuskeln
-  ctx.fillRect(22, 28, 8, 2);
-  ctx.fillRect(34, 28, 8, 2);
+  scaledRect(ctx, 22, 28, 8, 2, scale);
+  scaledRect(ctx, 34, 28, 8, 2, scale);
   // Bauchmuskeln
-  ctx.fillRect(28, 36, 8, 2);
-  ctx.fillRect(28, 42, 8, 2);
-  ctx.fillRect(28, 48, 8, 2);
+  scaledRect(ctx, 28, 36, 8, 2, scale);
+  scaledRect(ctx, 28, 42, 8, 2, scale);
+  scaledRect(ctx, 28, 48, 8, 2, scale);
   // Seitliche Muskeln
   ctx.fillStyle = '#DC143C';
-  ctx.fillRect(14, 30, 2, 20);
-  ctx.fillRect(48, 30, 2, 20);
+  scaledRect(ctx, 14, 30, 2, 20, scale);
+  scaledRect(ctx, 48, 30, 2, 20, scale);
 
   // Arme mit Muskelstruktur
-  const armGradient = ctx.createLinearGradient(0, 28, 0, 48);
+  const armGradient = ctx.createLinearGradient(0, 28 * scale, 0, 48 * scale);
   armGradient.addColorStop(0, '#DC143C');
   armGradient.addColorStop(0.5, '#8B0000');
   armGradient.addColorStop(1, '#5A0000');
   ctx.fillStyle = armGradient;
-  ctx.fillRect(4, 28, 10, 20);
-  ctx.fillRect(50, 28, 10, 20);
-  
+  scaledRect(ctx, 4, 28, 10, 20, scale);
+  scaledRect(ctx, 50, 28, 10, 20, scale);
+
   // Muskelschattierungen an Armen
   ctx.fillStyle = '#5A0000';
-  ctx.fillRect(6, 32, 2, 12);
-  ctx.fillRect(52, 32, 2, 12);
+  scaledRect(ctx, 6, 32, 2, 12, scale);
+  scaledRect(ctx, 52, 32, 2, 12, scale);
 
   // Detaillierte Hände mit einzelnen Krallen
   ctx.fillStyle = '#8B0000';
-  ctx.fillRect(2, 48, 10, 6); // Linke Hand
-  ctx.fillRect(52, 48, 10, 6); // Rechte Hand
-  
+  scaledRect(ctx, 2, 48, 10, 6, scale); // Linke Hand
+  scaledRect(ctx, 52, 48, 10, 6, scale); // Rechte Hand
+
   // Linke Hand - 4 Krallen
   ctx.fillStyle = '#E0E0E0';
-  ctx.fillRect(2, 54, 2, 5);   // Kralle 1
-  ctx.fillRect(5, 54, 2, 6);   // Kralle 2
-  ctx.fillRect(8, 54, 2, 5);   // Kralle 3
-  ctx.fillRect(11, 54, 2, 4);  // Kralle 4
-  
+  scaledRect(ctx, 2, 54, 2, 5, scale);   // Kralle 1
+  scaledRect(ctx, 5, 54, 2, 6, scale);   // Kralle 2
+  scaledRect(ctx, 8, 54, 2, 5, scale);   // Kralle 3
+  scaledRect(ctx, 11, 54, 2, 4, scale);  // Kralle 4
+
   // Rechte Hand - 4 Krallen
-  ctx.fillRect(52, 54, 2, 5);  // Kralle 1
-  ctx.fillRect(55, 54, 2, 6);  // Kralle 2
-  ctx.fillRect(58, 54, 2, 5);  // Kralle 3
-  ctx.fillRect(61, 54, 2, 4);  // Kralle 4
+  scaledRect(ctx, 52, 54, 2, 5, scale);  // Kralle 1
+  scaledRect(ctx, 55, 54, 2, 6, scale);  // Kralle 2
+  scaledRect(ctx, 58, 54, 2, 5, scale);  // Kralle 3
+  scaledRect(ctx, 61, 54, 2, 4, scale);  // Kralle 4
 
   // Kopf mit Muskelstruktur
-  const headGradient = ctx.createRadialGradient(32, 14, 3, 32, 14, 12);
+  const headGradient = ctx.createRadialGradient(32 * scale, 14 * scale, 3 * scale, 32 * scale, 14 * scale, 12 * scale);
   headGradient.addColorStop(0, '#DC143C');
   headGradient.addColorStop(0.6, '#8B0000');
   headGradient.addColorStop(1, '#5A0000');
   ctx.fillStyle = headGradient;
-  ctx.fillRect(20, 6, 24, 18);
-  
+  scaledRect(ctx, 20, 6, 24, 18, scale);
+
   // Kiefermuskulatur
   ctx.fillStyle = '#5A0000';
-  ctx.fillRect(20, 18, 4, 6);
-  ctx.fillRect(40, 18, 4, 6);
+  scaledRect(ctx, 20, 18, 4, 6, scale);
+  scaledRect(ctx, 40, 18, 4, 6, scale);
 
   // Detaillierte 3D-Hörner mit Glanzeffekten
   // Linkes Horn
-  const hornGradient1 = ctx.createLinearGradient(18, 0, 22, 6);
+  const hornGradient1 = ctx.createLinearGradient(18 * scale, 0, 22 * scale, 6 * scale);
   hornGradient1.addColorStop(0, '#C0C0C0'); // Silber (Glanz)
   hornGradient1.addColorStop(0.3, '#E8E8E8'); // Helles Silber (Highlight)
   hornGradient1.addColorStop(0.7, '#A0A0A0'); // Mittelgrau
   hornGradient1.addColorStop(1, '#696969'); // Dunkelgrau (Schatten)
   ctx.fillStyle = hornGradient1;
-  ctx.beginPath();
-  ctx.moveTo(22, 6);
-  ctx.lineTo(18, -2);
-  ctx.lineTo(20, -2);
-  ctx.lineTo(24, 6);
-  ctx.closePath();
-  ctx.fill();
-  
+  scaledPath(ctx, [{ x: 22, y: 6 }, { x: 18, y: -2 }, { x: 20, y: -2 }, { x: 24, y: 6 }], scale);
+
   // Glanzlicht auf linkem Horn
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(21, 1, 1, 3);
-  
+  scaledRect(ctx, 21, 1, 1, 3, scale);
+
   // Rechtes Horn
-  const hornGradient2 = ctx.createLinearGradient(42, 0, 46, 6);
+  const hornGradient2 = ctx.createLinearGradient(42 * scale, 0, 46 * scale, 6 * scale);
   hornGradient2.addColorStop(0, '#C0C0C0');
   hornGradient2.addColorStop(0.3, '#E8E8E8');
   hornGradient2.addColorStop(0.7, '#A0A0A0');
   hornGradient2.addColorStop(1, '#696969');
   ctx.fillStyle = hornGradient2;
-  ctx.beginPath();
-  ctx.moveTo(42, 6);
-  ctx.lineTo(46, -2);
-  ctx.lineTo(44, -2);
-  ctx.lineTo(40, 6);
-  ctx.closePath();
-  ctx.fill();
-  
+  scaledPath(ctx, [{ x: 42, y: 6 }, { x: 46, y: -2 }, { x: 44, y: -2 }, { x: 40, y: 6 }], scale);
+
   // Glanzlicht auf rechtem Horn
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(43, 1, 1, 3);
+  scaledRect(ctx, 43, 1, 1, 3, scale);
 
   // Leuchtende rot-gelbe Augen mit mehreren Schichten
   // Äußere Glühschicht
-  const eyeGlow1 = ctx.createRadialGradient(26, 12, 1, 26, 12, 6);
+  const eyeGlow1 = ctx.createRadialGradient(26 * scale, 12 * scale, 1 * scale, 26 * scale, 12 * scale, 6 * scale);
   eyeGlow1.addColorStop(0, 'rgba(255, 255, 0, 0.8)'); // Gelb
   eyeGlow1.addColorStop(0.5, 'rgba(255, 69, 0, 0.5)'); // Orangerot
   eyeGlow1.addColorStop(1, 'rgba(255, 0, 0, 0)'); // Transparent rot
   ctx.fillStyle = eyeGlow1;
-  ctx.beginPath();
-  ctx.arc(26, 12, 6, 0, Math.PI * 2);
-  ctx.fill();
-  
-  const eyeGlow2 = ctx.createRadialGradient(38, 12, 1, 38, 12, 6);
+  scaledArc(ctx, 26, 12, 6, scale);
+
+  const eyeGlow2 = ctx.createRadialGradient(38 * scale, 12 * scale, 1 * scale, 38 * scale, 12 * scale, 6 * scale);
   eyeGlow2.addColorStop(0, 'rgba(255, 255, 0, 0.8)');
   eyeGlow2.addColorStop(0.5, 'rgba(255, 69, 0, 0.5)');
   eyeGlow2.addColorStop(1, 'rgba(255, 0, 0, 0)');
   ctx.fillStyle = eyeGlow2;
-  ctx.beginPath();
-  ctx.arc(38, 12, 6, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledArc(ctx, 38, 12, 6, scale);
+
   // Mittlere Schicht - Rot
   ctx.fillStyle = '#FF0000';
-  ctx.beginPath();
-  ctx.arc(26, 12, 4, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(38, 12, 4, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledArc(ctx, 26, 12, 4, scale);
+  scaledArc(ctx, 38, 12, 4, scale);
+
   // Innere Schicht - Gelb
-  const eyeCore1 = ctx.createRadialGradient(26, 12, 0, 26, 12, 3);
+  const eyeCore1 = ctx.createRadialGradient(26 * scale, 12 * scale, 0, 26 * scale, 12 * scale, 3 * scale);
   eyeCore1.addColorStop(0, '#FFFF00'); // Helles Gelb
   eyeCore1.addColorStop(0.6, '#FFD700'); // Gold
   eyeCore1.addColorStop(1, '#FF8C00'); // Dunkelorange
   ctx.fillStyle = eyeCore1;
-  ctx.beginPath();
-  ctx.arc(26, 12, 3, 0, Math.PI * 2);
-  ctx.fill();
-  
-  const eyeCore2 = ctx.createRadialGradient(38, 12, 0, 38, 12, 3);
+  scaledArc(ctx, 26, 12, 3, scale);
+
+  const eyeCore2 = ctx.createRadialGradient(38 * scale, 12 * scale, 0, 38 * scale, 12 * scale, 3 * scale);
   eyeCore2.addColorStop(0, '#FFFF00');
   eyeCore2.addColorStop(0.6, '#FFD700');
   eyeCore2.addColorStop(1, '#FF8C00');
   ctx.fillStyle = eyeCore2;
-  ctx.beginPath();
-  ctx.arc(38, 12, 3, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledArc(ctx, 38, 12, 3, scale);
+
   // Pupillen
   ctx.fillStyle = '#000000';
-  ctx.beginPath();
-  ctx.arc(26, 12, 1, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(38, 12, 1, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 26, 12, 1, scale);
+  scaledArc(ctx, 38, 12, 1, scale);
 
   // Geöffnetes Maul mit 6-8 sichtbaren Reißzähnen
   ctx.fillStyle = '#000000';
-  ctx.fillRect(24, 18, 16, 6); // Geöffnetes Maul
-  
+  scaledRect(ctx, 24, 18, 16, 6, scale); // Geöffnetes Maul
+
   // Obere Reißzähne (4 Stück)
   ctx.fillStyle = '#FFFFFF';
-  ctx.beginPath();
-  ctx.moveTo(25, 18);
-  ctx.lineTo(26, 21);
-  ctx.lineTo(27, 18);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(29, 18);
-  ctx.lineTo(30, 22);
-  ctx.lineTo(31, 18);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(33, 18);
-  ctx.lineTo(34, 22);
-  ctx.lineTo(35, 18);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(37, 18);
-  ctx.lineTo(38, 21);
-  ctx.lineTo(39, 18);
-  ctx.closePath();
-  ctx.fill();
-  
+  scaledPath(ctx, [{ x: 25, y: 18 }, { x: 26, y: 21 }, { x: 27, y: 18 }], scale);
+  scaledPath(ctx, [{ x: 29, y: 18 }, { x: 30, y: 22 }, { x: 31, y: 18 }], scale);
+  scaledPath(ctx, [{ x: 33, y: 18 }, { x: 34, y: 22 }, { x: 35, y: 18 }], scale);
+  scaledPath(ctx, [{ x: 37, y: 18 }, { x: 38, y: 21 }, { x: 39, y: 18 }], scale);
+
   // Untere Reißzähne (4 Stück)
-  ctx.beginPath();
-  ctx.moveTo(26, 24);
-  ctx.lineTo(27, 21);
-  ctx.lineTo(28, 24);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(30, 24);
-  ctx.lineTo(31, 20);
-  ctx.lineTo(32, 24);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(34, 24);
-  ctx.lineTo(35, 20);
-  ctx.lineTo(36, 24);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(38, 24);
-  ctx.lineTo(39, 21);
-  ctx.lineTo(40, 24);
-  ctx.closePath();
-  ctx.fill();
+  scaledPath(ctx, [{ x: 26, y: 24 }, { x: 27, y: 21 }, { x: 28, y: 24 }], scale);
+  scaledPath(ctx, [{ x: 30, y: 24 }, { x: 31, y: 20 }, { x: 32, y: 24 }], scale);
+  scaledPath(ctx, [{ x: 34, y: 24 }, { x: 35, y: 20 }, { x: 36, y: 24 }], scale);
+  scaledPath(ctx, [{ x: 38, y: 24 }, { x: 39, y: 21 }, { x: 40, y: 24 }], scale);
 
   return canvas;
 }
 
-function createGhostTexture(): HTMLCanvasElement {
+function createGhostTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // --- Detaillierter ätherischer Geist mit mehreren Transparenzebenen ---
 
   // Äußere nebelige Schicht (70% Transparenz)
   ctx.globalAlpha = 0.7;
-  const outerMist = ctx.createRadialGradient(32, 36, 10, 32, 36, 35);
+  const outerMist = ctx.createRadialGradient(32 * scale, 36 * scale, 10 * scale, 32 * scale, 36 * scale, 35 * scale);
   outerMist.addColorStop(0, 'rgba(224, 255, 255, 0.8)'); // #E0FFFF - Hellcyan
   outerMist.addColorStop(0.5, 'rgba(176, 224, 230, 0.5)'); // #B0E0E6 - Puderblau
   outerMist.addColorStop(1, 'rgba(135, 206, 235, 0)'); // #87CEEB - Himmelblau (transparent)
   ctx.fillStyle = outerMist;
-  
+
   // Wispy, nebelige Ränder mit fließender Form
   ctx.beginPath();
-  ctx.moveTo(10, 60);
-  ctx.bezierCurveTo(-2, 45, 5, 15, 32, 8);
-  ctx.bezierCurveTo(59, 15, 66, 45, 54, 60);
-  ctx.bezierCurveTo(48, 52, 40, 58, 32, 62);
-  ctx.bezierCurveTo(24, 58, 16, 52, 10, 60);
+  ctx.moveTo(10 * scale, 60 * scale);
+  ctx.bezierCurveTo(-2 * scale, 45 * scale, 5 * scale, 15 * scale, 32 * scale, 8 * scale);
+  ctx.bezierCurveTo(59 * scale, 15 * scale, 66 * scale, 45 * scale, 54 * scale, 60 * scale);
+  ctx.bezierCurveTo(48 * scale, 52 * scale, 40 * scale, 58 * scale, 32 * scale, 62 * scale);
+  ctx.bezierCurveTo(24 * scale, 58 * scale, 16 * scale, 52 * scale, 10 * scale, 60 * scale);
   ctx.closePath();
   ctx.fill();
 
   // Mittlere ätherische Schicht (80% Transparenz)
   ctx.globalAlpha = 0.8;
-  const middleLayer = ctx.createRadialGradient(32, 34, 8, 32, 34, 28);
+  const middleLayer = ctx.createRadialGradient(32 * scale, 34 * scale, 8 * scale, 32 * scale, 34 * scale, 28 * scale);
   middleLayer.addColorStop(0, 'rgba(255, 255, 255, 0.95)'); // #FFFFFF - Weiß
   middleLayer.addColorStop(0.4, 'rgba(224, 255, 255, 0.8)'); // #E0FFFF - Hellcyan
   middleLayer.addColorStop(0.7, 'rgba(176, 224, 230, 0.6)'); // #B0E0E6 - Puderblau
   middleLayer.addColorStop(1, 'rgba(135, 206, 235, 0)'); // #87CEEB - Himmelblau (transparent)
   ctx.fillStyle = middleLayer;
-  
+
   // Hauptkörper mit fließender, ätherischer Form
   ctx.beginPath();
-  ctx.moveTo(12, 60);
-  ctx.bezierCurveTo(0, 40, 10, 10, 32, 10);
-  ctx.bezierCurveTo(54, 10, 64, 40, 52, 60);
-  ctx.quadraticCurveTo(42, 50, 32, 62);
-  ctx.quadraticCurveTo(22, 50, 12, 60);
+  ctx.moveTo(12 * scale, 60 * scale);
+  ctx.bezierCurveTo(0 * scale, 40 * scale, 10 * scale, 10 * scale, 32 * scale, 10 * scale);
+  ctx.bezierCurveTo(54 * scale, 10 * scale, 64 * scale, 40 * scale, 52 * scale, 60 * scale);
+  ctx.quadraticCurveTo(42 * scale, 50 * scale, 32 * scale, 62 * scale);
+  ctx.quadraticCurveTo(22 * scale, 50 * scale, 12 * scale, 60 * scale);
   ctx.closePath();
   ctx.fill();
 
   // Innere Leuchtschicht (85% Transparenz)
   ctx.globalAlpha = 0.85;
-  const innerGlow = ctx.createRadialGradient(32, 30, 2, 32, 30, 20);
+  const innerGlow = ctx.createRadialGradient(32 * scale, 30 * scale, 2 * scale, 32 * scale, 30 * scale, 20 * scale);
   innerGlow.addColorStop(0, 'rgba(255, 255, 255, 1)'); // Helles Zentrum
   innerGlow.addColorStop(0.3, 'rgba(240, 255, 255, 0.9)'); // Fast weiß
   innerGlow.addColorStop(0.6, 'rgba(224, 255, 255, 0.7)'); // #E0FFFF
   innerGlow.addColorStop(1, 'rgba(176, 224, 230, 0)'); // #B0E0E6 (transparent)
   ctx.fillStyle = innerGlow;
-  ctx.beginPath();
-  ctx.ellipse(32, 30, 18, 22, 0, 0, Math.PI * 2);
-  ctx.fill();
+  scaledEllipse(ctx, 32, 30, 18, 22, 0, 0, Math.PI * 2, scale);
 
   // Zusätzliche innere Leuchteffekte (Energie-Wirbel)
   ctx.globalAlpha = 0.75;
-  const energyGlow1 = ctx.createRadialGradient(28, 25, 1, 28, 25, 8);
+  const energyGlow1 = ctx.createRadialGradient(28 * scale, 25 * scale, 1 * scale, 28 * scale, 25 * scale, 8 * scale);
   energyGlow1.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
   energyGlow1.addColorStop(0.5, 'rgba(224, 255, 255, 0.6)');
   energyGlow1.addColorStop(1, 'rgba(176, 224, 230, 0)');
   ctx.fillStyle = energyGlow1;
-  ctx.beginPath();
-  ctx.arc(28, 25, 8, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 28, 25, 8, scale);
 
-  const energyGlow2 = ctx.createRadialGradient(36, 25, 1, 36, 25, 8);
+  const energyGlow2 = ctx.createRadialGradient(36 * scale, 25 * scale, 1 * scale, 36 * scale, 25 * scale, 8 * scale);
   energyGlow2.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
   energyGlow2.addColorStop(0.5, 'rgba(224, 255, 255, 0.6)');
   energyGlow2.addColorStop(1, 'rgba(176, 224, 230, 0)');
   ctx.fillStyle = energyGlow2;
-  ctx.beginPath();
-  ctx.arc(36, 25, 8, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 36, 25, 8, scale);
 
   // Zentrale Leuchtenergie
   ctx.globalAlpha = 0.8;
-  const coreGlow = ctx.createRadialGradient(32, 35, 1, 32, 35, 12);
+  const coreGlow = ctx.createRadialGradient(32 * scale, 35 * scale, 1 * scale, 32 * scale, 35 * scale, 12 * scale);
   coreGlow.addColorStop(0, 'rgba(255, 255, 255, 1)');
   coreGlow.addColorStop(0.4, 'rgba(240, 255, 255, 0.8)');
   coreGlow.addColorStop(1, 'rgba(224, 255, 255, 0)');
   ctx.fillStyle = coreGlow;
-  ctx.beginPath();
-  ctx.arc(32, 35, 12, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 32, 35, 12, scale);
 
   // Zurücksetzen für Gesichtszüge
   ctx.globalAlpha = 1.0;
 
   // Hohle, leuchtende Augen mit mehreren Schichten
   // Äußerer Glüheffekt
-  const eyeGlow1 = ctx.createRadialGradient(26, 28, 1, 26, 28, 8);
+  const eyeGlow1 = ctx.createRadialGradient(26 * scale, 28 * scale, 1 * scale, 26 * scale, 28 * scale, 8 * scale);
   eyeGlow1.addColorStop(0, 'rgba(135, 206, 235, 0.8)'); // #87CEEB - Himmelblau
   eyeGlow1.addColorStop(0.5, 'rgba(176, 224, 230, 0.5)'); // #B0E0E6
   eyeGlow1.addColorStop(1, 'rgba(135, 206, 235, 0)');
   ctx.fillStyle = eyeGlow1;
-  ctx.beginPath();
-  ctx.arc(26, 28, 8, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 26, 28, 8, scale);
 
-  const eyeGlow2 = ctx.createRadialGradient(40, 28, 1, 40, 28, 8);
+  const eyeGlow2 = ctx.createRadialGradient(40 * scale, 28 * scale, 1 * scale, 40 * scale, 28 * scale, 8 * scale);
   eyeGlow2.addColorStop(0, 'rgba(135, 206, 235, 0.8)');
   eyeGlow2.addColorStop(0.5, 'rgba(176, 224, 230, 0.5)');
   eyeGlow2.addColorStop(1, 'rgba(135, 206, 235, 0)');
   ctx.fillStyle = eyeGlow2;
-  ctx.beginPath();
-  ctx.arc(40, 28, 8, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 40, 28, 8, scale);
 
   // Hohle schwarze Augen
   ctx.fillStyle = '#000000';
-  ctx.beginPath();
-  ctx.arc(26, 28, 5, 0, Math.PI * 2);
-  ctx.arc(40, 28, 5, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 26, 28, 5, scale);
+  scaledArc(ctx, 40, 28, 5, scale);
 
   // Innerer Leuchteffekt in den Augen
-  const eyeInnerGlow1 = ctx.createRadialGradient(26, 28, 0, 26, 28, 4);
+  const eyeInnerGlow1 = ctx.createRadialGradient(26 * scale, 28 * scale, 0, 26 * scale, 28 * scale, 4 * scale);
   eyeInnerGlow1.addColorStop(0, 'rgba(224, 255, 255, 0.9)'); // #E0FFFF
   eyeInnerGlow1.addColorStop(0.6, 'rgba(176, 224, 230, 0.6)'); // #B0E0E6
   eyeInnerGlow1.addColorStop(1, 'rgba(135, 206, 235, 0.3)'); // #87CEEB
   ctx.fillStyle = eyeInnerGlow1;
-  ctx.beginPath();
-  ctx.arc(26, 28, 4, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 26, 28, 4, scale);
 
-  const eyeInnerGlow2 = ctx.createRadialGradient(40, 28, 0, 40, 28, 4);
+  const eyeInnerGlow2 = ctx.createRadialGradient(40 * scale, 28 * scale, 0, 40 * scale, 28 * scale, 4 * scale);
   eyeInnerGlow2.addColorStop(0, 'rgba(224, 255, 255, 0.9)');
   eyeInnerGlow2.addColorStop(0.6, 'rgba(176, 224, 230, 0.6)');
   eyeInnerGlow2.addColorStop(1, 'rgba(135, 206, 235, 0.3)');
   ctx.fillStyle = eyeInnerGlow2;
-  ctx.beginPath();
-  ctx.arc(40, 28, 4, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 40, 28, 4, scale);
 
   // Glanzpunkte in den Augen (heller)
   ctx.fillStyle = '#FFFFFF';
-  ctx.beginPath();
-  ctx.arc(24, 26, 2, 0, Math.PI * 2);
-  ctx.arc(38, 26, 2, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 24, 26, 2, scale);
+  scaledArc(ctx, 38, 26, 2, scale);
 
   // Kleinere Glanzpunkte
-  ctx.beginPath();
-  ctx.arc(27, 29, 1, 0, Math.PI * 2);
-  ctx.arc(41, 29, 1, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 27, 29, 1, scale);
+  scaledArc(ctx, 41, 29, 1, scale);
 
   // Gequälter Gesichtsausdruck mit gebogenem Mund
   ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2 * scale;
   ctx.beginPath();
-  ctx.arc(33, 40, 8, 0.2 * Math.PI, 0.8 * Math.PI);
+  ctx.arc(33 * scale, 40 * scale, 8 * scale, 0.2 * Math.PI, 0.8 * Math.PI);
   ctx.stroke();
 
   // Zusätzliche Munddetails für gequälten Ausdruck
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1 * scale;
   ctx.beginPath();
-  ctx.arc(33, 41, 6, 0.25 * Math.PI, 0.75 * Math.PI);
+  ctx.arc(33 * scale, 41 * scale, 6 * scale, 0.25 * Math.PI, 0.75 * Math.PI);
   ctx.stroke();
 
   return canvas;
 }
 
-function createLightTexture(): HTMLCanvasElement {
+function createLightTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
-  // Gelber Kreis mit Glow-Effekt
-  const gradient = ctx.createRadialGradient(32, 32, 5, 32, 32, 30);
-  gradient.addColorStop(0, '#FFFF00'); // Helles Gelb
-  gradient.addColorStop(0.3, '#FFD700'); // Gold
-  gradient.addColorStop(0.6, '#FFA500'); // Orange
-  gradient.addColorStop(1, 'rgba(255, 165, 0, 0)'); // Transparent
+  // Lichtschein (Gradient)
+  const gradient = ctx.createRadialGradient(32 * scale, 32 * scale, 10 * scale, 32 * scale, 32 * scale, 30 * scale);
+  gradient.addColorStop(0, 'rgba(255, 255, 200, 0.8)'); // Hellgelb
+  gradient.addColorStop(0.5, 'rgba(255, 255, 0, 0.2)'); // Gelb transparent
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); // Transparent
 
   ctx.fillStyle = gradient;
-  ctx.beginPath();
-  ctx.arc(32, 32, 30, 0, Math.PI * 2);
-  ctx.fill();
+  scaledRect(ctx, 0, 0, 64, 64, scale);
 
-  // Innerer heller Kern
-  const coreGradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 12);
-  coreGradient.addColorStop(0, '#FFFFFF');
-  coreGradient.addColorStop(0.5, '#FFFF00');
-  coreGradient.addColorStop(1, '#FFD700');
-
-  ctx.fillStyle = coreGradient;
-  ctx.beginPath();
-  ctx.arc(32, 32, 12, 0, Math.PI * 2);
-  ctx.fill();
+  // Lampe selbst (Kreis in der Mitte)
+  ctx.fillStyle = '#FFFFE0'; // Helles Gelb
+  scaledArc(ctx, 32, 32, 8, scale);
 
   return canvas;
 }
 
-function createVaseTexture(): HTMLCanvasElement {
+function createVaseTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
-  // Vertikales Rechteck mit Muster
-  const gradient = ctx.createLinearGradient(20, 0, 44, 0);
-  gradient.addColorStop(0, '#8B4513');
-  gradient.addColorStop(0.5, '#A0522D');
-  gradient.addColorStop(1, '#8B4513');
+  // Vase Form
+  ctx.fillStyle = '#8B4513'; // Braun
+  ctx.beginPath();
+  ctx.ellipse(32 * scale, 40 * scale, 12 * scale, 20 * scale, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-  ctx.fillStyle = gradient;
-  ctx.fillRect(20, 10, 24, 44);
+  // Vasenhals
+  ctx.fillStyle = '#A0522D';
+  scaledRect(ctx, 24, 10, 16, 15, scale);
 
-  // Vasenform - oben schmaler
-  ctx.fillRect(24, 6, 16, 4);
-  
-  // Muster - horizontale Streifen
-  ctx.fillStyle = '#654321';
-  for (let y = 15; y < 50; y += 8) {
-    ctx.fillRect(20, y, 24, 3);
-  }
-
-  // Highlights für 3D-Effekt
-  ctx.fillStyle = 'rgba(160, 82, 45, 0.5)';
-  ctx.fillRect(20, 10, 2, 44);
+  // Verzierung
+  ctx.fillStyle = '#DAA520'; // Gold
+  scaledRect(ctx, 24, 15, 16, 5, scale);
 
   return canvas;
 }
@@ -712,36 +631,33 @@ function createCrateTexture(): HTMLCanvasElement {
   return canvas;
 }
 
-function createBenchTexture(): HTMLCanvasElement {
+function createBenchTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
-
-  // Horizontales Rechteck mit Beinen
-  const gradient = ctx.createLinearGradient(0, 20, 0, 40);
-  gradient.addColorStop(0, '#8B4513');
-  gradient.addColorStop(0.5, '#A0522D');
-  gradient.addColorStop(1, '#654321');
+  const scale = size / 64;
 
   // Sitzfläche
-  ctx.fillStyle = gradient;
-  ctx.fillRect(4, 20, 56, 12);
-
-  // Holzmaserung
-  ctx.fillStyle = '#654321';
-  for (let x = 8; x < 60; x += 8) {
-    ctx.fillRect(x, 20, 1, 12);
-  }
+  ctx.fillStyle = '#8B4513';
+  scaledRect(ctx, 4, 20, 56, 24, scale);
 
   // Beine
-  ctx.fillStyle = '#654321';
-  ctx.fillRect(8, 32, 6, 20);
-  ctx.fillRect(50, 32, 6, 20);
+  ctx.fillStyle = '#4A3A2A';
+  scaledRect(ctx, 8, 44, 4, 12, scale); // Links vorne
+  scaledRect(ctx, 52, 44, 4, 12, scale); // Rechts vorne
+  scaledRect(ctx, 8, 12, 4, 8, scale); // Links hinten (Lehne-Halter)
+  scaledRect(ctx, 52, 12, 4, 8, scale); // Rechts hinten
 
-  // Schatten unter der Bank
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-  ctx.fillRect(4, 50, 56, 2);
+  // Rücklehne
+  ctx.fillStyle = '#A0522D';
+  scaledRect(ctx, 4, 4, 56, 12, scale);
+
+  // Holzmaserung
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  scaledRect(ctx, 4, 28, 56, 1, scale);
+  scaledRect(ctx, 4, 36, 56, 1, scale);
+  scaledRect(ctx, 4, 10, 56, 1, scale);
 
   return canvas;
 }
@@ -810,87 +726,85 @@ function createChairTexture(): HTMLCanvasElement {
   return canvas;
 }
 
-function createWineBottleTexture(): HTMLCanvasElement {
+function createWineBottleTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // Flasche
-  const bottleGradient = ctx.createLinearGradient(20, 0, 28, 0);
+  const bottleGradient = ctx.createLinearGradient(20 * scale, 0, 28 * scale, 0);
   bottleGradient.addColorStop(0, '#2F4F2F');
   bottleGradient.addColorStop(0.5, '#3A5F3A');
   bottleGradient.addColorStop(1, '#2F4F2F');
 
   ctx.fillStyle = bottleGradient;
   // Flaschenhals
-  ctx.fillRect(22, 10, 4, 8);
+  scaledRect(ctx, 22, 10, 4, 8, scale);
   // Flaschenkörper
-  ctx.fillRect(20, 18, 8, 20);
+  scaledRect(ctx, 20, 18, 8, 20, scale);
 
   // Etikett
   ctx.fillStyle = '#8B0000';
-  ctx.fillRect(20, 24, 8, 6);
+  scaledRect(ctx, 20, 24, 8, 6, scale);
 
   // Glanzlicht auf Flasche
   ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-  ctx.fillRect(21, 20, 2, 10);
+  scaledRect(ctx, 21, 20, 2, 10, scale);
 
   // Glas daneben
-  const glassGradient = ctx.createLinearGradient(36, 0, 44, 0);
+  const glassGradient = ctx.createLinearGradient(36 * scale, 0, 44 * scale, 0);
   glassGradient.addColorStop(0, 'rgba(200, 200, 255, 0.6)');
   glassGradient.addColorStop(0.5, 'rgba(220, 220, 255, 0.8)');
   glassGradient.addColorStop(1, 'rgba(200, 200, 255, 0.6)');
 
   ctx.fillStyle = glassGradient;
-  ctx.fillRect(36, 26, 8, 12);
+  scaledRect(ctx, 36, 26, 8, 12, scale);
 
   // Glanzlicht auf Glas
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-  ctx.fillRect(37, 28, 2, 6);
+  scaledRect(ctx, 37, 28, 2, 6, scale);
 
   return canvas;
 }
 
-function createSkeletonTexture(): HTMLCanvasElement {
+function createSkeletonTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // Knochen-Silhouette in Weiß
   ctx.fillStyle = '#E0E0E0';
 
   // Schädel
-  ctx.beginPath();
-  ctx.arc(32, 20, 10, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 32, 20, 10, scale);
 
   // Augenhöhlen
   ctx.fillStyle = '#000000';
-  ctx.beginPath();
-  ctx.arc(28, 18, 3, 0, Math.PI * 2);
-  ctx.arc(36, 18, 3, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 28, 18, 3, scale);
+  scaledArc(ctx, 36, 18, 3, scale);
 
   // Wirbelsäule
   ctx.fillStyle = '#E0E0E0';
-  ctx.fillRect(30, 30, 4, 20);
+  scaledRect(ctx, 30, 30, 4, 20, scale);
 
   // Rippen
   for (let i = 0; i < 4; i++) {
     const y = 32 + i * 4;
-    ctx.fillRect(20, y, 10, 2);
-    ctx.fillRect(34, y, 10, 2);
+    scaledRect(ctx, 20, y, 10, 2, scale);
+    scaledRect(ctx, 34, y, 10, 2, scale);
   }
 
   // Arme (liegend)
-  ctx.fillRect(12, 36, 16, 3);
-  ctx.fillRect(36, 36, 16, 3);
+  scaledRect(ctx, 12, 36, 16, 3, scale);
+  scaledRect(ctx, 36, 36, 16, 3, scale);
 
   // Beine (liegend)
-  ctx.fillRect(24, 50, 3, 10);
-  ctx.fillRect(37, 50, 3, 10);
+  scaledRect(ctx, 24, 50, 3, 10, scale);
+  scaledRect(ctx, 37, 50, 3, 10, scale);
 
   return canvas;
 }
@@ -981,14 +895,14 @@ export function getDecorativeTexture(
   if (colorVariant !== undefined && Math.abs(colorVariant - 0.5) > 0.01) {
     // Optimized: Check cache first
     const cacheKey = `${objectType}_${colorVariant.toFixed(2)}`;
-    
+
     if (colorVariantCache.has(cacheKey)) {
       return colorVariantCache.get(cacheKey)!;
     }
-    
+
     // Generate and cache the variant
     const variantTexture = applyColorVariant(baseTexture, colorVariant);
-    
+
     // Limit cache size
     if (colorVariantCache.size >= MAX_CACHE_SIZE) {
       // Remove oldest entry (first entry in Map)
@@ -997,7 +911,7 @@ export function getDecorativeTexture(
         colorVariantCache.delete(firstKey);
       }
     }
-    
+
     colorVariantCache.set(cacheKey, variantTexture);
     return variantTexture;
   }
@@ -1017,15 +931,16 @@ export function getItemTexture(itemType: string): CanvasImageSource | undefined 
   return itemTextures[itemType];
 }
 
-function createBrickTexture(): HTMLCanvasElement {
+function createBrickTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 32; // Original was 32x32
 
   // Hintergrund - Mörtel
   ctx.fillStyle = '#8B4513'; // D3D3D3' A98961FF
-  ctx.fillRect(0, 0, 32, 32);
+  scaledRect(ctx, 0, 0, 32, 32, scale);
 
   // Backstein-Muster
   ctx.fillStyle = '#D3D3D3';
@@ -1036,59 +951,61 @@ function createBrickTexture(): HTMLCanvasElement {
     const offset = (y / 8) % 2 === 0 ? 0 : 16;
 
     for (let x = 0; x < 32; x += 32) {
-      ctx.fillRect(x + offset, y, 16, 4);
+      scaledRect(ctx, x + offset, y, 16, 4, scale);
     }
   }
 
   // Vertikale Fugen
   ctx.fillStyle = '#A0522D';
   for (let x = 0; x < 32; x += 16) {
-    ctx.fillRect(x, 0, 1, 32);
+    scaledRect(ctx, x, 0, 1, 32, scale);
   }
 
   return canvas;
 }
 
-function createWoodTexture(): HTMLCanvasElement {
+function createWoodTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 32; // Original was 32x32
 
   // Grundfarbe - dunkles Holz
   ctx.fillStyle = '#8B4513';
-  ctx.fillRect(0, 0, 32, 32);
+  scaledRect(ctx, 0, 0, 32, 32, scale);
 
   // Holztäfelung - vertikale Bretter
   ctx.fillStyle = '#654321';
 
   for (let x = 0; x < 32; x += 8) {
-    ctx.fillRect(x, 0, 4, 32);
+    scaledRect(ctx, x, 0, 4, 32, scale);
 
     // Fugen zwischen Brettern
     ctx.fillStyle = '#4A4A4A';
-    ctx.fillRect(x + 4, 0, 1, 32);
+    scaledRect(ctx, x + 4, 0, 1, 32, scale);
     ctx.fillStyle = '#654321';
   }
 
   // Holzmaserung - horizontale Linien
   ctx.fillStyle = '#5D4037';
   for (let y = 4; y < 32; y += 8) {
-    ctx.fillRect(0, y, 32, 1);
+    scaledRect(ctx, 0, y, 32, 1, scale);
   }
 
   return canvas;
 }
 
-function createStoneTexture(): HTMLCanvasElement {
+function createStoneTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 32; // Original was 32x32
 
   // Grundfarbe - grauer Stein
   ctx.fillStyle = '#708090';
-  ctx.fillRect(0, 0, 32, 32);
+  scaledRect(ctx, 0, 0, 32, 32, scale);
 
   // Große Steinblöcke mit verschiedenen Grautönen
   const stoneColors = ['#778899', '#696969', '#808080', '#2F4F4F'];
@@ -1096,237 +1013,230 @@ function createStoneTexture(): HTMLCanvasElement {
   for (let i = 0; i < 2; i++) {
     for (let j = 0; j < 2; j++) {
       ctx.fillStyle = stoneColors[Math.floor(Math.random() * stoneColors.length)];
-      ctx.fillRect(i * 16, j * 16, 16, 16);
+      scaledRect(ctx, i * 16, j * 16, 16, 16, scale);
 
       // Schatten an den Rändern für 3D-Effekt
       ctx.fillStyle = '#2F4F4F';
-      ctx.fillRect(i * 16, j * 16, 16, 1);
-      ctx.fillRect(i * 16, j * 16, 1, 16);
+      scaledRect(ctx, i * 16, j * 16, 16, 1, scale);
+      scaledRect(ctx, i * 16, j * 16, 1, 16, scale);
     }
   }
 
   return canvas;
 }
 
-function createDoorTexture(): HTMLCanvasElement {
+function createDoorTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 32; // Original was 32x32
 
   // --- Verbesserte normale Tür mit detaillierter Holzmaserung und 3D-Effekt ---
 
   // Tür-Grundfarbe - dunkles Holz mit Farbverlauf
-  const backgroundGradient = ctx.createLinearGradient(0, 0, 32, 32);
+  const backgroundGradient = ctx.createLinearGradient(0, 0, 32 * scale, 32 * scale);
   backgroundGradient.addColorStop(0, '#654321'); // Dunkelbraun
   backgroundGradient.addColorStop(0.5, '#5A3A1A'); // Mittleres Braun
   backgroundGradient.addColorStop(1, '#4A2A0A'); // Sehr dunkelbraun
   ctx.fillStyle = backgroundGradient;
-  ctx.fillRect(0, 0, 32, 32);
+  scaledRect(ctx, 0, 0, 32, 32, scale);
 
   // Schatten an den Rändern für 3D-Wirkung (links und oben)
   ctx.fillStyle = '#2A1A0A'; // Sehr dunkel
-  ctx.fillRect(0, 0, 1, 32); // Linker Rand
-  ctx.fillRect(0, 0, 32, 1); // Oberer Rand
+  scaledRect(ctx, 0, 0, 1, 32, scale); // Linker Rand
+  scaledRect(ctx, 0, 0, 32, 1, scale); // Oberer Rand
 
   // Highlights für 3D-Wirkung (rechts und unten)
   ctx.fillStyle = '#8B6A3A'; // Helleres Braun
-  ctx.fillRect(31, 0, 1, 32); // Rechter Rand
-  ctx.fillRect(0, 31, 32, 1); // Unterer Rand
+  scaledRect(ctx, 31, 0, 1, 32, scale); // Rechter Rand
+  scaledRect(ctx, 0, 31, 32, 1, scale); // Unterer Rand
 
   // Sichtbare Türfüllungen/Paneele mit vertikalen Brettern
-  const woodGradient = ctx.createLinearGradient(0, 0, 32, 0);
-  woodGradient.addColorStop(0, '#8B4513'); // Sattelbraun
-  woodGradient.addColorStop(0.5, '#A0522D'); // Sienna
-  woodGradient.addColorStop(1, '#8B4513'); // Sattelbraun
-  
   // Vier vertikale Bretter mit Holzmaserung
   for (let x = 0; x < 32; x += 8) {
     // Brett mit Farbverlauf
-    const plankGradient = ctx.createLinearGradient(x, 0, x + 7, 0);
+    const plankGradient = ctx.createLinearGradient(x * scale, 0, (x + 7) * scale, 0);
     plankGradient.addColorStop(0, '#6B4A2A'); // Dunkler
     plankGradient.addColorStop(0.3, '#8B4513'); // Mittel
     plankGradient.addColorStop(0.7, '#A0522D'); // Hell
     plankGradient.addColorStop(1, '#6B4A2A'); // Dunkler
     ctx.fillStyle = plankGradient;
-    ctx.fillRect(x + 1, 2, 6, 28);
+    scaledRect(ctx, x + 1, 2, 6, 28, scale);
 
     // Holzmaserung - horizontale Linien für Textur
     ctx.fillStyle = '#5A3A1A';
     for (let y = 4; y < 30; y += 6) {
-      ctx.fillRect(x + 1, y, 6, 1);
+      scaledRect(ctx, x + 1, y, 6, 1, scale);
       // Zusätzliche feine Maserung
       ctx.fillStyle = 'rgba(90, 58, 26, 0.5)';
-      ctx.fillRect(x + 1, y + 2, 6, 1);
+      scaledRect(ctx, x + 1, y + 2, 6, 1, scale);
       ctx.fillStyle = '#5A3A1A';
     }
 
     // Schatten auf der linken Seite jedes Bretts für 3D-Effekt
     ctx.fillStyle = 'rgba(42, 26, 10, 0.6)';
-    ctx.fillRect(x + 1, 2, 1, 28);
+    scaledRect(ctx, x + 1, 2, 1, 28, scale);
 
     // Highlight auf der rechten Seite jedes Bretts
     ctx.fillStyle = 'rgba(160, 82, 45, 0.4)';
-    ctx.fillRect(x + 6, 2, 1, 28);
+    scaledRect(ctx, x + 6, 2, 1, 28, scale);
 
     // Fugen zwischen den Brettern
     ctx.fillStyle = '#4A4A4A'; // Dunkelgrau
-    ctx.fillRect(x + 7, 0, 1, 32);
-    
+    scaledRect(ctx, x + 7, 0, 1, 32, scale);
+
     // Schatten in den Fugen für Tiefe
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(x + 7, 1, 1, 30);
+    scaledRect(ctx, x + 7, 1, 1, 30, scale);
   }
 
   // Dunkle Metallscharniere (oben und unten, links)
   ctx.fillStyle = '#2A2A2A'; // Dunkelgrau/Schwarz
-  
+
   // Oberes Scharnier
-  ctx.fillRect(2, 6, 6, 3);
+  scaledRect(ctx, 2, 6, 6, 3, scale);
   // Schrauben am oberen Scharnier
   ctx.fillStyle = '#1A1A1A';
-  ctx.fillRect(3, 7, 1, 1);
-  ctx.fillRect(6, 7, 1, 1);
-  
+  scaledRect(ctx, 3, 7, 1, 1, scale);
+  scaledRect(ctx, 6, 7, 1, 1, scale);
+
   // Unteres Scharnier
   ctx.fillStyle = '#2A2A2A';
-  ctx.fillRect(2, 23, 6, 3);
+  scaledRect(ctx, 2, 23, 6, 3, scale);
   // Schrauben am unteren Scharnier
   ctx.fillStyle = '#1A1A1A';
-  ctx.fillRect(3, 24, 1, 1);
-  ctx.fillRect(6, 24, 1, 1);
+  scaledRect(ctx, 3, 24, 1, 1, scale);
+  scaledRect(ctx, 6, 24, 1, 1, scale);
 
   // Highlights auf Scharnieren für Metall-Effekt
   ctx.fillStyle = '#4A4A4A';
-  ctx.fillRect(2, 6, 6, 1); // Oberes Scharnier
-  ctx.fillRect(2, 23, 6, 1); // Unteres Scharnier
+  scaledRect(ctx, 2, 6, 6, 1, scale); // Oberes Scharnier
+  scaledRect(ctx, 2, 23, 6, 1, scale); // Unteres Scharnier
 
   // Goldener Türgriff auf der rechten Seite mit 3D-Effekt
-  const handleGradient = ctx.createRadialGradient(26, 16, 1, 26, 16, 4);
+  const handleGradient = ctx.createRadialGradient(26 * scale, 16 * scale, 1 * scale, 26 * scale, 16 * scale, 4 * scale);
   handleGradient.addColorStop(0, '#FFD700'); // Gold
   handleGradient.addColorStop(0.6, '#FFA500'); // Orange-Gold
   handleGradient.addColorStop(1, '#B8860B'); // Dunkelgold
   ctx.fillStyle = handleGradient;
-  ctx.fillRect(24, 14, 4, 4);
+  scaledRect(ctx, 24, 14, 4, 4, scale);
 
   // Schatten unter dem Türgriff
   ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-  ctx.fillRect(24, 17, 4, 1);
+  scaledRect(ctx, 24, 17, 4, 1, scale);
 
   // Highlight auf dem Türgriff für Glanz
   ctx.fillStyle = '#FFFFE0'; // Helles Gelb
-  ctx.fillRect(24, 14, 3, 1);
-  ctx.fillRect(24, 14, 1, 2);
+  scaledRect(ctx, 24, 14, 3, 1, scale);
+  scaledRect(ctx, 24, 14, 1, 2, scale);
 
   // Türklinke mit 3D-Effekt
-  const knobGradient = ctx.createLinearGradient(28, 15, 31, 17);
+  const knobGradient = ctx.createLinearGradient(28 * scale, 15 * scale, 31 * scale, 17 * scale);
   knobGradient.addColorStop(0, '#FFD700'); // Gold
   knobGradient.addColorStop(0.5, '#FFA500'); // Orange-Gold
   knobGradient.addColorStop(1, '#B8860B'); // Dunkelgold
   ctx.fillStyle = knobGradient;
-  ctx.fillRect(28, 15, 3, 2);
+  scaledRect(ctx, 28, 15, 3, 2, scale);
 
   // Schatten unter der Klinke
   ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-  ctx.fillRect(28, 16, 3, 1);
+  scaledRect(ctx, 28, 16, 3, 1, scale);
 
   // Highlight auf der Klinke
   ctx.fillStyle = '#FFFFE0';
-  ctx.fillRect(28, 15, 2, 1);
+  scaledRect(ctx, 28, 15, 2, 1, scale);
 
   return canvas;
 }
 
-function createExitDoorTexture(): HTMLCanvasElement {
+function createExitDoorTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 32; // Original was 32x32
 
   // --- Verbesserte Exit-Tür mit grüner Färbung und ähnlicher Struktur wie normale Tür ---
 
   // Leuchteffekt - heller Rand für Aufmerksamkeit (äußerer Glüheffekt)
   ctx.fillStyle = '#90EE90'; // Hellgrün
-  ctx.fillRect(0, 0, 32, 32);
+  scaledRect(ctx, 0, 0, 32, 32, scale);
 
   // Tür-Grundfarbe - grünes Holz mit Farbverlauf
-  const backgroundGradient = ctx.createLinearGradient(0, 0, 32, 32);
+  const backgroundGradient = ctx.createLinearGradient(0, 0, 32 * scale, 32 * scale);
   backgroundGradient.addColorStop(0, '#32CD32'); // Limettengrün (hell)
   backgroundGradient.addColorStop(0.5, '#228B22'); // Waldgrün (mittel)
   backgroundGradient.addColorStop(1, '#006400'); // Dunkelgrün
   ctx.fillStyle = backgroundGradient;
-  ctx.fillRect(1, 1, 30, 30);
+  scaledRect(ctx, 1, 1, 30, 30, scale);
 
   // Schatten an den Rändern für 3D-Wirkung (links und oben)
   ctx.fillStyle = '#004400'; // Sehr dunkelgrün
-  ctx.fillRect(1, 1, 1, 30); // Linker Rand
-  ctx.fillRect(1, 1, 30, 1); // Oberer Rand
+  scaledRect(ctx, 1, 1, 1, 30, scale); // Linker Rand
+  scaledRect(ctx, 1, 1, 30, 1, scale); // Oberer Rand
 
   // Highlights für 3D-Wirkung (rechts und unten)
   ctx.fillStyle = '#4AE54A'; // Helleres Grün
-  ctx.fillRect(30, 1, 1, 30); // Rechter Rand
-  ctx.fillRect(1, 30, 30, 1); // Unterer Rand
+  scaledRect(ctx, 30, 1, 1, 30, scale); // Rechter Rand
+  scaledRect(ctx, 1, 30, 30, 1, scale); // Unterer Rand
 
   // Sichtbare Türfüllungen/Paneele mit vertikalen Brettern (ähnlich wie normale Tür)
   for (let x = 0; x < 32; x += 8) {
     // Brett mit Farbverlauf
-    const plankGradient = ctx.createLinearGradient(x, 0, x + 7, 0);
+    const plankGradient = ctx.createLinearGradient(x * scale, 0, (x + 7) * scale, 0);
     plankGradient.addColorStop(0, '#1A5A1A'); // Dunkler
     plankGradient.addColorStop(0.3, '#228B22'); // Mittel
     plankGradient.addColorStop(0.7, '#32CD32'); // Hell
     plankGradient.addColorStop(1, '#1A5A1A'); // Dunkler
     ctx.fillStyle = plankGradient;
-    ctx.fillRect(x + 2, 3, 5, 26);
+    scaledRect(ctx, x + 2, 3, 5, 26, scale);
 
     // Holzmaserung - horizontale Linien für Textur
     ctx.fillStyle = '#1A5A1A';
     for (let y = 5; y < 28; y += 6) {
-      ctx.fillRect(x + 2, y, 5, 1);
+      scaledRect(ctx, x + 2, y, 5, 1, scale);
       // Zusätzliche feine Maserung
       ctx.fillStyle = 'rgba(26, 90, 26, 0.5)';
-      ctx.fillRect(x + 2, y + 2, 5, 1);
+      scaledRect(ctx, x + 2, y + 2, 5, 1, scale);
       ctx.fillStyle = '#1A5A1A';
     }
 
     // Schatten auf der linken Seite jedes Bretts für 3D-Effekt
     ctx.fillStyle = 'rgba(0, 68, 0, 0.6)';
-    ctx.fillRect(x + 2, 3, 1, 26);
+    scaledRect(ctx, x + 2, 3, 1, 26, scale);
 
     // Highlight auf der rechten Seite jedes Bretts
     ctx.fillStyle = 'rgba(74, 229, 74, 0.4)';
-    ctx.fillRect(x + 6, 3, 1, 26);
+    scaledRect(ctx, x + 6, 3, 1, 26, scale);
 
     // Fugen zwischen den Brettern
     ctx.fillStyle = '#004400'; // Dunkelgrün
-    ctx.fillRect(x + 7, 1, 1, 30);
-    
+    scaledRect(ctx, x + 7, 1, 1, 30, scale);
+
     // Schatten in den Fugen für Tiefe
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(x + 7, 2, 1, 28);
+    scaledRect(ctx, x + 7, 2, 1, 28, scale);
   }
 
   // Großes, gut sichtbares Exit-Symbol (X) in Gold - zentral positioniert
   // Äußerer Glüheffekt für das Symbol
   ctx.shadowColor = '#FFD700';
-  ctx.shadowBlur = 8;
+  ctx.shadowBlur = 8 * scale;
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
 
   // X-Symbol mit dicken Linien für bessere Sichtbarkeit
   ctx.strokeStyle = '#FFD700'; // Gold
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 4 * scale;
   ctx.lineCap = 'round';
 
   // Diagonale von links oben nach rechts unten
-  ctx.beginPath();
-  ctx.moveTo(10, 10);
-  ctx.lineTo(22, 22);
+  scaledPath(ctx, [{ x: 10, y: 10 }, { x: 22, y: 22 }], scale);
   ctx.stroke();
 
   // Diagonale von rechts oben nach links unten
-  ctx.beginPath();
-  ctx.moveTo(22, 10);
-  ctx.lineTo(10, 22);
+  scaledPath(ctx, [{ x: 22, y: 10 }, { x: 10, y: 22 }], scale);
   ctx.stroke();
 
   // Schatten zurücksetzen
@@ -1334,32 +1244,24 @@ function createExitDoorTexture(): HTMLCanvasElement {
 
   // Zusätzliche Highlights auf dem X für mehr Kontrast
   ctx.strokeStyle = '#FFFFE0'; // Helles Gelb
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2 * scale;
 
   // Highlight-Linien (etwas versetzt für 3D-Effekt)
-  ctx.beginPath();
-  ctx.moveTo(10, 10);
-  ctx.lineTo(21, 21);
+  scaledPath(ctx, [{ x: 10, y: 10 }, { x: 21, y: 21 }], scale);
   ctx.stroke();
 
-  ctx.beginPath();
-  ctx.moveTo(22, 10);
-  ctx.lineTo(11, 21);
+  scaledPath(ctx, [{ x: 22, y: 10 }, { x: 11, y: 21 }], scale);
   ctx.stroke();
 
   // Dunkler Rand um das X für hohen Kontrast
   ctx.strokeStyle = '#000000';
-  ctx.lineWidth = 5;
+  ctx.lineWidth = 5 * scale;
   ctx.globalAlpha = 0.3;
 
-  ctx.beginPath();
-  ctx.moveTo(10, 10);
-  ctx.lineTo(22, 22);
+  scaledPath(ctx, [{ x: 10, y: 10 }, { x: 22, y: 22 }], scale);
   ctx.stroke();
 
-  ctx.beginPath();
-  ctx.moveTo(22, 10);
-  ctx.lineTo(10, 22);
+  scaledPath(ctx, [{ x: 22, y: 10 }, { x: 10, y: 22 }], scale);
   ctx.stroke();
 
   ctx.globalAlpha = 1.0;
@@ -1367,60 +1269,61 @@ function createExitDoorTexture(): HTMLCanvasElement {
   return canvas;
 }
 
-function createHealthSmallTexture(): HTMLCanvasElement {
+function createHealthSmallTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 32; // Original was 32x32
 
   // --- Verbessertes kleines Medi-Pack mit 3D-Effekt ---
 
   // Dunkler Rand für bessere Definition
   ctx.fillStyle = '#8B0000'; // Dunkelrot
-  ctx.fillRect(0, 0, 32, 32);
+  scaledRect(ctx, 0, 0, 32, 32, scale);
 
   // 3D-Box-Effekt mit Schattierungen - Hauptkörper
-  const boxGradient = ctx.createLinearGradient(2, 2, 30, 30);
+  const boxGradient = ctx.createLinearGradient(2 * scale, 2 * scale, 30 * scale, 30 * scale);
   boxGradient.addColorStop(0, '#FF4444'); // Hellrot (Highlight)
   boxGradient.addColorStop(0.5, '#FF0000'); // Rot
   boxGradient.addColorStop(1, '#CC0000'); // Dunkelrot (Schatten)
   ctx.fillStyle = boxGradient;
-  ctx.fillRect(2, 2, 28, 28);
+  scaledRect(ctx, 2, 2, 28, 28, scale);
 
   // Schatten für 3D-Effekt (unten und rechts)
   ctx.fillStyle = '#8B0000';
-  ctx.fillRect(2, 29, 28, 1); // Unten
-  ctx.fillRect(29, 2, 1, 28); // Rechts
+  scaledRect(ctx, 2, 29, 28, 1, scale); // Unten
+  scaledRect(ctx, 29, 2, 1, 28, scale); // Rechts
 
   // Zusätzliche Schattierung für mehr Tiefe
   ctx.fillStyle = 'rgba(139, 0, 0, 0.5)';
-  ctx.fillRect(3, 28, 26, 1);
-  ctx.fillRect(28, 3, 1, 26);
+  scaledRect(ctx, 3, 28, 26, 1, scale);
+  scaledRect(ctx, 28, 3, 1, 26, scale);
 
   // Weiße Highlights für Plastik-Glanz-Effekt (oben und links)
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(2, 2, 26, 1); // Oben
-  ctx.fillRect(2, 2, 1, 26); // Links
+  scaledRect(ctx, 2, 2, 26, 1, scale); // Oben
+  scaledRect(ctx, 2, 2, 1, 26, scale); // Links
 
   // Zusätzliche Highlights für mehr Glanz
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-  ctx.fillRect(3, 3, 24, 1);
-  ctx.fillRect(3, 3, 1, 24);
+  scaledRect(ctx, 3, 3, 24, 1, scale);
+  scaledRect(ctx, 3, 3, 1, 24, scale);
 
   // Deutliches weißes Kreuz auf rotem Hintergrund
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(13, 7, 6, 18);  // Vertikaler Balken
-  ctx.fillRect(7, 13, 18, 6);  // Horizontaler Balken
+  scaledRect(ctx, 13, 7, 6, 18, scale);  // Vertikaler Balken
+  scaledRect(ctx, 7, 13, 18, 6, scale);  // Horizontaler Balken
 
   // Schatten am Kreuz für 3D-Effekt
   ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-  ctx.fillRect(13, 24, 6, 1); // Schatten unten am vertikalen Balken
-  ctx.fillRect(24, 13, 1, 6); // Schatten rechts am horizontalen Balken
+  scaledRect(ctx, 13, 24, 6, 1, scale); // Schatten unten am vertikalen Balken
+  scaledRect(ctx, 24, 13, 1, 6, scale); // Schatten rechts am horizontalen Balken
 
   // Highlights am Kreuz für Plastik-Effekt
   ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-  ctx.fillRect(13, 7, 6, 1); // Highlight oben am vertikalen Balken
-  ctx.fillRect(7, 13, 1, 6); // Highlight links am horizontalen Balken
+  scaledRect(ctx, 13, 7, 6, 1, scale); // Highlight oben am vertikalen Balken
+  scaledRect(ctx, 7, 13, 1, 6, scale); // Highlight links am horizontalen Balken
 
   return canvas;
 }
@@ -1530,7 +1433,7 @@ function createTreasureTexture(): HTMLCanvasElement {
   baseGradient.addColorStop(0.5, '#FFA500'); // Orange
   baseGradient.addColorStop(1, '#B8860B'); // Dunkelgold
   ctx.fillStyle = baseGradient;
-  
+
   ctx.beginPath();
   ctx.moveTo(10, 28);
   ctx.bezierCurveTo(10, 30, 22, 30, 22, 28); // Untere Kurve
@@ -1538,12 +1441,12 @@ function createTreasureTexture(): HTMLCanvasElement {
   ctx.lineTo(12, 24);
   ctx.closePath();
   ctx.fill();
-  
+
   // Dunkler Rand für 3D-Effekt an der Basis
   ctx.strokeStyle = '#6B4A0A';
   ctx.lineWidth = 1;
   ctx.stroke();
-  
+
   // Schatten unter der Basis
   ctx.fillStyle = 'rgba(107, 74, 10, 0.5)';
   ctx.beginPath();
@@ -1557,7 +1460,7 @@ function createTreasureTexture(): HTMLCanvasElement {
   stemGradient.addColorStop(0.7, '#FFD700'); // Gold
   stemGradient.addColorStop(1, '#FFA500'); // Orange
   ctx.fillStyle = stemGradient;
-  
+
   ctx.beginPath();
   ctx.moveTo(14, 24);
   ctx.bezierCurveTo(13, 18, 13, 16, 14, 12); // Linke Seite mit Kurve
@@ -1565,12 +1468,12 @@ function createTreasureTexture(): HTMLCanvasElement {
   ctx.bezierCurveTo(19, 16, 19, 18, 18, 24); // Rechte Seite mit Kurve
   ctx.closePath();
   ctx.fill();
-  
+
   // Dunkler Rand am Stiel
   ctx.strokeStyle = '#6B4A0A';
   ctx.lineWidth = 0.8;
   ctx.stroke();
-  
+
   // Highlight auf dem Stiel (links)
   ctx.fillStyle = '#FFFFE0';
   ctx.fillRect(14.5, 14, 1, 8);
@@ -1595,7 +1498,7 @@ function createTreasureTexture(): HTMLCanvasElement {
   cupGradient.addColorStop(0.6, '#FFA500'); // Orange
   cupGradient.addColorStop(1, '#B8860B'); // Dunkelgold (Schatten)
   ctx.fillStyle = cupGradient;
-  
+
   ctx.beginPath();
   ctx.moveTo(8, 12);
   // Linke Seite mit eleganter Kurve
@@ -1606,12 +1509,12 @@ function createTreasureTexture(): HTMLCanvasElement {
   ctx.bezierCurveTo(27, 6, 26, 10, 24, 12);
   ctx.closePath();
   ctx.fill();
-  
+
   // Dunkler Rand für 3D-Effekt
   ctx.strokeStyle = '#6B4A0A';
   ctx.lineWidth = 1;
   ctx.stroke();
-  
+
   // Innere Schattierung für Tiefe
   ctx.fillStyle = 'rgba(184, 134, 11, 0.4)';
   ctx.beginPath();
@@ -1627,12 +1530,12 @@ function createTreasureTexture(): HTMLCanvasElement {
   ctx.beginPath();
   ctx.ellipse(11, 6, 2, 3, -0.3, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Kleineres Glanzlicht rechts
   ctx.beginPath();
   ctx.ellipse(20, 7, 1.5, 2, 0.3, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Sehr helles Highlight (Spitzlicht)
   ctx.fillStyle = '#FFFFFF';
   ctx.beginPath();
@@ -1648,12 +1551,12 @@ function createTreasureTexture(): HTMLCanvasElement {
   ctx.beginPath();
   ctx.arc(16, 18, 2, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Dunkler Rand am Edelstein
   ctx.strokeStyle = '#5A0000';
   ctx.lineWidth = 0.5;
   ctx.stroke();
-  
+
   // Glanzpunkt auf dem Edelstein
   ctx.fillStyle = '#FFB6C1';
   ctx.beginPath();
@@ -1669,12 +1572,12 @@ function createTreasureTexture(): HTMLCanvasElement {
   ctx.beginPath();
   ctx.arc(16, 6, 1.5, 0, Math.PI * 2);
   ctx.fill();
-  
+
   // Dunkler Rand am blauen Edelstein
   ctx.strokeStyle = '#000080';
   ctx.lineWidth = 0.4;
   ctx.stroke();
-  
+
   // Glanzpunkt auf dem blauen Edelstein
   ctx.fillStyle = '#ADD8E6';
   ctx.beginPath();
@@ -1684,276 +1587,231 @@ function createTreasureTexture(): HTMLCanvasElement {
   return canvas;
 }
 
-function createAmmoTexture(): HTMLCanvasElement {
+function createAmmoTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 32; // Original was 32x32
 
   // --- Militärische Munitionskiste mit detailliertem 3D-Effekt ---
 
   // Hauptkörper der Kiste mit Farbverlauf für 3D-Effekt
-  const boxGradient = ctx.createLinearGradient(4, 10, 28, 28);
+  const boxGradient = ctx.createLinearGradient(4 * scale, 10 * scale, 28 * scale, 28 * scale);
   boxGradient.addColorStop(0, '#6B8E23'); // Olivgrün (Highlight)
   boxGradient.addColorStop(0.5, '#556B2F'); // Dunkelolivgrün
   boxGradient.addColorStop(1, '#3A4A1F'); // Sehr dunkel (Schatten)
   ctx.fillStyle = boxGradient;
-  ctx.fillRect(4, 10, 24, 18);
+  scaledRect(ctx, 4, 10, 24, 18, scale);
 
   // Schattierungen für Tiefenwirkung - rechte Seite
   ctx.fillStyle = '#2A3A0F';
-  ctx.fillRect(27, 11, 1, 17); // Rechter Rand
-  ctx.fillRect(26, 12, 1, 15); // Zusätzlicher Schatten
+  scaledRect(ctx, 27, 11, 1, 17, scale); // Rechter Rand
+  scaledRect(ctx, 26, 12, 1, 15, scale); // Zusätzlicher Schatten
 
   // Schattierungen für Tiefenwirkung - untere Seite
   ctx.fillStyle = '#2A3A0F';
-  ctx.fillRect(5, 27, 22, 1); // Unterer Rand
-  ctx.fillRect(6, 26, 20, 1); // Zusätzlicher Schatten
+  scaledRect(ctx, 5, 27, 22, 1, scale); // Unterer Rand
+  scaledRect(ctx, 6, 26, 20, 1, scale); // Zusätzlicher Schatten
 
   // Highlights für 3D-Effekt - obere und linke Seite
   ctx.fillStyle = '#7A9E33';
-  ctx.fillRect(4, 10, 23, 1); // Oberer Rand
-  ctx.fillRect(4, 11, 1, 16); // Linker Rand
+  scaledRect(ctx, 4, 10, 23, 1, scale); // Oberer Rand
+  scaledRect(ctx, 4, 11, 1, 16, scale); // Linker Rand
 
   // Deckel mit dunklerer Farbe
-  const lidGradient = ctx.createLinearGradient(2, 6, 30, 10);
+  const lidGradient = ctx.createLinearGradient(2 * scale, 6 * scale, 30 * scale, 10 * scale);
   lidGradient.addColorStop(0, '#4A5A2F'); // Mittleres Olivgrün
   lidGradient.addColorStop(0.5, '#3A4A1F'); // Dunkel
   lidGradient.addColorStop(1, '#2A3A0F'); // Sehr dunkel
   ctx.fillStyle = lidGradient;
-  ctx.fillRect(2, 6, 28, 4);
+  scaledRect(ctx, 2, 6, 28, 4, scale);
 
   // Deckel-Schattierung
   ctx.fillStyle = '#1A2A0F';
-  ctx.fillRect(2, 9, 28, 1); // Schatten unter dem Deckel
+  scaledRect(ctx, 2, 9, 28, 1, scale); // Schatten unter dem Deckel
 
   // Deckel-Highlight
   ctx.fillStyle = '#5A6A3F';
-  ctx.fillRect(2, 6, 28, 1); // Highlight oben
+  scaledRect(ctx, 2, 6, 28, 1, scale); // Highlight oben
 
   // Schwarze Riemen über die Kiste (2 Riemen)
   ctx.fillStyle = '#000000';
-  ctx.fillRect(10, 6, 3, 22); // Linker Riemen
-  ctx.fillRect(19, 6, 3, 22); // Rechter Riemen
+  scaledRect(ctx, 10, 6, 3, 22, scale); // Linker Riemen
+  scaledRect(ctx, 19, 6, 3, 22, scale); // Rechter Riemen
 
   // Riemen-Highlights für Leder-Effekt
   ctx.fillStyle = 'rgba(50, 50, 50, 0.8)';
-  ctx.fillRect(10, 6, 1, 22); // Linker Riemen Highlight
-  ctx.fillRect(19, 6, 1, 22); // Rechter Riemen Highlight
+  scaledRect(ctx, 10, 6, 1, 22, scale); // Linker Riemen Highlight
+  scaledRect(ctx, 19, 6, 1, 22, scale); // Rechter Riemen Highlight
 
   // Metallschnallen an den Riemen
   ctx.fillStyle = '#696969'; // Dunkelgrau
-  ctx.fillRect(10, 14, 3, 4); // Linke Schnalle
-  ctx.fillRect(19, 14, 3, 4); // Rechte Schnalle
+  scaledRect(ctx, 10, 14, 3, 4, scale); // Linke Schnalle
+  scaledRect(ctx, 19, 14, 3, 4, scale); // Rechte Schnalle
 
   // Schnallen-Highlights
   ctx.fillStyle = '#A0A0A0';
-  ctx.fillRect(10, 14, 3, 1); // Linke Schnalle Highlight
-  ctx.fillRect(19, 14, 3, 1); // Rechte Schnalle Highlight
+  scaledRect(ctx, 10, 14, 3, 1, scale); // Linke Schnalle Highlight
+  scaledRect(ctx, 19, 14, 3, 1, scale); // Rechte Schnalle Highlight
 
   // Weißes Label für "AMMO" Beschriftung
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(13, 16, 6, 6);
+  scaledRect(ctx, 13, 16, 6, 6, scale);
 
   // Label-Rand
   ctx.strokeStyle = '#000000';
-  ctx.lineWidth = 0.5;
-  ctx.strokeRect(13, 16, 6, 6);
+  ctx.lineWidth = 0.5 * scale;
+  ctx.strokeRect(13 * scale, 16 * scale, 6 * scale, 6 * scale);
 
   // "AMMO" Beschriftung
   ctx.fillStyle = '#000000';
-  ctx.font = 'bold 4px Arial';
+  ctx.font = `bold ${4 * scale}px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('AMMO', 16, 19);
+  ctx.fillText('AMMO', 16 * scale, 19 * scale);
 
   // Sichtbare Patronenspitzen in Gold (3-4 Stück)
-  const bulletGradient = ctx.createRadialGradient(8, 24, 0, 8, 24, 2);
+  const bulletGradient = ctx.createRadialGradient(8 * scale, 24 * scale, 0, 8 * scale, 24 * scale, 2 * scale);
   bulletGradient.addColorStop(0, '#FFD700'); // Gold
   bulletGradient.addColorStop(0.7, '#DAA520'); // Goldenrod
   bulletGradient.addColorStop(1, '#B8860B'); // Dunkelgold
-  
+
   // Patrone 1 (links)
   ctx.fillStyle = bulletGradient;
-  ctx.beginPath();
-  ctx.arc(6, 24, 1.5, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledArc(ctx, 6, 24, 1.5, scale);
+
   // Patronenhülse
   ctx.fillStyle = '#B8860B';
-  ctx.fillRect(5, 25, 2, 2);
+  scaledRect(ctx, 5, 25, 2, 2, scale);
 
   // Patrone 2
-  const bulletGradient2 = ctx.createRadialGradient(14, 24, 0, 14, 24, 2);
+  const bulletGradient2 = ctx.createRadialGradient(14 * scale, 24 * scale, 0, 14 * scale, 24 * scale, 2 * scale);
   bulletGradient2.addColorStop(0, '#FFD700');
   bulletGradient2.addColorStop(0.7, '#DAA520');
   bulletGradient2.addColorStop(1, '#B8860B');
   ctx.fillStyle = bulletGradient2;
-  ctx.beginPath();
-  ctx.arc(14, 24, 1.5, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledArc(ctx, 14, 24, 1.5, scale);
+
   ctx.fillStyle = '#B8860B';
-  ctx.fillRect(13, 25, 2, 2);
+  scaledRect(ctx, 13, 25, 2, 2, scale);
 
   // Patrone 3
-  const bulletGradient3 = ctx.createRadialGradient(18, 24, 0, 18, 24, 2);
+  const bulletGradient3 = ctx.createRadialGradient(18 * scale, 24 * scale, 0, 18 * scale, 24 * scale, 2 * scale);
   bulletGradient3.addColorStop(0, '#FFD700');
   bulletGradient3.addColorStop(0.7, '#DAA520');
   bulletGradient3.addColorStop(1, '#B8860B');
   ctx.fillStyle = bulletGradient3;
-  ctx.beginPath();
-  ctx.arc(18, 24, 1.5, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledArc(ctx, 18, 24, 1.5, scale);
+
   ctx.fillStyle = '#B8860B';
-  ctx.fillRect(17, 25, 2, 2);
+  scaledRect(ctx, 17, 25, 2, 2, scale);
 
   // Patrone 4 (rechts)
-  const bulletGradient4 = ctx.createRadialGradient(26, 24, 0, 26, 24, 2);
+  const bulletGradient4 = ctx.createRadialGradient(26 * scale, 24 * scale, 0, 26 * scale, 24 * scale, 2 * scale);
   bulletGradient4.addColorStop(0, '#FFD700');
   bulletGradient4.addColorStop(0.7, '#DAA520');
   bulletGradient4.addColorStop(1, '#B8860B');
   ctx.fillStyle = bulletGradient4;
-  ctx.beginPath();
-  ctx.arc(26, 24, 1.5, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledArc(ctx, 26, 24, 1.5, scale);
+
   ctx.fillStyle = '#B8860B';
-  ctx.fillRect(25, 25, 2, 2);
+  scaledRect(ctx, 25, 25, 2, 2, scale);
 
   // Highlights auf Patronenspitzen für metallischen Glanz
   ctx.fillStyle = '#FFFFE0';
-  ctx.beginPath();
-  ctx.arc(5.5, 23.5, 0.5, 0, Math.PI * 2);
-  ctx.arc(13.5, 23.5, 0.5, 0, Math.PI * 2);
-  ctx.arc(17.5, 23.5, 0.5, 0, Math.PI * 2);
-  ctx.arc(25.5, 23.5, 0.5, 0, Math.PI * 2);
-  ctx.fill();
-
-
-  // Sichtbare Patronenspitzen
-  ctx.fillStyle = '#FFD700'; // Gold
-  ctx.fillRect(20, 10, 2, 4);
-  ctx.fillRect(23, 10, 2, 4);
-  ctx.fillRect(26, 10, 2, 4);
-
+  scaledArc(ctx, 5.5, 23.5, 0.5, scale);
+  scaledArc(ctx, 13.5, 23.5, 0.5, scale);
+  scaledArc(ctx, 17.5, 23.5, 0.5, scale);
+  scaledArc(ctx, 25.5, 23.5, 0.5, scale);
 
   return canvas;
 }
 
-function createWeaponTexture(): HTMLCanvasElement {
+function createWeaponTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 32; // Original was 32x32
 
   // --- Detailliertes Sturmgewehr mit erkennbaren Komponenten ---
 
   // Schulterstütze (hinten) mit metallischem Farbverlauf
-  const stockGradient = ctx.createLinearGradient(2, 13, 2, 17);
+  const stockGradient = ctx.createLinearGradient(2 * scale, 13 * scale, 2 * scale, 17 * scale);
   stockGradient.addColorStop(0, '#4A4A4A'); // Hellgrau
   stockGradient.addColorStop(0.5, '#2A2A2A'); // Mittelgrau
   stockGradient.addColorStop(1, '#1A1A1A'); // Dunkelgrau
   ctx.fillStyle = stockGradient;
-  ctx.fillRect(2, 13, 5, 4); // Hauptteil der Stütze
-  
+  scaledRect(ctx, 2, 13, 5, 4, scale); // Hauptteil der Stütze
+
   // Schulterstütze - Verbindung zum Körper
   ctx.fillStyle = '#2A2A2A';
-  ctx.fillRect(6, 14, 2, 2);
-  
+  scaledRect(ctx, 6, 14, 2, 2, scale);
+
   // Highlight auf Schulterstütze für Metall-Glanz
   ctx.fillStyle = '#696969';
-  ctx.fillRect(2, 13, 5, 1);
+  scaledRect(ctx, 2, 13, 5, 1, scale);
 
   // Hauptkörper der Waffe (Receiver) mit metallischem Farbverlauf
-  const bodyGradient = ctx.createLinearGradient(8, 11, 8, 19);
+  const bodyGradient = ctx.createLinearGradient(8 * scale, 11 * scale, 8 * scale, 19 * scale);
   bodyGradient.addColorStop(0, '#4A4A4A'); // Hellgrau (Highlight)
   bodyGradient.addColorStop(0.3, '#2A2A2A'); // Mittelgrau
   bodyGradient.addColorStop(0.7, '#1A1A1A'); // Dunkelgrau
   bodyGradient.addColorStop(1, '#0A0A0A'); // Sehr dunkelgrau (Schatten)
   ctx.fillStyle = bodyGradient;
-  ctx.fillRect(8, 11, 14, 8); // Hauptkörper
-  
+  scaledRect(ctx, 8, 11, 14, 8, scale); // Hauptkörper
+
   // Obere Schiene (Rail) für Visier
   ctx.fillStyle = '#1A1A1A';
-  ctx.fillRect(10, 10, 10, 1);
-  
+  scaledRect(ctx, 10, 10, 10, 1, scale);
+
   // Schatten am Hauptkörper für 3D-Effekt
   ctx.fillStyle = '#0A0A0A';
-  ctx.fillRect(8, 18, 14, 1); // Unten
-  ctx.fillRect(21, 11, 1, 8); // Rechts
-  
+  scaledRect(ctx, 8, 18, 14, 1, scale); // Unten
+  scaledRect(ctx, 21, 11, 1, 8, scale); // Rechts
+
   // Highlights am Hauptkörper für Metall-Glanz
   ctx.fillStyle = '#696969';
-  ctx.fillRect(8, 11, 14, 1); // Oben
-  ctx.fillRect(8, 11, 1, 8); // Links
-  
+  scaledRect(ctx, 8, 11, 14, 1, scale); // Oben
+  scaledRect(ctx, 8, 11, 1, 8, scale); // Links
+
   // Zusätzliche Highlights für starken Metall-Effekt
   ctx.fillStyle = '#8A8A8A';
-  ctx.fillRect(9, 12, 12, 1);
-  ctx.fillRect(9, 12, 1, 6);
+  scaledRect(ctx, 9, 12, 12, 1, scale);
+  scaledRect(ctx, 9, 12, 1, 6, scale);
 
   // Lauf mit metallischem Farbverlauf
-  const barrelGradient = ctx.createLinearGradient(22, 12, 22, 18);
-  barrelGradient.addColorStop(0, '#2A2A2A'); // Helleres Grau
-  barrelGradient.addColorStop(0.5, '#1A1A1A'); // Dunkelgrau
-  barrelGradient.addColorStop(1, '#0A0A0A'); // Sehr dunkelgrau
+  const barrelGradient = ctx.createLinearGradient(22 * scale, 14 * scale, 30 * scale, 14 * scale);
+  barrelGradient.addColorStop(0, '#3A3A3A');
+  barrelGradient.addColorStop(0.5, '#5A5A5A');
+  barrelGradient.addColorStop(1, '#2A2A2A');
   ctx.fillStyle = barrelGradient;
-  ctx.fillRect(22, 12, 8, 6); // Lauf
-  
-  // Laufmündung (dunkler)
-  ctx.fillStyle = '#000000';
-  ctx.fillRect(29, 13, 1, 4);
-  
-  // Rillen am Lauf für Details
-  ctx.fillStyle = '#0A0A0A';
-  ctx.fillRect(24, 12, 1, 6);
-  ctx.fillRect(26, 12, 1, 6);
-  ctx.fillRect(28, 12, 1, 6);
-  
-  // Highlights am Lauf
-  ctx.fillStyle = '#4A4A4A';
-  ctx.fillRect(22, 12, 8, 1); // Oben
-  ctx.fillRect(23, 13, 1, 1); // Glanzpunkt
+  scaledRect(ctx, 22, 14, 8, 2, scale);
 
-  // Visier (vorne) mit Details
+  // Mündung (etwas breiter)
   ctx.fillStyle = '#1A1A1A';
-  ctx.fillRect(20, 9, 3, 2); // Vorderes Visier
-  ctx.fillRect(21, 8, 1, 1); // Spitze
-  
-  // Visier (hinten)
-  ctx.fillRect(10, 9, 3, 2);
-  ctx.fillRect(11, 8, 1, 1); // Spitze
-  
-  // Highlight auf Visieren
-  ctx.fillStyle = '#4A4A4A';
-  ctx.fillRect(20, 9, 3, 1);
-  ctx.fillRect(10, 9, 3, 1);
+  scaledRect(ctx, 30, 13, 1, 4, scale);
 
-  // Magazin unter dem Hauptkörper mit Farbverlauf
-  const magGradient = ctx.createLinearGradient(13, 19, 13, 27);
-  magGradient.addColorStop(0, '#2A2A2A'); // Helleres Grau
-  magGradient.addColorStop(0.5, '#1A1A1A'); // Mittelgrau
-  magGradient.addColorStop(1, '#0A0A0A'); // Dunkelgrau
-  ctx.fillStyle = magGradient;
-  ctx.fillRect(13, 19, 6, 8); // Magazin
-  
-  // Magazin - gebogene Form (unten breiter)
-  ctx.fillRect(12, 25, 8, 2);
-  
-  // Schatten am Magazin
+  // Mündungsfeuer-Dämpfer (Schlitze)
   ctx.fillStyle = '#000000';
-  ctx.fillRect(18, 19, 1, 8); // Rechts
-  ctx.fillRect(13, 26, 6, 1); // Unten
-  
-  // Highlights am Magazin
-  ctx.fillStyle = '#4A4A4A';
-  ctx.fillRect(13, 19, 6, 1); // Oben
-  ctx.fillRect(13, 19, 1, 8); // Links
-  
-  // Rillen am Magazin für Grip-Textur
-  ctx.fillStyle = '#0A0A0A';
+  scaledRect(ctx, 29, 14, 1, 2, scale);
+
+  // Vordergriff / Handschutz
+  ctx.fillStyle = '#2F4F2F'; // Dunkelgrün (Armee-Look)
+  scaledRect(ctx, 22, 16, 6, 3, scale);
+
+  // Struktur auf Handschutz
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  scaledRect(ctx, 23, 16, 1, 3, scale);
+  scaledRect(ctx, 25, 16, 1, 3, scale);
+  scaledRect(ctx, 27, 16, 1, 3, scale);
+
+  // Magazin (gebogen angedeutet)
+  const magGradient = ctx.createLinearGradient(14 * scale, 19 * scale, 18 * scale, 25 * scale);
+  magGradient.addColorStop(0, '#3A3A3A');
+  magGradient.addColorStop(1, '#1A1A1A');
+  ctx.fillStyle = magGradient;
   ctx.fillRect(14, 21, 4, 1);
   ctx.fillRect(14, 23, 4, 1);
   ctx.fillRect(14, 25, 4, 1);
@@ -1967,13 +1825,13 @@ function createWeaponTexture(): HTMLCanvasElement {
   ctx.lineTo(13, 19);
   ctx.closePath();
   ctx.fill();
-  
+
   // Griff - Textur für besseren Halt
   ctx.fillStyle = '#0A0A0A';
   ctx.fillRect(9, 21, 3, 1);
   ctx.fillRect(9, 23, 3, 1);
   ctx.fillRect(9, 25, 3, 1);
-  
+
   // Highlight am Griff
   ctx.fillStyle = '#2A2A2A';
   ctx.beginPath();
@@ -1986,14 +1844,14 @@ function createWeaponTexture(): HTMLCanvasElement {
   // Abzug (Trigger)
   ctx.fillStyle = '#1A1A1A';
   ctx.fillRect(11, 17, 2, 3);
-  
+
   // Abzugsbügel (Trigger Guard)
   ctx.strokeStyle = '#2A2A2A';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.arc(12, 18, 2, 0, Math.PI);
   ctx.stroke();
-  
+
   // Highlight am Abzug
   ctx.fillStyle = '#4A4A4A';
   ctx.fillRect(11, 17, 2, 1);
@@ -2005,7 +1863,7 @@ function createWeaponTexture(): HTMLCanvasElement {
   ctx.fillRect(9, 16, 1, 1);
   ctx.fillRect(15, 13, 1, 1);
   ctx.fillRect(20, 13, 1, 1);
-  
+
   // Highlights auf Schrauben (Metall-Glanz)
   ctx.fillStyle = '#696969';
   ctx.fillRect(9, 13, 1, 0.5);
@@ -2015,7 +1873,7 @@ function createWeaponTexture(): HTMLCanvasElement {
   // Auswurfschacht (Ejection Port) - Detail
   ctx.fillStyle = '#000000';
   ctx.fillRect(16, 12, 3, 2);
-  
+
   // Highlight am Auswurfschacht
   ctx.fillStyle = '#1A1A1A';
   ctx.fillRect(16, 12, 3, 1);
@@ -2029,249 +1887,220 @@ function createWeaponTexture(): HTMLCanvasElement {
   return canvas;
 }
 
-function createZombieCorpseTexture(): HTMLCanvasElement {
+function createZombieCorpseTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // Blutlache (größer und realistischer)
-  const bloodGradient = ctx.createRadialGradient(32, 54, 5, 32, 54, 28);
+  const bloodGradient = ctx.createRadialGradient(32 * scale, 54 * scale, 5 * scale, 32 * scale, 54 * scale, 28 * scale);
   bloodGradient.addColorStop(0, '#8B0000'); // Dunkelrot
   bloodGradient.addColorStop(0.5, '#5A0000'); // Sehr dunkelrot
   bloodGradient.addColorStop(1, 'rgba(90, 0, 0, 0.3)'); // Transparent
   ctx.fillStyle = bloodGradient;
-  ctx.beginPath();
-  ctx.ellipse(32, 54, 28, 12, 0, 0, Math.PI * 2);
-  ctx.fill();
+  scaledEllipse(ctx, 32, 54, 28, 12, 0, 0, Math.PI * 2, scale);
 
   // Liegender Körper (zerrissenes Hemd)
   ctx.fillStyle = '#5A0000'; // Dunkelrotes Hemd
-  ctx.fillRect(14, 48, 36, 10); // Hauptkörper
-  
+  scaledRect(ctx, 14, 48, 36, 10, scale); // Hauptkörper
+
   // Körper-Schattierung
   ctx.fillStyle = '#3A0000';
-  ctx.fillRect(14, 48, 36, 2); // Oberer Schatten
+  scaledRect(ctx, 14, 48, 36, 2, scale); // Oberer Schatten
 
   // Linker Arm ausgestreckt
   ctx.fillStyle = '#2E8B57'; // Grüne Haut
-  ctx.fillRect(6, 50, 10, 6);
+  scaledRect(ctx, 6, 50, 10, 6, scale);
   // Linke Hand
   ctx.fillStyle = '#3CB371';
-  ctx.fillRect(4, 52, 4, 4);
+  scaledRect(ctx, 4, 52, 4, 4, scale);
   // Finger angedeutet
   ctx.fillStyle = '#2E8B57';
-  ctx.fillRect(2, 53, 2, 1);
-  ctx.fillRect(2, 55, 2, 1);
+  scaledRect(ctx, 2, 53, 2, 1, scale);
+  scaledRect(ctx, 2, 55, 2, 1, scale);
 
   // Rechter Arm ausgestreckt
   ctx.fillStyle = '#2E8B57';
-  ctx.fillRect(48, 50, 10, 6);
+  scaledRect(ctx, 48, 50, 10, 6, scale);
   // Rechte Hand
   ctx.fillStyle = '#3CB371';
-  ctx.fillRect(56, 52, 4, 4);
+  scaledRect(ctx, 56, 52, 4, 4, scale);
   // Finger angedeutet
   ctx.fillStyle = '#2E8B57';
-  ctx.fillRect(60, 53, 2, 1);
-  ctx.fillRect(60, 55, 2, 1);
+  scaledRect(ctx, 60, 53, 2, 1, scale);
+  scaledRect(ctx, 60, 55, 2, 1, scale);
 
   // Kopf (seitlich liegend)
   ctx.fillStyle = '#3CB371'; // Grüne Haut
-  ctx.fillRect(26, 44, 12, 8);
-  
+  scaledRect(ctx, 26, 44, 12, 8, scale);
+
   // Wunde am Kopf
   ctx.fillStyle = '#5A0000';
-  ctx.fillRect(32, 45, 4, 3);
+  scaledRect(ctx, 32, 45, 4, 3, scale);
 
   // Beine (angewinkelt)
   ctx.fillStyle = '#4B3A26'; // Braune Hose
-  ctx.fillRect(18, 56, 8, 6);
-  ctx.fillRect(38, 56, 8, 6);
-  
+  scaledRect(ctx, 18, 56, 8, 6, scale);
+  scaledRect(ctx, 38, 56, 8, 6, scale);
+
   // Schuhe
   ctx.fillStyle = '#1A1A1A';
-  ctx.fillRect(16, 58, 6, 4);
-  ctx.fillRect(40, 58, 6, 4);
+  scaledRect(ctx, 16, 58, 6, 4, scale);
+  scaledRect(ctx, 40, 58, 6, 4, scale);
 
   return canvas;
 }
 
-function createMonsterCorpseTexture(): HTMLCanvasElement {
+function createMonsterCorpseTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // --- Zusammengesunkener Monster-Leichnam ---
 
   // Blutlache
-  const bloodGradient = ctx.createRadialGradient(32, 54, 5, 32, 54, 30);
+  const bloodGradient = ctx.createRadialGradient(32 * scale, 54 * scale, 5 * scale, 32 * scale, 54 * scale, 30 * scale);
   bloodGradient.addColorStop(0, '#8B0000'); // Dunkelrot
   bloodGradient.addColorStop(0.5, '#5A0000'); // Sehr dunkelrot
   bloodGradient.addColorStop(1, 'rgba(90, 0, 0, 0.2)'); // Transparent
   ctx.fillStyle = bloodGradient;
-  ctx.beginPath();
-  ctx.ellipse(32, 56, 32, 14, 0, 0, Math.PI * 2);
-  ctx.fill();
+  scaledEllipse(ctx, 32, 56, 32, 14, 0, 0, Math.PI * 2, scale);
 
   // Zusammengesunkener Körper (flach)
-  const corpseGradient = ctx.createRadialGradient(32, 52, 5, 32, 52, 24);
+  const corpseGradient = ctx.createRadialGradient(32 * scale, 52 * scale, 5 * scale, 32 * scale, 52 * scale, 24 * scale);
   corpseGradient.addColorStop(0, '#5A0000'); // Sehr dunkelrot
   corpseGradient.addColorStop(0.5, '#3A0000'); // Fast schwarz-rot
   corpseGradient.addColorStop(1, '#2A0000'); // Sehr dunkel
   ctx.fillStyle = corpseGradient;
-  ctx.beginPath();
-  ctx.ellipse(32, 52, 26, 12, 0, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledEllipse(ctx, 32, 52, 26, 12, 0, 0, Math.PI * 2, scale);
+
   // Muskelstruktur noch sichtbar (Schattierungen)
   ctx.fillStyle = '#1A0000';
-  ctx.fillRect(28, 48, 8, 2);
-  ctx.fillRect(28, 52, 8, 2);
-  ctx.fillRect(28, 56, 8, 2);
+  scaledRect(ctx, 28, 48, 8, 2, scale);
+  scaledRect(ctx, 28, 52, 8, 2, scale);
+  scaledRect(ctx, 28, 56, 8, 2, scale);
 
   // Ausgestreckte Arme
   ctx.fillStyle = '#3A0000';
-  ctx.beginPath();
-  ctx.ellipse(12, 52, 8, 4, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(52, 52, 8, 4, 0, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledEllipse(ctx, 12, 52, 8, 4, 0, 0, Math.PI * 2, scale);
+  scaledEllipse(ctx, 52, 52, 8, 4, 0, 0, Math.PI * 2, scale);
+
   // Klauen noch sichtbar
   ctx.fillStyle = '#808080';
-  ctx.fillRect(6, 52, 2, 3);
-  ctx.fillRect(9, 52, 2, 3);
-  ctx.fillRect(56, 52, 2, 3);
-  ctx.fillRect(59, 52, 2, 3);
+  scaledRect(ctx, 6, 52, 2, 3, scale);
+  scaledRect(ctx, 9, 52, 2, 3, scale);
+  scaledRect(ctx, 56, 52, 2, 3, scale);
+  scaledRect(ctx, 59, 52, 2, 3, scale);
 
   // Beine zusammengesunken
   ctx.fillStyle = '#3A0000';
-  ctx.beginPath();
-  ctx.ellipse(22, 58, 6, 4, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(42, 58, 6, 4, 0, 0, Math.PI * 2);
-  ctx.fill();
+  scaledEllipse(ctx, 22, 58, 6, 4, 0, 0, Math.PI * 2, scale);
+  scaledEllipse(ctx, 42, 58, 6, 4, 0, 0, Math.PI * 2, scale);
 
   // Kopf seitlich liegend
   ctx.fillStyle = '#4A0000';
-  ctx.fillRect(26, 44, 12, 8);
-  
+  scaledRect(ctx, 26, 44, 12, 8, scale);
+
   // Hörner noch sichtbar (seitlich)
-  const hornGradient = ctx.createLinearGradient(10, 44, 18, 48);
+  const hornGradient = ctx.createLinearGradient(10 * scale, 44 * scale, 18 * scale, 48 * scale);
   hornGradient.addColorStop(0, '#A0A0A0');
   hornGradient.addColorStop(0.5, '#808080');
   hornGradient.addColorStop(1, '#505050');
   ctx.fillStyle = hornGradient;
-  ctx.fillRect(10, 44, 10, 4); // Linkes Horn
-  
-  const hornGradient2 = ctx.createLinearGradient(44, 44, 52, 48);
+  scaledRect(ctx, 10, 44, 10, 4, scale); // Linkes Horn
+
+  const hornGradient2 = ctx.createLinearGradient(44 * scale, 44 * scale, 52 * scale, 48 * scale);
   hornGradient2.addColorStop(0, '#A0A0A0');
   hornGradient2.addColorStop(0.5, '#808080');
   hornGradient2.addColorStop(1, '#505050');
   ctx.fillStyle = hornGradient2;
-  ctx.fillRect(44, 44, 10, 4); // Rechtes Horn
-  
+  scaledRect(ctx, 44, 44, 10, 4, scale); // Rechtes Horn
+
   // Hornspitzen
   ctx.fillStyle = '#C0C0C0';
-  ctx.fillRect(8, 44, 3, 2);
-  ctx.fillRect(53, 44, 3, 2);
+  scaledRect(ctx, 8, 44, 3, 2, scale);
+  scaledRect(ctx, 53, 44, 3, 2, scale);
 
   // Erloschene Augen
   ctx.fillStyle = '#1A0000';
-  ctx.beginPath();
-  ctx.arc(30, 47, 2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(34, 47, 2, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 30, 47, 2, scale);
+  scaledArc(ctx, 34, 47, 2, scale);
 
   return canvas;
 }
 
-function createGhostCorpseTexture(): HTMLCanvasElement {
+function createGhostCorpseTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // --- Verblassender Geist mit mehreren Transparenzebenen ---
 
   // Äußerste Schicht - fast vollständig verblasst (30% Transparenz)
   ctx.globalAlpha = 0.3;
-  const outerFade = ctx.createRadialGradient(32, 52, 8, 32, 52, 32);
+  const outerFade = ctx.createRadialGradient(32 * scale, 52 * scale, 8 * scale, 32 * scale, 52 * scale, 32 * scale);
   outerFade.addColorStop(0, 'rgba(176, 224, 230, 0.4)'); // #B0E0E6 - Puderblau
   outerFade.addColorStop(0.5, 'rgba(135, 206, 235, 0.2)'); // #87CEEB - Himmelblau
   outerFade.addColorStop(1, 'rgba(135, 206, 235, 0)'); // Vollständig transparent
   ctx.fillStyle = outerFade;
-  
+
   // Verblassende Geisterform (flach am Boden)
-  ctx.beginPath();
-  ctx.ellipse(32, 52, 28, 10, 0, 0, Math.PI * 2);
-  ctx.fill();
+  scaledEllipse(ctx, 32, 52, 28, 10, 0, 0, Math.PI * 2, scale);
 
   // Mittlere Schicht - stärker sichtbar (45% Transparenz)
   ctx.globalAlpha = 0.45;
-  const middleFade = ctx.createRadialGradient(32, 50, 5, 32, 50, 22);
+  const middleFade = ctx.createRadialGradient(32 * scale, 50 * scale, 5 * scale, 32 * scale, 50 * scale, 22 * scale);
   middleFade.addColorStop(0, 'rgba(200, 220, 255, 0.6)'); // Hellblau
   middleFade.addColorStop(0.5, 'rgba(176, 224, 230, 0.4)'); // #B0E0E6
   middleFade.addColorStop(1, 'rgba(135, 206, 235, 0)'); // #87CEEB (transparent)
   ctx.fillStyle = middleFade;
-  ctx.beginPath();
-  ctx.ellipse(32, 50, 22, 8, 0, 0, Math.PI * 2);
-  ctx.fill();
+  scaledEllipse(ctx, 32, 50, 22, 8, 0, 0, Math.PI * 2, scale);
 
   // Innere Schicht - noch erkennbar (55% Transparenz)
   ctx.globalAlpha = 0.55;
-  const innerFade = ctx.createRadialGradient(32, 48, 3, 32, 48, 16);
+  const innerFade = ctx.createRadialGradient(32 * scale, 48 * scale, 3 * scale, 32 * scale, 48 * scale, 16 * scale);
   innerFade.addColorStop(0, 'rgba(224, 255, 255, 0.7)'); // #E0FFFF - Hellcyan
   innerFade.addColorStop(0.5, 'rgba(200, 220, 255, 0.5)');
   innerFade.addColorStop(1, 'rgba(176, 224, 230, 0)'); // #B0E0E6 (transparent)
   ctx.fillStyle = innerFade;
-  ctx.beginPath();
-  ctx.ellipse(32, 48, 16, 6, 0, 0, Math.PI * 2);
-  ctx.fill();
+  scaledEllipse(ctx, 32, 48, 16, 6, 0, 0, Math.PI * 2, scale);
 
   // Kern - letzter Rest der Energie (65% Transparenz)
   ctx.globalAlpha = 0.65;
-  const coreFade = ctx.createRadialGradient(32, 48, 1, 32, 48, 10);
+  const coreFade = ctx.createRadialGradient(32 * scale, 48 * scale, 1 * scale, 32 * scale, 48 * scale, 10 * scale);
   coreFade.addColorStop(0, 'rgba(255, 255, 255, 0.8)'); // Weißer Kern
   coreFade.addColorStop(0.4, 'rgba(224, 255, 255, 0.6)'); // #E0FFFF
   coreFade.addColorStop(1, 'rgba(200, 220, 255, 0)'); // Transparent
   ctx.fillStyle = coreFade;
-  ctx.beginPath();
-  ctx.ellipse(32, 48, 10, 4, 0, 0, Math.PI * 2);
-  ctx.fill();
+  scaledEllipse(ctx, 32, 48, 10, 4, 0, 0, Math.PI * 2, scale);
 
   // Letzte Energiefunken (sehr schwach, 40% Transparenz)
   ctx.globalAlpha = 0.4;
-  const spark1 = ctx.createRadialGradient(28, 46, 0, 28, 46, 4);
+  const spark1 = ctx.createRadialGradient(28 * scale, 46 * scale, 0, 28 * scale, 46 * scale, 4 * scale);
   spark1.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
   spark1.addColorStop(0.5, 'rgba(224, 255, 255, 0.4)');
   spark1.addColorStop(1, 'rgba(176, 224, 230, 0)');
   ctx.fillStyle = spark1;
-  ctx.beginPath();
-  ctx.arc(28, 46, 4, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 28, 46, 4, scale);
 
-  const spark2 = ctx.createRadialGradient(36, 46, 0, 36, 46, 4);
+  const spark2 = ctx.createRadialGradient(36 * scale, 46 * scale, 0, 36 * scale, 46 * scale, 4 * scale);
   spark2.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
   spark2.addColorStop(0.5, 'rgba(224, 255, 255, 0.4)');
   spark2.addColorStop(1, 'rgba(176, 224, 230, 0)');
   ctx.fillStyle = spark2;
-  ctx.beginPath();
-  ctx.arc(36, 46, 4, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 36, 46, 4, scale);
 
   // Schwache Augenreste (25% Transparenz)
   ctx.globalAlpha = 0.25;
   ctx.fillStyle = 'rgba(135, 206, 235, 0.5)'; // #87CEEB
-  ctx.beginPath();
-  ctx.arc(28, 47, 2, 0, Math.PI * 2);
-  ctx.arc(36, 47, 2, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 28, 47, 2, scale);
+  scaledArc(ctx, 36, 47, 2, scale);
 
   // Zurücksetzen
   ctx.globalAlpha = 1.0;
@@ -2283,331 +2112,254 @@ export function getCorpseTexture(enemyType: EnemyType): CanvasImageSource | unde
   return corpseTextures[enemyType];
 }
 
-function createDogTexture(): HTMLCanvasElement {
+function createDogTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // --- Detaillierter aggressiver Kampfhund ---
-  const yOffset = 12;
+  const yOffset = 12 * scale;
 
   // Hintere Beine (weiter hinten für Tiefenwirkung)
-  const legGradient1 = ctx.createLinearGradient(0, 32 + yOffset, 0, 48 + yOffset);
+  const legGradient1 = ctx.createLinearGradient(0, 32 * scale + yOffset, 0, 48 * scale + yOffset);
   legGradient1.addColorStop(0, '#5A3A1A'); // Mittelbraun
   legGradient1.addColorStop(0.5, '#3A1A0A'); // Dunkelbraun
   legGradient1.addColorStop(1, '#2A0A0A'); // Sehr dunkelbraun
   ctx.fillStyle = legGradient1;
-  ctx.fillRect(18, 32 + yOffset, 7, 16); // Hinten links
-  ctx.fillRect(39, 32 + yOffset, 7, 16); // Hinten rechts
-  
+  scaledRect(ctx, 18, 32 + 12, 7, 16, scale); // Hinten links (adjusting for yOffset logic)
+  scaledRect(ctx, 39, 32 + 12, 7, 16, scale); // Hinten rechts
+
   // Pfoten hinten mit Krallen
   ctx.fillStyle = '#3A1A0A';
-  ctx.fillRect(17, 46 + yOffset, 9, 5); // Linke Hinterpfote
-  ctx.fillRect(38, 46 + yOffset, 9, 5); // Rechte Hinterpfote
-  
+  scaledRect(ctx, 17, 46 + 12, 9, 5, scale); // Linke Hinterpfote
+  scaledRect(ctx, 38, 46 + 12, 9, 5, scale); // Rechte Hinterpfote
+
   // Krallen hinten
   ctx.fillStyle = '#E0E0E0';
-  ctx.fillRect(16, 50 + yOffset, 2, 3); // Kralle 1 links
-  ctx.fillRect(19, 50 + yOffset, 2, 3); // Kralle 2 links
-  ctx.fillRect(22, 50 + yOffset, 2, 3); // Kralle 3 links
-  ctx.fillRect(37, 50 + yOffset, 2, 3); // Kralle 1 rechts
-  ctx.fillRect(40, 50 + yOffset, 2, 3); // Kralle 2 rechts
-  ctx.fillRect(43, 50 + yOffset, 2, 3); // Kralle 3 rechts
+  scaledRect(ctx, 16, 50 + 12, 2, 3, scale); // Kralle 1 links
+  scaledRect(ctx, 19, 50 + 12, 2, 3, scale); // Kralle 2 links
+  scaledRect(ctx, 22, 50 + 12, 2, 3, scale); // Kralle 3 links
+  scaledRect(ctx, 37, 50 + 12, 2, 3, scale); // Kralle 1 rechts
+  scaledRect(ctx, 40, 50 + 12, 2, 3, scale); // Kralle 2 rechts
+  scaledRect(ctx, 43, 50 + 12, 2, 3, scale); // Kralle 3 rechts
 
   // Körper mit Fellstruktur (mehrere Brauntöne)
-  const bodyGradient = ctx.createLinearGradient(0, 20 + yOffset, 0, 40 + yOffset);
+  const bodyGradient = ctx.createLinearGradient(0, 20 * scale + yOffset, 0, 40 * scale + yOffset);
   bodyGradient.addColorStop(0, '#6B4A2A'); // Hellbraun (Rücken)
   bodyGradient.addColorStop(0.4, '#5A3A1A'); // Mittelbraun
   bodyGradient.addColorStop(0.7, '#3A1A0A'); // Dunkelbraun
   bodyGradient.addColorStop(1, '#2A0A0A'); // Sehr dunkelbraun (Bauch)
   ctx.fillStyle = bodyGradient;
-  ctx.fillRect(14, 20 + yOffset, 36, 20);
-  
+  scaledRect(ctx, 14, 20 + 12, 36, 20, scale);
+
   // Fellstruktur durch Schattierungen
   ctx.fillStyle = '#3A1A0A';
-  ctx.fillRect(16, 22 + yOffset, 32, 1); // Rückenlinie
-  ctx.fillRect(16, 26 + yOffset, 32, 1); // Mittellinie
+  scaledRect(ctx, 16, 22 + 12, 32, 1, scale); // Rückenlinie
+  scaledRect(ctx, 16, 26 + 12, 32, 1, scale); // Mittellinie
   ctx.fillStyle = '#5A3A1A';
-  ctx.fillRect(16, 38 + yOffset, 32, 1); // Bauchlinie
+  scaledRect(ctx, 16, 38 + 12, 32, 1, scale); // Bauchlinie
 
   // Vordere Beine (aggressive Angriffsstellung - leicht nach vorne)
-  const legGradient2 = ctx.createLinearGradient(0, 32 + yOffset, 0, 50 + yOffset);
+  const legGradient2 = ctx.createLinearGradient(0, 32 * scale + yOffset, 0, 50 * scale + yOffset);
   legGradient2.addColorStop(0, '#5A3A1A');
   legGradient2.addColorStop(0.5, '#3A1A0A');
   legGradient2.addColorStop(1, '#2A0A0A');
   ctx.fillStyle = legGradient2;
-  ctx.fillRect(14, 34 + yOffset, 8, 16); // Vorne links
-  ctx.fillRect(42, 34 + yOffset, 8, 16); // Vorne rechts
-  
+  scaledRect(ctx, 14, 34 + 12, 8, 16, scale); // Vorne links
+  scaledRect(ctx, 42, 34 + 12, 8, 16, scale); // Vorne rechts
+
   // Pfoten vorne mit Krallen
   ctx.fillStyle = '#3A1A0A';
-  ctx.fillRect(12, 48 + yOffset, 10, 6); // Linke Vorderpfote
-  ctx.fillRect(41, 48 + yOffset, 10, 6); // Rechte Vorderpfote
-  
+  scaledRect(ctx, 12, 48 + 12, 10, 6, scale); // Linke Vorderpfote
+  scaledRect(ctx, 41, 48 + 12, 10, 6, scale); // Rechte Vorderpfote
+
   // Krallen vorne (länger für aggressive Haltung)
   ctx.fillStyle = '#E0E0E0';
-  ctx.fillRect(11, 53 + yOffset, 2, 4); // Kralle 1 links
-  ctx.fillRect(14, 53 + yOffset, 2, 5); // Kralle 2 links
-  ctx.fillRect(17, 53 + yOffset, 2, 4); // Kralle 3 links
-  ctx.fillRect(20, 53 + yOffset, 2, 3); // Kralle 4 links
-  ctx.fillRect(40, 53 + yOffset, 2, 4); // Kralle 1 rechts
-  ctx.fillRect(43, 53 + yOffset, 2, 5); // Kralle 2 rechts
-  ctx.fillRect(46, 53 + yOffset, 2, 4); // Kralle 3 rechts
-  ctx.fillRect(49, 53 + yOffset, 2, 3); // Kralle 4 rechts
+  scaledRect(ctx, 11, 53 + 12, 2, 4, scale); // Kralle 1 links
+  scaledRect(ctx, 14, 53 + 12, 2, 5, scale); // Kralle 2 links
+  scaledRect(ctx, 17, 53 + 12, 2, 4, scale); // Kralle 3 links
+  scaledRect(ctx, 20, 53 + 12, 2, 3, scale); // Kralle 4 links
+  scaledRect(ctx, 40, 53 + 12, 2, 4, scale); // Kralle 1 rechts
+  scaledRect(ctx, 43, 53 + 12, 2, 5, scale); // Kralle 2 rechts
+  scaledRect(ctx, 46, 53 + 12, 2, 4, scale); // Kralle 3 rechts
+  scaledRect(ctx, 49, 53 + 12, 2, 3, scale); // Kralle 4 rechts
 
   // Kopf mit detaillierter Fellstruktur
-  const headGradient = ctx.createLinearGradient(0, 8 + yOffset, 0, 24 + yOffset);
+  const headGradient = ctx.createLinearGradient(0, 8 * scale + yOffset, 0, 24 * scale + yOffset);
   headGradient.addColorStop(0, '#6B4A2A'); // Hellbraun (Stirn)
   headGradient.addColorStop(0.5, '#5A3A1A'); // Mittelbraun
   headGradient.addColorStop(1, '#3A1A0A'); // Dunkelbraun (Schnauze)
   ctx.fillStyle = headGradient;
-  ctx.fillRect(22, 8 + yOffset, 20, 16);
-  
+  scaledRect(ctx, 22, 8 + 12, 20, 16, scale);
+
   // Fellschattierungen am Kopf
   ctx.fillStyle = '#3A1A0A';
-  ctx.fillRect(24, 10 + yOffset, 16, 1);
-  ctx.fillRect(24, 14 + yOffset, 16, 1);
+  scaledRect(ctx, 24, 10 + 12, 16, 1, scale);
+  scaledRect(ctx, 24, 14 + 12, 16, 1, scale);
 
   // Angelegte Ohren (aggressive Haltung)
   ctx.fillStyle = '#3A1A0A';
-  ctx.beginPath();
-  ctx.moveTo(24, 10 + yOffset);
-  ctx.lineTo(18, 12 + yOffset);
-  ctx.lineTo(22, 16 + yOffset);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(40, 10 + yOffset);
-  ctx.lineTo(46, 12 + yOffset);
-  ctx.lineTo(42, 16 + yOffset);
-  ctx.closePath();
-  ctx.fill();
-  
+  scaledPath(ctx, [{ x: 24, y: 10 + 12 }, { x: 18, y: 12 + 12 }, { x: 22, y: 16 + 12 }], scale);
+  scaledPath(ctx, [{ x: 40, y: 10 + 12 }, { x: 46, y: 12 + 12 }, { x: 42, y: 16 + 12 }], scale);
+
   // Innere Ohrdetails
   ctx.fillStyle = '#5A3A1A';
-  ctx.beginPath();
-  ctx.moveTo(24, 11 + yOffset);
-  ctx.lineTo(20, 12 + yOffset);
-  ctx.lineTo(23, 14 + yOffset);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(40, 11 + yOffset);
-  ctx.lineTo(44, 12 + yOffset);
-  ctx.lineTo(41, 14 + yOffset);
-  ctx.closePath();
-  ctx.fill();
+  scaledPath(ctx, [{ x: 24, y: 11 + 12 }, { x: 20, y: 12 + 12 }, { x: 23, y: 14 + 12 }], scale);
+  scaledPath(ctx, [{ x: 40, y: 11 + 12 }, { x: 44, y: 12 + 12 }, { x: 41, y: 14 + 12 }], scale);
 
   // Leuchtend rote Augen mit Glüheffekt
   // Äußerer Glüheffekt
-  const eyeGlow1 = ctx.createRadialGradient(27, 14 + yOffset, 1, 27, 14 + yOffset, 5);
+  const eyeGlow1 = ctx.createRadialGradient(27 * scale, (14 + 12) * scale, 1 * scale, 27 * scale, (14 + 12) * scale, 5 * scale);
   eyeGlow1.addColorStop(0, 'rgba(255, 0, 0, 0.9)');
   eyeGlow1.addColorStop(0.5, 'rgba(255, 0, 0, 0.5)');
   eyeGlow1.addColorStop(1, 'rgba(255, 0, 0, 0)');
   ctx.fillStyle = eyeGlow1;
-  ctx.beginPath();
-  ctx.arc(27, 14 + yOffset, 5, 0, Math.PI * 2);
-  ctx.fill();
-  
-  const eyeGlow2 = ctx.createRadialGradient(37, 14 + yOffset, 1, 37, 14 + yOffset, 5);
+  scaledArc(ctx, 27, 14 + 12, 5, scale);
+
+  const eyeGlow2 = ctx.createRadialGradient(37 * scale, (14 + 12) * scale, 1 * scale, 37 * scale, (14 + 12) * scale, 5 * scale);
   eyeGlow2.addColorStop(0, 'rgba(255, 0, 0, 0.9)');
   eyeGlow2.addColorStop(0.5, 'rgba(255, 0, 0, 0.5)');
   eyeGlow2.addColorStop(1, 'rgba(255, 0, 0, 0)');
   ctx.fillStyle = eyeGlow2;
-  ctx.beginPath();
-  ctx.arc(37, 14 + yOffset, 5, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledArc(ctx, 37, 14 + 12, 5, scale);
+
   // Hauptaugen
   ctx.fillStyle = '#FF0000';
-  ctx.beginPath();
-  ctx.arc(27, 14 + yOffset, 3, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(37, 14 + yOffset, 3, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledArc(ctx, 27, 14 + 12, 3, scale);
+  scaledArc(ctx, 37, 14 + 12, 3, scale);
+
   // Pupillen
   ctx.fillStyle = '#000000';
-  ctx.beginPath();
-  ctx.arc(27, 14 + yOffset, 1, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(37, 14 + yOffset, 1, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 27, 14 + 12, 1, scale);
+  scaledArc(ctx, 37, 14 + 12, 1, scale);
 
   // Detaillierte Schnauze
   ctx.fillStyle = '#2A0A0A';
-  ctx.fillRect(26, 18 + yOffset, 12, 6);
-  
+  scaledRect(ctx, 26, 18 + 12, 12, 6, scale);
+
   // Nase
   ctx.fillStyle = '#000000';
-  ctx.fillRect(30, 18 + yOffset, 4, 3);
+  scaledRect(ctx, 30, 18 + 12, 4, 3, scale);
 
   // Geblecktes Maul mit mindestens 4 Zähnen
   ctx.fillStyle = '#000000';
-  ctx.fillRect(26, 22 + yOffset, 12, 4); // Geöffnetes Maul
-  
+  scaledRect(ctx, 26, 22 + 12, 12, 4, scale); // Geöffnetes Maul
+
   // Obere Zähne (Reißzähne)
   ctx.fillStyle = '#FFFFFF';
-  ctx.beginPath();
-  ctx.moveTo(27, 22 + yOffset);
-  ctx.lineTo(28, 25 + yOffset);
-  ctx.lineTo(29, 22 + yOffset);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(30, 22 + yOffset);
-  ctx.lineTo(31, 25 + yOffset);
-  ctx.lineTo(32, 22 + yOffset);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(33, 22 + yOffset);
-  ctx.lineTo(34, 25 + yOffset);
-  ctx.lineTo(35, 22 + yOffset);
-  ctx.closePath();
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(36, 22 + yOffset);
-  ctx.lineTo(37, 25 + yOffset);
-  ctx.lineTo(38, 22 + yOffset);
-  ctx.closePath();
-  ctx.fill();
-  
+  scaledPath(ctx, [{ x: 27, y: 22 + 12 }, { x: 28, y: 25 + 12 }, { x: 29, y: 22 + 12 }], scale);
+  scaledPath(ctx, [{ x: 30, y: 22 + 12 }, { x: 31, y: 25 + 12 }, { x: 32, y: 22 + 12 }], scale);
+  scaledPath(ctx, [{ x: 33, y: 22 + 12 }, { x: 34, y: 25 + 12 }, { x: 35, y: 22 + 12 }], scale);
+  scaledPath(ctx, [{ x: 36, y: 22 + 12 }, { x: 37, y: 25 + 12 }, { x: 38, y: 22 + 12 }], scale);
+
   // Untere Zähne
   ctx.fillStyle = '#E0E0E0';
-  ctx.fillRect(28, 24 + yOffset, 2, 2);
-  ctx.fillRect(31, 24 + yOffset, 2, 2);
-  ctx.fillRect(34, 24 + yOffset, 2, 2);
+  scaledRect(ctx, 28, 24 + 12, 2, 2, scale);
+  scaledRect(ctx, 31, 24 + 12, 2, 2, scale);
+  scaledRect(ctx, 34, 24 + 12, 2, 2, scale);
 
   return canvas;
 }
 
-function createDogCorpseTexture(): HTMLCanvasElement {
+function createDogCorpseTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // --- Detaillierter liegender Hund mit Blutlache ---
 
   // Große Blutlache mit Farbverlauf
-  const bloodGradient = ctx.createRadialGradient(32, 56, 5, 32, 56, 30);
+  const bloodGradient = ctx.createRadialGradient(32 * scale, 56 * scale, 5 * scale, 32 * scale, 56 * scale, 30 * scale);
   bloodGradient.addColorStop(0, '#8B0000'); // Dunkelrot (Zentrum)
   bloodGradient.addColorStop(0.4, '#5A0000'); // Sehr dunkelrot
   bloodGradient.addColorStop(0.7, 'rgba(90, 0, 0, 0.6)'); // Transparent werdend
   bloodGradient.addColorStop(1, 'rgba(90, 0, 0, 0)'); // Vollständig transparent
   ctx.fillStyle = bloodGradient;
-  ctx.beginPath();
-  ctx.ellipse(32, 56, 30, 14, 0, 0, Math.PI * 2);
-  ctx.fill();
+  scaledEllipse(ctx, 32, 56, 30, 14, 0, 0, Math.PI * 2, scale);
 
   // Hintere Beine (ausgestreckt)
   ctx.fillStyle = '#3A1A0A';
-  ctx.fillRect(12, 52, 6, 10); // Hinten links
-  ctx.fillRect(46, 52, 6, 10); // Hinten rechts
-  
+  scaledRect(ctx, 12, 52, 6, 10, scale); // Hinten links
+  scaledRect(ctx, 46, 52, 6, 10, scale); // Hinten rechts
+
   // Hinterpfoten
   ctx.fillStyle = '#2A0A0A';
-  ctx.fillRect(10, 58, 8, 4);
-  ctx.fillRect(46, 58, 8, 4);
+  scaledRect(ctx, 10, 58, 8, 4, scale);
+  scaledRect(ctx, 46, 58, 8, 4, scale);
 
   // Hauptkörper (liegend, seitlich) mit Fellstruktur
-  const bodyGradient = ctx.createLinearGradient(0, 48, 0, 56);
+  const bodyGradient = ctx.createLinearGradient(0, 48 * scale, 0, 56 * scale);
   bodyGradient.addColorStop(0, '#5A3A1A'); // Mittelbraun (Rücken)
   bodyGradient.addColorStop(0.5, '#3A1A0A'); // Dunkelbraun
   bodyGradient.addColorStop(1, '#2A0A0A'); // Sehr dunkelbraun (Bauch)
   ctx.fillStyle = bodyGradient;
-  ctx.beginPath();
-  ctx.ellipse(32, 52, 24, 10, 0, 0, Math.PI * 2);
-  ctx.fill();
-  
+  scaledEllipse(ctx, 32, 52, 24, 10, 0, 0, Math.PI * 2, scale);
+
   // Fellschattierungen
   ctx.fillStyle = '#2A0A0A';
-  ctx.beginPath();
-  ctx.ellipse(32, 50, 22, 3, 0, 0, Math.PI * 2);
-  ctx.fill();
+  scaledEllipse(ctx, 32, 50, 22, 3, 0, 0, Math.PI * 2, scale);
 
   // Vordere Beine (ausgestreckt nach vorne)
   ctx.fillStyle = '#3A1A0A';
-  ctx.fillRect(20, 54, 6, 8); // Vorne links
-  ctx.fillRect(38, 54, 6, 8); // Vorne rechts
-  
+  scaledRect(ctx, 20, 54, 6, 8, scale); // Vorne links
+  scaledRect(ctx, 38, 54, 6, 8, scale); // Vorne rechts
+
   // Vorderpfoten
   ctx.fillStyle = '#2A0A0A';
-  ctx.fillRect(18, 58, 8, 4);
-  ctx.fillRect(38, 58, 8, 4);
-  
+  scaledRect(ctx, 18, 58, 8, 4, scale);
+  scaledRect(ctx, 38, 58, 8, 4, scale);
+
   // Krallen sichtbar
   ctx.fillStyle = '#E0E0E0';
-  ctx.fillRect(17, 60, 1, 2);
-  ctx.fillRect(20, 60, 1, 2);
-  ctx.fillRect(23, 60, 1, 2);
-  ctx.fillRect(38, 60, 1, 2);
-  ctx.fillRect(41, 60, 1, 2);
-  ctx.fillRect(44, 60, 1, 2);
+  scaledRect(ctx, 17, 60, 1, 2, scale);
+  scaledRect(ctx, 20, 60, 1, 2, scale);
+  scaledRect(ctx, 23, 60, 1, 2, scale);
+  scaledRect(ctx, 38, 60, 1, 2, scale);
+  scaledRect(ctx, 41, 60, 1, 2, scale);
+  scaledRect(ctx, 44, 60, 1, 2, scale);
 
   // Kopf (seitlich liegend)
-  const headGradient = ctx.createLinearGradient(0, 44, 0, 52);
+  const headGradient = ctx.createLinearGradient(0, 44 * scale, 0, 52 * scale);
   headGradient.addColorStop(0, '#5A3A1A');
   headGradient.addColorStop(1, '#3A1A0A');
   ctx.fillStyle = headGradient;
-  ctx.fillRect(24, 44, 16, 10);
-  
+  scaledRect(ctx, 24, 44, 16, 10, scale);
+
   // Schnauze
   ctx.fillStyle = '#2A0A0A';
-  ctx.fillRect(22, 48, 8, 4);
-  
+  scaledRect(ctx, 22, 48, 8, 4, scale);
+
   // Nase
   ctx.fillStyle = '#000000';
-  ctx.fillRect(22, 49, 3, 2);
+  scaledRect(ctx, 22, 49, 3, 2, scale);
 
   // Ohr (sichtbar, da seitlich liegend)
   ctx.fillStyle = '#2A0A0A';
-  ctx.beginPath();
-  ctx.moveTo(36, 44);
-  ctx.lineTo(42, 42);
-  ctx.lineTo(38, 48);
-  ctx.closePath();
-  ctx.fill();
-  
+  scaledPath(ctx, [{ x: 36, y: 44 }, { x: 42, y: 42 }, { x: 38, y: 48 }], scale);
+
   // Inneres Ohr
   ctx.fillStyle = '#3A1A0A';
-  ctx.beginPath();
-  ctx.moveTo(37, 45);
-  ctx.lineTo(40, 44);
-  ctx.lineTo(38, 47);
-  ctx.closePath();
-  ctx.fill();
+  scaledPath(ctx, [{ x: 37, y: 45 }, { x: 40, y: 44 }, { x: 38, y: 47 }], scale);
 
   // Geschlossenes Auge
   ctx.fillStyle = '#000000';
-  ctx.fillRect(32, 48, 4, 1);
+  scaledRect(ctx, 32, 48, 4, 1, scale);
 
   // Blutflecken auf dem Fell
   ctx.fillStyle = 'rgba(139, 0, 0, 0.8)';
-  ctx.beginPath();
-  ctx.arc(28, 50, 2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(36, 52, 3, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(42, 54, 2, 0, Math.PI * 2);
-  ctx.fill();
+  scaledArc(ctx, 28, 50, 2, scale);
+  scaledArc(ctx, 36, 52, 3, scale);
+  scaledArc(ctx, 42, 54, 2, scale);
 
   // Schwanz (ausgestreckt)
   ctx.fillStyle = '#3A1A0A';
-  ctx.fillRect(52, 54, 8, 3);
+  scaledRect(ctx, 52, 54, 8, 3, scale);
   ctx.fillStyle = '#2A0A0A';
-  ctx.fillRect(58, 55, 4, 2);
+  scaledRect(ctx, 58, 55, 4, 2, scale);
 
   return canvas;
 }

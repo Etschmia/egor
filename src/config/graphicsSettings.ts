@@ -57,3 +57,49 @@ export const QUALITY_PRESETS: QualityPresets = {
     animationFrames: 8
   }
 };
+
+class GraphicsSystem {
+  private currentSettings: GraphicsSettings;
+  private currentPresetName: 'low' | 'medium' | 'high' | 'ultra' = 'medium';
+
+  constructor() {
+    this.currentSettings = QUALITY_PRESETS.medium;
+    this.load();
+  }
+
+  public getSettings(): GraphicsSettings {
+    return this.currentSettings;
+  }
+
+  public getPresetName(): string {
+    return this.currentPresetName;
+  }
+
+  public setQuality(quality: 'low' | 'medium' | 'high' | 'ultra') {
+    this.currentPresetName = quality;
+    this.currentSettings = QUALITY_PRESETS[quality];
+    this.save();
+  }
+
+  private save() {
+    try {
+      localStorage.setItem('hundefelsen_graphics', this.currentPresetName);
+    } catch (e) {
+      console.warn('Could not save graphics settings:', e);
+    }
+  }
+
+  private load() {
+    try {
+      const saved = localStorage.getItem('hundefelsen_graphics');
+      if (saved && (saved === 'low' || saved === 'medium' || saved === 'high' || saved === 'ultra')) {
+        this.currentPresetName = saved;
+        this.currentSettings = QUALITY_PRESETS[saved];
+      }
+    } catch (e) {
+      console.warn('Could not load graphics settings:', e);
+    }
+  }
+}
+
+export const graphicsSystem = new GraphicsSystem();

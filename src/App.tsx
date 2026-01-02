@@ -31,33 +31,41 @@ import { ActionType } from './types.ts';
 
 type GameMode = 'menu' | 'playing' | 'paused' | 'help' | 'save' | 'load' | 'difficulty' | 'levelComplete' | 'config';
 
+import { graphicsSystem } from './config/graphicsSettings.ts';
+
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [gameMode, setGameMode] = useState<GameMode>('menu');
   const [saveName, setSaveName] = useState('spielstand1');
-  // keys state removed, using inputSystem
   const [showStats, setShowStats] = useState(false);
   const [texturesLoaded, setTexturesLoaded] = useState(false);
   const animationFrameRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(Date.now());
   const lastFireTimeRef = useRef<number>(0);
+  const lastFootstepTimeRef = useRef<number>(0);
   const gameStateRef = useRef<GameState | null>(null);
   const gameModeRef = useRef<GameMode>('menu');
 
-  useEffect(() => {
-    loadTextures().then(() => {
+  const loadGameTextures = useCallback(() => {
+    setTexturesLoaded(false);
+    const settings = graphicsSystem.getSettings();
+    loadTextures(settings.textureQuality).then(() => {
       setTexturesLoaded(true);
     }).catch((err) => {
       console.error('Failed to load textures:', err);
       setTexturesLoaded(true); // Proceed with fallbacks
     });
+  }, []);
+
+  useEffect(() => {
+    loadGameTextures();
 
     inputSystem.initialize();
     return () => {
       inputSystem.cleanup();
     };
-  }, []);
+  }, [loadGameTextures]);
 
   const screenWidth = 800;
   const screenHeight = 600;
@@ -165,8 +173,8 @@ function App() {
           setGameMode('playing');
           soundSystem.playMenuSelect();
         } else if (gameMode === 'config') {
-           setGameMode(gameState ? 'paused' : 'menu');
-           soundSystem.playMenuSelect();
+          setGameMode(gameState ? 'paused' : 'menu');
+          soundSystem.playMenuSelect();
         } else if (gameMode !== 'menu') {
           setGameMode((prev) => prev !== 'menu' ? 'playing' : prev);
         }
@@ -237,25 +245,25 @@ function App() {
         ActionType.WEAPON_5,
         ActionType.WEAPON_6
       ];
-      
+
       const triggeredWeaponIndex = weaponActions.findIndex(act => isAction(act));
-      
+
       if (triggeredWeaponIndex >= 0) {
-          const weaponTypes = [
-            WeaponType.KNIFE,
-            WeaponType.PISTOL,
-            WeaponType.MACHINE_PISTOL,
-            WeaponType.CHAINSAW,
-            WeaponType.ASSAULT_RIFLE,
-            WeaponType.HEAVY_MG
-          ];
-          const selectedWeapon = weaponTypes[triggeredWeaponIndex];
-          setGameState((prev) => {
-            if (prev && prev.player.weapons.includes(selectedWeapon)) {
-              return { ...prev, player: { ...prev.player, currentWeapon: selectedWeapon } };
-            }
-            return prev;
-          });
+        const weaponTypes = [
+          WeaponType.KNIFE,
+          WeaponType.PISTOL,
+          WeaponType.MACHINE_PISTOL,
+          WeaponType.CHAINSAW,
+          WeaponType.ASSAULT_RIFLE,
+          WeaponType.HEAVY_MG
+        ];
+        const selectedWeapon = weaponTypes[triggeredWeaponIndex];
+        setGameState((prev) => {
+          if (prev && prev.player.weapons.includes(selectedWeapon)) {
+            return { ...prev, player: { ...prev.player, currentWeapon: selectedWeapon } };
+          }
+          return prev;
+        });
       }
     };
 
@@ -334,6 +342,19 @@ function App() {
     }
     if (inputSystem.isActionActive(ActionType.TURN_RIGHT)) {
       newState.player = rotatePlayer(newState.player, rotSpeed);
+    }
+
+    // Footstep Sound Logic
+    const isMoving = inputSystem.isActionActive(ActionType.MOVE_FORWARD) ||
+      inputSystem.isActionActive(ActionType.MOVE_BACKWARD) ||
+      inputSystem.isActionActive(ActionType.STRAFE_LEFT) ||
+      inputSystem.isActionActive(ActionType.STRAFE_RIGHT);
+
+    if (isMoving && !newState.player.isJumping) {
+      if (now - lastFootstepTimeRef.current > 400) { // Every 400ms
+        soundSystem.playFootstep();
+        lastFootstepTimeRef.current = now;
+      }
     }
 
     // Schießen
@@ -492,7 +513,7 @@ function App() {
     const height = canvas.height;
 
     const player = gameState.player;
-    
+
     // Berechne Jump-Offset für visuelle Darstellung
     let jumpOffset = 0;
     if (player.isJumping && player.jumpStartTime && player.jumpDuration) {
@@ -797,7 +818,10 @@ function App() {
         );
 
       case 'config':
-        return <ConfigMenu onBack={() => setGameMode(gameState ? 'paused' : 'menu')} />;
+        return <ConfigMenu
+          onBack={() => setGameMode(gameState ? 'paused' : 'menu')}
+          onGraphicsChanged={loadGameTextures}
+        />;
 
       case 'paused':
         return (
