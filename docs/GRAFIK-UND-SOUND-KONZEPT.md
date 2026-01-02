@@ -746,7 +746,7 @@ const QUALITY_PRESETS: QualityPresets = {
 | Schritt | Beschreibung | Aufwand | Dateien |
 |---------|--------------|---------|---------|
 | 1.1 | GraphicsSettings-System erstellen | 2-3h | `src/config/graphicsSettings.ts` (NEU) |
-| 1.2 | Textur-Funktionen parametrisieren | 4-6h | `src/textures.ts` |
+| 1.2 | Textur-Funktionen parametrisieren (2 Funktionen aktualisiert) | 4-6h | `src/textures.ts` |
 | 1.3 | Sound-Synthese verbessern | 3-4h | `src/soundSystem.ts` |
 | 1.4 | Qualitäts-Menü im UI | 2h | `src/App.tsx` |
 

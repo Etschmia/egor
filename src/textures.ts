@@ -48,138 +48,139 @@ export function loadTextures(): Promise<void[]> {
   return Promise.resolve([]);
 }
 
-function createZombieTexture(): HTMLCanvasElement {
+function createZombieTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // --- Detaillierter Zombie mit Gesichtszügen, Wunden und erkennbaren Händen ---
 
   // Beine (Hose)
   ctx.fillStyle = '#4B3A26'; // Dunkelbraun
-  ctx.fillRect(20, 52, 8, 12);
-  ctx.fillRect(36, 52, 8, 12);
+  ctx.fillRect(20 * scale, 52 * scale, 8 * scale, 12 * scale);
+  ctx.fillRect(36 * scale, 52 * scale, 8 * scale, 12 * scale);
   
   // Schuhe
   ctx.fillStyle = '#1A1A1A'; // Fast schwarz
-  ctx.fillRect(18, 60, 10, 4);
-  ctx.fillRect(34, 60, 10, 4);
+  ctx.fillRect(18 * scale, 60 * scale, 10 * scale, 4 * scale);
+  ctx.fillRect(34 * scale, 60 * scale, 10 * scale, 4 * scale);
 
   // Körper (zerrissenes Hemd) mit Farbverlauf
-  const shirtGradient = ctx.createLinearGradient(16, 28, 48, 52);
+  const shirtGradient = ctx.createLinearGradient(16 * scale, 28 * scale, 48 * scale, 52 * scale);
   shirtGradient.addColorStop(0, '#8B0000'); // Dunkelrot
   shirtGradient.addColorStop(0.5, '#A52A2A'); // Braun-Rot
   shirtGradient.addColorStop(1, '#5A0000'); // Sehr dunkelrot
   ctx.fillStyle = shirtGradient;
-  ctx.fillRect(16, 28, 32, 24);
+  ctx.fillRect(16 * scale, 28 * scale, 32 * scale, 24 * scale);
   
   // Zerrissene Fetzen
   ctx.fillStyle = '#5A0000';
-  ctx.fillRect(16, 50, 5, 5);
-  ctx.fillRect(25, 48, 8, 8);
-  ctx.fillRect(40, 50, 6, 6);
+  ctx.fillRect(16 * scale, 50 * scale, 5 * scale, 5 * scale);
+  ctx.fillRect(25 * scale, 48 * scale, 8 * scale, 8 * scale);
+  ctx.fillRect(40 * scale, 50 * scale, 6 * scale, 6 * scale);
   
   // Blutflecken auf der Kleidung
   ctx.fillStyle = 'rgba(90, 0, 0, 0.8)';
   ctx.beginPath();
-  ctx.arc(22, 35, 3, 0, Math.PI * 2);
+  ctx.arc(22 * scale, 35 * scale, 3 * scale, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(38, 42, 4, 0, Math.PI * 2);
+  ctx.arc(38 * scale, 42 * scale, 4 * scale, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(28, 48, 2, 0, Math.PI * 2);
+  ctx.arc(28 * scale, 48 * scale, 2 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   // Arme mit mehreren Grüntönen
-  const armGradient = ctx.createLinearGradient(0, 28, 0, 44);
+  const armGradient = ctx.createLinearGradient(0, 28 * scale, 0, 44 * scale);
   armGradient.addColorStop(0, '#2E8B57'); // Seegrün
   armGradient.addColorStop(0.5, '#3CB371'); // Mittelseegrün
   armGradient.addColorStop(1, '#90EE90'); // Hellgrün
   ctx.fillStyle = armGradient;
-  ctx.fillRect(8, 28, 8, 16);
-  ctx.fillRect(48, 28, 8, 16);
+  ctx.fillRect(8 * scale, 28 * scale, 8 * scale, 16 * scale);
+  ctx.fillRect(48 * scale, 28 * scale, 8 * scale, 16 * scale);
 
   // Linke Hand mit 5 erkennbaren Fingern
   ctx.fillStyle = '#3CB371';
-  ctx.fillRect(6, 44, 10, 6); // Handfläche
+  ctx.fillRect(6 * scale, 44 * scale, 10 * scale, 6 * scale); // Handfläche
   // Finger
   ctx.fillStyle = '#2E8B57';
-  ctx.fillRect(6, 50, 1.5, 4);   // Daumen
-  ctx.fillRect(8, 50, 1.5, 5);   // Zeigefinger
-  ctx.fillRect(10, 50, 1.5, 5);  // Mittelfinger
-  ctx.fillRect(12, 50, 1.5, 4);  // Ringfinger
-  ctx.fillRect(14, 50, 1.5, 3);  // Kleiner Finger
+  ctx.fillRect(6 * scale, 50 * scale, 1.5 * scale, 4 * scale);   // Daumen
+  ctx.fillRect(8 * scale, 50 * scale, 1.5 * scale, 5 * scale);   // Zeigefinger
+  ctx.fillRect(10 * scale, 50 * scale, 1.5 * scale, 5 * scale);  // Mittelfinger
+  ctx.fillRect(12 * scale, 50 * scale, 1.5 * scale, 4 * scale);  // Ringfinger
+  ctx.fillRect(14 * scale, 50 * scale, 1.5 * scale, 3 * scale);  // Kleiner Finger
 
   // Rechte Hand mit 5 erkennbaren Fingern
   ctx.fillStyle = '#3CB371';
-  ctx.fillRect(48, 44, 10, 6); // Handfläche
+  ctx.fillRect(48 * scale, 44 * scale, 10 * scale, 6 * scale); // Handfläche
   // Finger
   ctx.fillStyle = '#2E8B57';
-  ctx.fillRect(48, 50, 1.5, 4);  // Daumen
-  ctx.fillRect(50, 50, 1.5, 5);  // Zeigefinger
-  ctx.fillRect(52, 50, 1.5, 5);  // Mittelfinger
-  ctx.fillRect(54, 50, 1.5, 4);  // Ringfinger
-  ctx.fillRect(56, 50, 1.5, 3);  // Kleiner Finger
+  ctx.fillRect(48 * scale, 50 * scale, 1.5 * scale, 4 * scale);  // Daumen
+  ctx.fillRect(50 * scale, 50 * scale, 1.5 * scale, 5 * scale);  // Zeigefinger
+  ctx.fillRect(52 * scale, 50 * scale, 1.5 * scale, 5 * scale);  // Mittelfinger
+  ctx.fillRect(54 * scale, 50 * scale, 1.5 * scale, 4 * scale);  // Ringfinger
+  ctx.fillRect(56 * scale, 50 * scale, 1.5 * scale, 3 * scale);  // Kleiner Finger
 
   // Kopf mit mehreren Grüntönen
-  const headGradient = ctx.createRadialGradient(32, 16, 2, 32, 16, 10);
+  const headGradient = ctx.createRadialGradient(32 * scale, 16 * scale, 2 * scale, 32 * scale, 16 * scale, 10 * scale);
   headGradient.addColorStop(0, '#90EE90'); // Hellgrün
   headGradient.addColorStop(0.5, '#3CB371'); // Mittelseegrün
   headGradient.addColorStop(1, '#2E8B57'); // Seegrün
   ctx.fillStyle = headGradient;
-  ctx.fillRect(24, 8, 16, 16);
+  ctx.fillRect(24 * scale, 8 * scale, 16 * scale, 16 * scale);
   
   // Wunden und Verfärbungen
   ctx.fillStyle = '#5A0000';
-  ctx.fillRect(35, 9, 4, 6);  // Große Wunde rechts
-  ctx.fillRect(26, 11, 3, 3); // Kleine Wunde links
+  ctx.fillRect(35 * scale, 9 * scale, 4 * scale, 6 * scale);  // Große Wunde rechts
+  ctx.fillRect(26 * scale, 11 * scale, 3 * scale, 3 * scale); // Kleine Wunde links
   ctx.fillStyle = 'rgba(139, 0, 0, 0.5)';
-  ctx.fillRect(30, 22, 4, 2); // Verfärbung am Kinn
+  ctx.fillRect(30 * scale, 22 * scale, 4 * scale, 2 * scale); // Verfärbung am Kinn
 
   // Nase
   ctx.fillStyle = '#2E8B57';
-  ctx.fillRect(31, 16, 2, 3);
+  ctx.fillRect(31 * scale, 16 * scale, 2 * scale, 3 * scale);
 
   // Leuchtende gelbe Augen mit radialen Gradienten
-  const eyeGradient = ctx.createRadialGradient(28, 14, 0.5, 28, 14, 3);
+  const eyeGradient = ctx.createRadialGradient(28 * scale, 14 * scale, 0.5 * scale, 28 * scale, 14 * scale, 3 * scale);
   eyeGradient.addColorStop(0, '#FFFF00'); // Gelb
   eyeGradient.addColorStop(0.6, '#FFD700'); // Gold
   eyeGradient.addColorStop(1, '#FF8C00'); // Dunkelorange
   ctx.fillStyle = eyeGradient;
   ctx.beginPath();
-  ctx.arc(28, 14, 3, 0, Math.PI * 2);
+  ctx.arc(28 * scale, 14 * scale, 3 * scale, 0, Math.PI * 2);
   ctx.fill();
   
-  const eyeGradient2 = ctx.createRadialGradient(36, 14, 0.5, 36, 14, 3);
+  const eyeGradient2 = ctx.createRadialGradient(36 * scale, 14 * scale, 0.5 * scale, 36 * scale, 14 * scale, 3 * scale);
   eyeGradient2.addColorStop(0, '#FFFF00');
   eyeGradient2.addColorStop(0.6, '#FFD700');
   eyeGradient2.addColorStop(1, '#FF8C00');
   ctx.fillStyle = eyeGradient2;
   ctx.beginPath();
-  ctx.arc(36, 14, 3, 0, Math.PI * 2);
+  ctx.arc(36 * scale, 14 * scale, 3 * scale, 0, Math.PI * 2);
   ctx.fill();
   
   // Pupillen
   ctx.fillStyle = '#000000';
   ctx.beginPath();
-  ctx.arc(28, 14, 1, 0, Math.PI * 2);
+  ctx.arc(28 * scale, 14 * scale, 1 * scale, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(36, 14, 1, 0, Math.PI * 2);
+  ctx.arc(36 * scale, 14 * scale, 1 * scale, 0, Math.PI * 2);
   ctx.fill();
 
   // Mund mit sichtbaren Zähnen
   ctx.fillStyle = '#000000';
-  ctx.fillRect(28, 20, 8, 3); // Mund geöffnet
+  ctx.fillRect(28 * scale, 20 * scale, 8 * scale, 3 * scale); // Mund geöffnet
   
   // Zähne
   ctx.fillStyle = '#E0E0E0';
-  ctx.fillRect(28, 20, 1.5, 2);  // Zahn 1
-  ctx.fillRect(30, 20, 1.5, 2);  // Zahn 2
-  ctx.fillRect(32, 20, 1.5, 2);  // Zahn 3
-  ctx.fillRect(34, 20, 1.5, 2);  // Zahn 4
+  ctx.fillRect(28 * scale, 20 * scale, 1.5 * scale, 2 * scale);  // Zahn 1
+  ctx.fillRect(30 * scale, 20 * scale, 1.5 * scale, 2 * scale);  // Zahn 2
+  ctx.fillRect(32 * scale, 20 * scale, 1.5 * scale, 2 * scale);  // Zahn 3
+  ctx.fillRect(34 * scale, 20 * scale, 1.5 * scale, 2 * scale);  // Zahn 4
 
   return canvas;
 }
