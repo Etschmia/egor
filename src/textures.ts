@@ -594,39 +594,40 @@ function createVaseTexture(size: number = 64): HTMLCanvasElement {
   return canvas;
 }
 
-function createCrateTexture(): HTMLCanvasElement {
+function createCrateTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // Braunes Quadrat mit Holzmaserung
   ctx.fillStyle = '#8B4513';
-  ctx.fillRect(8, 8, 48, 48);
+  scaledRect(ctx, 8, 8, 48, 48, scale);
 
   // Holzbretter
   ctx.fillStyle = '#654321';
   for (let x = 8; x < 56; x += 12) {
-    ctx.fillRect(x, 8, 10, 48);
+    scaledRect(ctx, x, 8, 10, 48, scale);
   }
 
   // Holzmaserung - horizontale Linien
   ctx.fillStyle = '#5D4037';
   for (let y = 12; y < 56; y += 6) {
-    ctx.fillRect(8, y, 48, 1);
+    scaledRect(ctx, 8, y, 48, 1, scale);
   }
 
   // Metallbeschläge an den Ecken
   ctx.fillStyle = '#2A2A2A';
-  ctx.fillRect(8, 8, 6, 6);
-  ctx.fillRect(50, 8, 6, 6);
-  ctx.fillRect(8, 50, 6, 6);
-  ctx.fillRect(50, 50, 6, 6);
+  scaledRect(ctx, 8, 8, 6, 6, scale);
+  scaledRect(ctx, 50, 8, 6, 6, scale);
+  scaledRect(ctx, 8, 50, 6, 6, scale);
+  scaledRect(ctx, 50, 50, 6, 6, scale);
 
   // Schatten für 3D-Effekt
   ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-  ctx.fillRect(8, 54, 48, 2);
-  ctx.fillRect(54, 8, 2, 48);
+  scaledRect(ctx, 8, 54, 48, 2, scale);
+  scaledRect(ctx, 54, 8, 2, 48, scale);
 
   return canvas;
 }
@@ -662,66 +663,68 @@ function createBenchTexture(size: number = 64): HTMLCanvasElement {
   return canvas;
 }
 
-function createTableTexture(): HTMLCanvasElement {
+function createTableTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // Tischplatte
-  const gradient = ctx.createRadialGradient(32, 24, 5, 32, 24, 28);
+  const gradient = ctx.createRadialGradient(32 * scale, 24 * scale, 5 * scale, 32 * scale, 24 * scale, 28 * scale);
   gradient.addColorStop(0, '#A0522D');
   gradient.addColorStop(0.7, '#8B4513');
   gradient.addColorStop(1, '#654321');
 
   ctx.fillStyle = gradient;
-  ctx.fillRect(8, 16, 48, 16);
+  scaledRect(ctx, 8, 16, 48, 16, scale);
 
   // Holzmaserung
   ctx.fillStyle = '#654321';
   for (let y = 18; y < 32; y += 4) {
-    ctx.fillRect(8, y, 48, 1);
+    scaledRect(ctx, 8, y, 48, 1, scale);
   }
 
   // Tischbeine
   ctx.fillStyle = '#654321';
-  ctx.fillRect(12, 32, 6, 20);
-  ctx.fillRect(46, 32, 6, 20);
+  scaledRect(ctx, 12, 32, 6, 20, scale);
+  scaledRect(ctx, 46, 32, 6, 20, scale);
 
   // Schatten
   ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-  ctx.fillRect(8, 30, 48, 2);
+  scaledRect(ctx, 8, 30, 48, 2, scale);
 
   return canvas;
 }
 
-function createChairTexture(): HTMLCanvasElement {
+function createChairTexture(size: number = 64): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 64;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 64;
 
   // Rückenlehne
   ctx.fillStyle = '#8B4513';
-  ctx.fillRect(20, 8, 24, 20);
+  scaledRect(ctx, 20, 8, 24, 20, scale);
 
   // Sitzfläche
-  const gradient = ctx.createLinearGradient(0, 28, 0, 40);
+  const gradient = ctx.createLinearGradient(0, 28 * scale, 0, 40 * scale);
   gradient.addColorStop(0, '#A0522D');
   gradient.addColorStop(1, '#8B4513');
 
   ctx.fillStyle = gradient;
-  ctx.fillRect(16, 28, 32, 12);
+  scaledRect(ctx, 16, 28, 32, 12, scale);
 
   // Beine
   ctx.fillStyle = '#654321';
-  ctx.fillRect(18, 40, 4, 16);
-  ctx.fillRect(42, 40, 4, 16);
+  scaledRect(ctx, 18, 40, 4, 16, scale);
+  scaledRect(ctx, 42, 40, 4, 16, scale);
 
   // Details auf Rückenlehne
   ctx.fillStyle = '#654321';
-  ctx.fillRect(24, 12, 2, 12);
-  ctx.fillRect(38, 12, 2, 12);
+  scaledRect(ctx, 24, 12, 2, 12, scale);
+  scaledRect(ctx, 38, 12, 2, 12, scale);
 
   return canvas;
 }
@@ -1328,133 +1331,134 @@ function createHealthSmallTexture(size: number = 64): HTMLCanvasElement {
   return canvas;
 }
 
-function createHealthLargeTexture(): HTMLCanvasElement {
+function createHealthLargeTexture(size: number = 32): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 32;
 
   // --- Verbessertes großes Medi-Pack mit 3D-Effekt und visuellen Größenunterschieden ---
 
   // Dunkler Rand für bessere Definition (dicker als beim kleinen Pack)
   ctx.fillStyle = '#5A0000'; // Sehr dunkelrot
-  ctx.fillRect(0, 0, 32, 32);
+  scaledRect(ctx, 0, 0, 32, 32, scale);
 
   // Zweiter Rand für mehr Tiefe
   ctx.fillStyle = '#8B0000'; // Dunkelrot
-  ctx.fillRect(1, 1, 30, 30);
+  scaledRect(ctx, 1, 1, 30, 30, scale);
 
   // 3D-Box-Effekt mit Schattierungen - Hauptkörper
-  const boxGradient = ctx.createLinearGradient(2, 2, 30, 30);
+  const boxGradient = ctx.createLinearGradient(2 * scale, 2 * scale, 30 * scale, 30 * scale);
   boxGradient.addColorStop(0, '#FF4444'); // Hellrot (Highlight)
   boxGradient.addColorStop(0.3, '#FF0000'); // Rot
   boxGradient.addColorStop(0.7, '#CC0000'); // Dunkelrot
   boxGradient.addColorStop(1, '#8B0000'); // Sehr dunkelrot (Schatten)
   ctx.fillStyle = boxGradient;
-  ctx.fillRect(2, 2, 28, 28);
+  scaledRect(ctx, 2, 2, 28, 28, scale);
 
   // Stärkere Schatten für 3D-Effekt (unten und rechts)
   ctx.fillStyle = '#5A0000';
-  ctx.fillRect(2, 29, 28, 1); // Unten
-  ctx.fillRect(29, 2, 1, 28); // Rechts
-  ctx.fillRect(3, 28, 26, 1); // Zusätzlicher Schatten unten
-  ctx.fillRect(28, 3, 1, 26); // Zusätzlicher Schatten rechts
+  scaledRect(ctx, 2, 29, 28, 1, scale); // Unten
+  scaledRect(ctx, 29, 2, 1, 28, scale); // Rechts
+  scaledRect(ctx, 3, 28, 26, 1, scale); // Zusätzlicher Schatten unten
+  scaledRect(ctx, 28, 3, 1, 26, scale); // Zusätzlicher Schatten rechts
 
   // Noch mehr Schattierung für Tiefe
   ctx.fillStyle = 'rgba(90, 0, 0, 0.6)';
-  ctx.fillRect(4, 27, 24, 1);
-  ctx.fillRect(27, 4, 1, 24);
+  scaledRect(ctx, 4, 27, 24, 1, scale);
+  scaledRect(ctx, 27, 4, 1, 24, scale);
 
   // Weiße Highlights für Plastik-Glanz-Effekt (oben und links)
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(2, 2, 26, 2); // Oben (dicker)
-  ctx.fillRect(2, 2, 2, 26); // Links (dicker)
+  scaledRect(ctx, 2, 2, 26, 2, scale); // Oben (dicker)
+  scaledRect(ctx, 2, 2, 2, 26, scale); // Links (dicker)
 
   // Zusätzliche Highlights für mehr Glanz
   ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-  ctx.fillRect(4, 4, 22, 1);
-  ctx.fillRect(4, 4, 1, 22);
+  scaledRect(ctx, 4, 4, 22, 1, scale);
+  scaledRect(ctx, 4, 4, 1, 22, scale);
 
   // Sekundäre Highlights für starken Plastik-Effekt
   ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.fillRect(5, 5, 20, 1);
-  ctx.fillRect(5, 5, 1, 20);
+  scaledRect(ctx, 5, 5, 20, 1, scale);
+  scaledRect(ctx, 5, 5, 1, 20, scale);
 
   // Deutliches weißes Kreuz (dickere Balken als beim kleinen Pack)
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(11, 5, 10, 22);  // Vertikaler Balken (dicker)
-  ctx.fillRect(5, 11, 22, 10);  // Horizontaler Balken (dicker)
+  scaledRect(ctx, 11, 5, 10, 22, scale);  // Vertikaler Balken (dicker)
+  scaledRect(ctx, 5, 11, 22, 10, scale);  // Horizontaler Balken (dicker)
 
   // Schatten am Kreuz für 3D-Effekt
   ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-  ctx.fillRect(11, 26, 10, 1); // Schatten unten am vertikalen Balken
-  ctx.fillRect(26, 11, 1, 10); // Schatten rechts am horizontalen Balken
-  ctx.fillRect(12, 25, 8, 1); // Zusätzlicher Schatten
-  ctx.fillRect(25, 12, 1, 8); // Zusätzlicher Schatten
+  scaledRect(ctx, 11, 26, 10, 1, scale); // Schatten unten am vertikalen Balken
+  scaledRect(ctx, 26, 11, 1, 10, scale); // Schatten rechts am horizontalen Balken
+  scaledRect(ctx, 12, 25, 8, 1, scale); // Zusätzlicher Schatten
+  scaledRect(ctx, 25, 12, 1, 8, scale); // Zusätzlicher Schatten
 
   // Starke Highlights am Kreuz für Plastik-Effekt
   ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-  ctx.fillRect(11, 5, 10, 2); // Highlight oben am vertikalen Balken (dicker)
-  ctx.fillRect(5, 11, 2, 10); // Highlight links am horizontalen Balken (dicker)
+  scaledRect(ctx, 11, 5, 10, 2, scale); // Highlight oben am vertikalen Balken (dicker)
+  scaledRect(ctx, 5, 11, 2, 10, scale); // Highlight links am horizontalen Balken (dicker)
 
   // Sekundäre Highlights am Kreuz
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-  ctx.fillRect(12, 7, 8, 1);
-  ctx.fillRect(7, 12, 1, 8);
+  scaledRect(ctx, 12, 7, 8, 1, scale);
+  scaledRect(ctx, 7, 12, 1, 8, scale);
 
   // Zusätzliche Details für "großes" Pack - Metallverschlüsse
   ctx.fillStyle = '#C0C0C0'; // Silber
-  ctx.fillRect(6, 6, 2, 2); // Oben links
-  ctx.fillRect(24, 6, 2, 2); // Oben rechts
-  ctx.fillRect(6, 24, 2, 2); // Unten links
-  ctx.fillRect(24, 24, 2, 2); // Unten rechts
+  scaledRect(ctx, 6, 6, 2, 2, scale); // Oben links
+  scaledRect(ctx, 24, 6, 2, 2, scale); // Oben rechts
+  scaledRect(ctx, 6, 24, 2, 2, scale); // Unten links
+  scaledRect(ctx, 24, 24, 2, 2, scale); // Unten rechts
 
   // Glanzpunkte auf Metallverschlüssen
   ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(6, 6, 1, 1);
-  ctx.fillRect(24, 6, 1, 1);
-  ctx.fillRect(6, 24, 1, 1);
-  ctx.fillRect(24, 24, 1, 1);
+  scaledRect(ctx, 6, 6, 1, 1, scale);
+  scaledRect(ctx, 24, 6, 1, 1, scale);
+  scaledRect(ctx, 6, 24, 1, 1, scale);
+  scaledRect(ctx, 24, 24, 1, 1, scale);
 
   return canvas;
 }
 
-function createTreasureTexture(): HTMLCanvasElement {
+function createTreasureTexture(size: number = 32): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = 32;
-  canvas.height = 32;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
+  const scale = size / 32;
 
   // --- Detaillierter Kelch mit organischen Kurven und 3D-Effekt ---
 
   // Basis des Kelchs mit goldenem Farbverlauf
-  const baseGradient = ctx.createLinearGradient(10, 26, 22, 30);
+  const baseGradient = ctx.createLinearGradient(10 * scale, 26 * scale, 22 * scale, 30 * scale);
   baseGradient.addColorStop(0, '#FFD700'); // Gold
   baseGradient.addColorStop(0.5, '#FFA500'); // Orange
   baseGradient.addColorStop(1, '#B8860B'); // Dunkelgold
   ctx.fillStyle = baseGradient;
 
   ctx.beginPath();
-  ctx.moveTo(10, 28);
-  ctx.bezierCurveTo(10, 30, 22, 30, 22, 28); // Untere Kurve
-  ctx.lineTo(20, 24);
-  ctx.lineTo(12, 24);
+  ctx.moveTo(10 * scale, 28 * scale);
+  ctx.bezierCurveTo(10 * scale, 30 * scale, 22 * scale, 30 * scale, 22 * scale, 28 * scale); // Untere Kurve
+  ctx.lineTo(20 * scale, 24 * scale);
+  ctx.lineTo(12 * scale, 24 * scale);
   ctx.closePath();
   ctx.fill();
 
   // Dunkler Rand für 3D-Effekt an der Basis
   ctx.strokeStyle = '#6B4A0A';
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1 * scale;
   ctx.stroke();
 
   // Schatten unter der Basis
   ctx.fillStyle = 'rgba(107, 74, 10, 0.5)';
-  ctx.beginPath();
-  ctx.ellipse(16, 30, 6, 1.5, 0, 0, Math.PI * 2);
+  scaledEllipse(ctx, 16, 30, 6, 1.5, 0, 0, Math.PI * 2, scale);
   ctx.fill();
 
   // Stiel mit Farbverlauf und organischer Form
-  const stemGradient = ctx.createLinearGradient(14, 24, 18, 12);
+  const stemGradient = ctx.createLinearGradient(14 * scale, 24 * scale, 18 * scale, 12 * scale);
   stemGradient.addColorStop(0, '#B8860B'); // Dunkelgold
   stemGradient.addColorStop(0.3, '#FFA500'); // Orange
   stemGradient.addColorStop(0.7, '#FFD700'); // Gold
@@ -1462,37 +1466,36 @@ function createTreasureTexture(): HTMLCanvasElement {
   ctx.fillStyle = stemGradient;
 
   ctx.beginPath();
-  ctx.moveTo(14, 24);
-  ctx.bezierCurveTo(13, 18, 13, 16, 14, 12); // Linke Seite mit Kurve
-  ctx.lineTo(18, 12);
-  ctx.bezierCurveTo(19, 16, 19, 18, 18, 24); // Rechte Seite mit Kurve
+  ctx.moveTo(14 * scale, 24 * scale);
+  ctx.bezierCurveTo(13 * scale, 18 * scale, 13 * scale, 16 * scale, 14 * scale, 12 * scale); // Linke Seite mit Kurve
+  ctx.lineTo(18 * scale, 12 * scale);
+  ctx.bezierCurveTo(19 * scale, 16 * scale, 19 * scale, 18 * scale, 18 * scale, 24 * scale); // Rechte Seite mit Kurve
   ctx.closePath();
   ctx.fill();
 
   // Dunkler Rand am Stiel
   ctx.strokeStyle = '#6B4A0A';
-  ctx.lineWidth = 0.8;
+  ctx.lineWidth = 0.8 * scale;
   ctx.stroke();
 
   // Highlight auf dem Stiel (links)
   ctx.fillStyle = '#FFFFE0';
-  ctx.fillRect(14.5, 14, 1, 8);
+  scaledRect(ctx, 14.5, 14, 1, 8, scale);
 
   // Knauf am Stiel (dekoratives Element)
-  const knobGradient = ctx.createRadialGradient(16, 18, 1, 16, 18, 3);
+  const knobGradient = ctx.createRadialGradient(16 * scale, 18 * scale, 1 * scale, 16 * scale, 18 * scale, 3 * scale);
   knobGradient.addColorStop(0, '#FFFFE0'); // Helles Highlight
   knobGradient.addColorStop(0.5, '#FFD700'); // Gold
   knobGradient.addColorStop(1, '#B8860B'); // Dunkelgold
   ctx.fillStyle = knobGradient;
-  ctx.beginPath();
-  ctx.ellipse(16, 18, 3, 2, 0, 0, Math.PI * 2);
+  scaledEllipse(ctx, 16, 18, 3, 2, 0, 0, Math.PI * 2, scale);
   ctx.fill();
   ctx.strokeStyle = '#6B4A0A';
-  ctx.lineWidth = 0.5;
+  ctx.lineWidth = 0.5 * scale;
   ctx.stroke();
 
   // Oberteil des Kelchs (Schale) mit organischen Kurven
-  const cupGradient = ctx.createRadialGradient(16, 8, 2, 16, 8, 12);
+  const cupGradient = ctx.createRadialGradient(16 * scale, 8 * scale, 2 * scale, 16 * scale, 8 * scale, 12 * scale);
   cupGradient.addColorStop(0, '#FFFFE0'); // Helles Zentrum (Highlight)
   cupGradient.addColorStop(0.3, '#FFD700'); // Gold
   cupGradient.addColorStop(0.6, '#FFA500'); // Orange
@@ -1500,88 +1503,81 @@ function createTreasureTexture(): HTMLCanvasElement {
   ctx.fillStyle = cupGradient;
 
   ctx.beginPath();
-  ctx.moveTo(8, 12);
+  ctx.moveTo(8 * scale, 12 * scale);
   // Linke Seite mit eleganter Kurve
-  ctx.bezierCurveTo(6, 10, 5, 6, 8, 4);
-  ctx.bezierCurveTo(10, 2, 12, 2, 16, 3);
+  ctx.bezierCurveTo(6 * scale, 10 * scale, 5 * scale, 6 * scale, 8 * scale, 4 * scale);
+  ctx.bezierCurveTo(10 * scale, 2 * scale, 12 * scale, 2 * scale, 16 * scale, 3 * scale);
   // Rechte Seite mit eleganter Kurve
-  ctx.bezierCurveTo(20, 2, 22, 2, 24, 4);
-  ctx.bezierCurveTo(27, 6, 26, 10, 24, 12);
+  ctx.bezierCurveTo(20 * scale, 2 * scale, 22 * scale, 2 * scale, 24 * scale, 4 * scale);
+  ctx.bezierCurveTo(27 * scale, 6 * scale, 26 * scale, 10 * scale, 24 * scale, 12 * scale);
   ctx.closePath();
   ctx.fill();
 
   // Dunkler Rand für 3D-Effekt
   ctx.strokeStyle = '#6B4A0A';
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 1 * scale;
   ctx.stroke();
 
   // Innere Schattierung für Tiefe
   ctx.fillStyle = 'rgba(184, 134, 11, 0.4)';
   ctx.beginPath();
-  ctx.moveTo(10, 12);
-  ctx.bezierCurveTo(10, 10, 12, 8, 16, 8);
-  ctx.bezierCurveTo(20, 8, 22, 10, 22, 12);
+  ctx.moveTo(10 * scale, 12 * scale);
+  ctx.bezierCurveTo(10 * scale, 10 * scale, 12 * scale, 8 * scale, 16 * scale, 8 * scale);
+  ctx.bezierCurveTo(20 * scale, 8 * scale, 22 * scale, 10 * scale, 22 * scale, 12 * scale);
   ctx.closePath();
   ctx.fill();
 
   // Glanzlichter auf der Schale (mehrere für metallischen Effekt)
   ctx.fillStyle = '#FFFFE0';
   // Hauptglanzlicht links
-  ctx.beginPath();
-  ctx.ellipse(11, 6, 2, 3, -0.3, 0, Math.PI * 2);
+  scaledEllipse(ctx, 11, 6, 2, 3, -0.3, 0, Math.PI * 2, scale);
   ctx.fill();
 
   // Kleineres Glanzlicht rechts
-  ctx.beginPath();
-  ctx.ellipse(20, 7, 1.5, 2, 0.3, 0, Math.PI * 2);
+  scaledEllipse(ctx, 20, 7, 1.5, 2, 0.3, 0, Math.PI * 2, scale);
   ctx.fill();
 
   // Sehr helles Highlight (Spitzlicht)
   ctx.fillStyle = '#FFFFFF';
-  ctx.beginPath();
-  ctx.arc(10, 5, 1, 0, Math.PI * 2);
+  scaledArc(ctx, 10, 5, 1, scale);
   ctx.fill();
 
   // Edelstein (roter Rubin) auf dem Knauf
-  const gemGradient = ctx.createRadialGradient(16, 18, 0.5, 16, 18, 2);
+  const gemGradient = ctx.createRadialGradient(16 * scale, 18 * scale, 0.5 * scale, 16 * scale, 18 * scale, 2 * scale);
   gemGradient.addColorStop(0, '#FF6B6B'); // Helles Rot (Glanz)
   gemGradient.addColorStop(0.5, '#FF0000'); // Rot
   gemGradient.addColorStop(1, '#8B0000'); // Dunkelrot
   ctx.fillStyle = gemGradient;
-  ctx.beginPath();
-  ctx.arc(16, 18, 2, 0, Math.PI * 2);
+  scaledArc(ctx, 16, 18, 2, scale);
   ctx.fill();
 
   // Dunkler Rand am Edelstein
   ctx.strokeStyle = '#5A0000';
-  ctx.lineWidth = 0.5;
+  ctx.lineWidth = 0.5 * scale;
   ctx.stroke();
 
   // Glanzpunkt auf dem Edelstein
   ctx.fillStyle = '#FFB6C1';
-  ctx.beginPath();
-  ctx.arc(15.5, 17.5, 0.8, 0, Math.PI * 2);
+  scaledArc(ctx, 15.5, 17.5, 0.8, scale);
   ctx.fill();
 
   // Zusätzlicher blauer Edelstein auf der Schale (Akzent)
-  const blueGemGradient = ctx.createRadialGradient(16, 6, 0.3, 16, 6, 1.5);
+  const blueGemGradient = ctx.createRadialGradient(16 * scale, 6 * scale, 0.3 * scale, 16 * scale, 6 * scale, 1.5 * scale);
   blueGemGradient.addColorStop(0, '#87CEEB'); // Hellblau (Glanz)
   blueGemGradient.addColorStop(0.5, '#0000FF'); // Blau
   blueGemGradient.addColorStop(1, '#00008B'); // Dunkelblau
   ctx.fillStyle = blueGemGradient;
-  ctx.beginPath();
-  ctx.arc(16, 6, 1.5, 0, Math.PI * 2);
+  scaledArc(ctx, 16, 6, 1.5, scale);
   ctx.fill();
 
   // Dunkler Rand am blauen Edelstein
   ctx.strokeStyle = '#000080';
-  ctx.lineWidth = 0.4;
+  ctx.lineWidth = 0.4 * scale;
   ctx.stroke();
 
   // Glanzpunkt auf dem blauen Edelstein
   ctx.fillStyle = '#ADD8E6';
-  ctx.beginPath();
-  ctx.arc(15.7, 5.7, 0.5, 0, Math.PI * 2);
+  scaledArc(ctx, 15.7, 5.7, 0.5, scale);
   ctx.fill();
 
   return canvas;
