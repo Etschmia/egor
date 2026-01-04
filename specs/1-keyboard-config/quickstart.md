@@ -31,3 +31,6 @@ if (inputSystem.isActionActive(ActionType.MOVE_FORWARD)) { ... }
 2. **Verification**: Switch to "Classic", verify Spacebar opens doors and Ctrl shoots.
 
 
+
+
+

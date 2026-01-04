@@ -65,6 +65,19 @@ export class InputSystem {
   private initialized: boolean = false;
 
   private constructor() {
+    // Detect Mac OS and pre-assign Jump to Option (Alt) key
+    const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+    if (isMac) {
+      const altKey = 'Alt';
+      // Mute the defaults directly so it applies to initialization and resets
+      if (!DEFAULT_MODERN_PROFILE.bindings[ActionType.JUMP].includes(altKey)) {
+        DEFAULT_MODERN_PROFILE.bindings[ActionType.JUMP].push(altKey);
+      }
+      if (!DEFAULT_CLASSIC_PROFILE.bindings[ActionType.JUMP].includes(altKey)) {
+        DEFAULT_CLASSIC_PROFILE.bindings[ActionType.JUMP].push(altKey);
+      }
+    }
+
     this.profiles = {
       [InputProfileType.MODERN]: DEFAULT_MODERN_PROFILE,
       [InputProfileType.CLASSIC]: DEFAULT_CLASSIC_PROFILE,
@@ -144,10 +157,10 @@ export class InputSystem {
         return true;
       }
     }
-    
+
     // Special handling for classic strafing with modifiers if desired, 
     // but sticking to simple keys for T009 as per spec (Action -> Key[]).
-    
+
     return false;
   }
 
@@ -170,7 +183,7 @@ export class InputSystem {
   public remapKey(action: ActionType, key: string): void {
     // Ensure we are editing the custom profile
     const customProfile = this.profiles[InputProfileType.CUSTOM];
-    
+
     // 1. Remove key from any other action in Custom profile (Auto-overwrite)
     for (const act of Object.values(ActionType)) {
       const bindings = customProfile.bindings[act];
@@ -188,7 +201,7 @@ export class InputSystem {
     // If we want multiple keys, we might need a UI for primary/secondary.
     // For now, let's just add it if not there, maybe clearing others? 
     // Spec says "Remap" implies setting the binding.
-    customProfile.bindings[action] = [key]; 
+    customProfile.bindings[action] = [key];
 
     this.settings.customBindings = customProfile.bindings;
     this.saveSettings();
@@ -207,10 +220,10 @@ export class InputSystem {
         const parsed = JSON.parse(saved) as InputSettings;
         // Merge saved settings
         this.settings.activeProfileId = parsed.activeProfileId || InputProfileType.MODERN;
-        
+
         if (parsed.customBindings) {
           this.settings.customBindings = parsed.customBindings;
-          this.profiles[InputProfileType.CUSTOM].bindings = { 
+          this.profiles[InputProfileType.CUSTOM].bindings = {
             ...DEFAULT_MODERN_PROFILE.bindings, // Start with base
             ...parsed.customBindings // Apply overrides
           };
