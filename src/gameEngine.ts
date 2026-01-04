@@ -14,22 +14,22 @@ import { loadMapHistory, saveMapHistory, selectMapVariant, recordMapPlay, getMap
 export const ENEMY_SAFETY_RULES = {
   /** Mindestdistanz in Sekunden: Jeder Gegner muss mindestens diese Zeit vom Spieler-Startpunkt entfernt sein */
   MINIMUM_DISTANCE_SECONDS: 3,
-  
+
   /** Bewegungsverzögerung in Millisekunden: Gegner dürfen sich erst nach dieser Zeit bewegen */
   MOVEMENT_DELAY_MS: 2000,
-  
+
   /** Bewegungsverzögerung in Sekunden (für Berechnungen) */
   MOVEMENT_DELAY_SECONDS: 2,
-  
+
   /** Geschwindigkeits-Ramp-up-Zeit in Millisekunden: Zeit, die Gegner benötigen, um von langsamer zu normaler Geschwindigkeit zu beschleunigen */
   SPEED_RAMP_UP_MS: 4000,
-  
+
   /** Anfangsgeschwindigkeitsmultiplikator: Gegner starten mit diesem Multiplikator ihrer normalen Geschwindigkeit */
   INITIAL_SPEED_MULTIPLIER: 0.05,
-  
+
   /** Türöffnungszeit in Sekunden: Geschätzte Zeit, die ein Gegner benötigt, um eine Tür zu öffnen */
   DOOR_OPENING_TIME_SECONDS: 1,
-  
+
   /** Fallback-Mindestdistanz in Sekunden: Wenn Level zu klein ist, wird diese als Minimum verwendet */
   FALLBACK_MINIMUM_DISTANCE_SECONDS: 2
 } as const;
@@ -229,32 +229,32 @@ export function getEnemySpeedMultiplier(
   if (levelStartTime <= 0) {
     return 1.0; // Fallback: Volle Geschwindigkeit wenn levelStartTime nicht gesetzt ist
   }
-  
+
   const elapsed = currentTime - levelStartTime;
-  
+
   // Vor der Bewegungsverzögerung: Keine Bewegung (Multiplikator 0)
   if (elapsed < ENEMY_SAFETY_RULES.MOVEMENT_DELAY_MS) {
     return 0;
   }
-  
+
   // Nach der Bewegungsverzögerung: Berechne Ramp-up
   const timeSinceMovementStart = elapsed - ENEMY_SAFETY_RULES.MOVEMENT_DELAY_MS;
-  
+
   // Wenn Ramp-up-Zeit abgelaufen: Volle Geschwindigkeit
   if (timeSinceMovementStart >= ENEMY_SAFETY_RULES.SPEED_RAMP_UP_MS) {
     return 1.0;
   }
-  
+
   // Während der Ramp-up-Zeit: Interpoliere zwischen INITIAL_SPEED_MULTIPLIER und 1.0
   const rampProgress = timeSinceMovementStart / ENEMY_SAFETY_RULES.SPEED_RAMP_UP_MS;
   const initialMultiplier = ENEMY_SAFETY_RULES.INITIAL_SPEED_MULTIPLIER;
-  
+
   // Ease-in-out Interpolation für sanftere Beschleunigung
   // Verwendet eine kubische Easing-Funktion für natürlichere Bewegung
   const easedProgress = rampProgress < 0.5
     ? 2 * rampProgress * rampProgress * rampProgress
     : 1 - Math.pow(-2 * rampProgress + 2, 3) / 2;
-  
+
   // Interpoliere von initialMultiplier zu 1.0 mit eased progress
   return initialMultiplier + (1.0 - initialMultiplier) * easedProgress;
 }
@@ -335,7 +335,7 @@ export function ensureEnemySpawnSafety(
       const warning = `Warnung: Gegner ${enemy.id} (${enemy.type}) ist nur ${distanceResult.distance.toFixed(2)} Sekunden vom Spieler-Startpunkt entfernt (erforderlich: ${ENEMY_SAFETY_RULES.MINIMUM_DISTANCE_SECONDS} Sekunden).`;
       warnings.push(warning);
       console.warn(warning);
-      
+
       // Verwende Fallback-Mindestdistanz für sehr kleine Level
       // In Phase 4 wird automatische Repositionierung implementiert
       adjustedEnemies.push(enemy);
@@ -349,12 +349,12 @@ export function ensureEnemySpawnSafety(
 
 export function createInitialGameState(difficulty: Difficulty): GameState {
   const player = createInitialPlayer(difficulty);
-  
+
   // Load map history and select variant for level 0
   const history = loadMapHistory();
   const variant = selectMapVariant(0, history);
   const level = getMap(0, variant, LEVEL_VARIANTS);
-  
+
   // Record this map selection in history
   const updatedHistory = recordMapPlay(0, variant, history);
   saveMapHistory(updatedHistory);
@@ -384,7 +384,7 @@ export function createInitialGameState(difficulty: Difficulty): GameState {
   });
 
   // Füge einen Hund hinzu
-  const dog = createDog(state.currentMap.tiles);
+  const dog = createDog(state.currentMap.tiles, level.playerStartX, level.playerStartY, level.decorativeObjects);
   if (dog) {
     state.enemies.push(dog);
   }
@@ -423,28 +423,64 @@ function findRandomValidPosition(tiles: number[][]): { x: number; y: number } | 
   return freeTiles[randomIndex];
 }
 
-function createDog(tiles: number[][]): Enemy | null {
-  const position = findRandomValidPosition(tiles);
-  if (!position) {
-    return null;
+function createDog(
+  tiles: number[][],
+  playerStartX: number,
+  playerStartY: number,
+  decorativeObjects: DecorativeObject[] = []
+): Enemy | null {
+  // Versuche max 10 mal eine gültige UND erreichbare Position zu finden
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const position = findRandomValidPosition(tiles);
+    if (!position) continue;
+
+    const dog: Enemy = {
+      id: `dog-${Date.now()}-${attempt}`,
+      type: EnemyType.DOG,
+      x: position.x,
+      y: position.y,
+      health: 50,
+      maxHealth: 50,
+      damage: 15,
+      speed: 0.04,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 500,
+      state: 'alive',
+      texture: getTexture(EnemyType.DOG)
+    };
+
+    // Prüfe Erreichbarkeit (ignoriere Distanz-Sicherheit hier, Hauptsache erreichbar)
+    const result = calculatePathDistance(dog, playerStartX, playerStartY, tiles, decorativeObjects);
+
+    if (result.hasPath) {
+      return dog;
+    }
   }
 
-  return {
-    id: `dog-${Date.now()}`,
-    type: EnemyType.DOG,
-    x: position.x,
-    y: position.y,
-    health: 50,
-    maxHealth: 50,
-    damage: 15,
-    speed: 0.04,
-    isAlive: true,
-    direction: 0,
-    lastAttackTime: 0,
-    attackCooldown: 500,
-    state: 'alive',
-    texture: getTexture(EnemyType.DOG)
-  };
+  // Fallback: Wenn kein Pfad gefunden wurde (sehr unwahrscheinlich), gib null zurück oder akzeptiere Position
+  const fallbackPos = findRandomValidPosition(tiles);
+  if (fallbackPos) {
+    return {
+      id: `dog-${Date.now()}-fallback`,
+      type: EnemyType.DOG,
+      x: fallbackPos.x,
+      y: fallbackPos.y,
+      health: 50,
+      maxHealth: 50,
+      damage: 15,
+      speed: 0.04,
+      isAlive: true,
+      direction: 0,
+      lastAttackTime: 0,
+      attackCooldown: 500,
+      state: 'alive',
+      texture: getTexture(EnemyType.DOG)
+    };
+  }
+
+  return null;
 }
 
 export function checkCollision(x: number, y: number, tiles: number[][]): boolean {
@@ -483,31 +519,31 @@ export function checkDecorativeObjectCollision(
 
   // Optimized: Only check objects within reasonable distance (3 units)
   const maxCheckDistance = 3;
-  
+
   for (const obj of decorativeObjects) {
     // Verwende den Kollisionsradius aus dem Objekt oder den Standard-Radius
     const collisionRadius = obj.collisionRadius || DECORATIVE_OBJECT_COLLISION_RADII[obj.type];
-    
+
     // Überspringe Objekte ohne Kollision
     if (collisionRadius === 0) {
       continue;
     }
-    
+
     const dx = x - obj.x;
     const dy = y - obj.y;
-    
+
     // Optimized: Quick distance check using squared distance to avoid sqrt
     const distanceSquared = dx * dx + dy * dy;
     const maxDistSquared = maxCheckDistance * maxCheckDistance;
-    
+
     // Skip objects that are too far away
     if (distanceSquared > maxDistSquared) {
       continue;
     }
-    
+
     // Only calculate sqrt for nearby objects
     const distance = Math.sqrt(distanceSquared);
-    
+
     if (distance < collisionRadius) {
       return true; // Kollision erkannt
     }
@@ -526,7 +562,7 @@ export function movePlayer(
   const newY = player.y + moveY;
 
   const collisionMargin = 0.2;
-  
+
   // Während des Sprungs ignoriere Kollisionen mit dekorativen Objekten
   const ignoreDecorativeCollisions = player.isJumping || false;
 
@@ -535,7 +571,7 @@ export function movePlayer(
       !checkCollision(newX, player.y + collisionMargin, tiles) &&
       !checkCollision(newX, player.y - collisionMargin, tiles) &&
       (ignoreDecorativeCollisions || (!checkDecorativeObjectCollision(newX, player.y + collisionMargin, decorativeObjects) &&
-      !checkDecorativeObjectCollision(newX, player.y - collisionMargin, decorativeObjects)))
+        !checkDecorativeObjectCollision(newX, player.y - collisionMargin, decorativeObjects)))
     ) {
       player.x = newX;
     }
@@ -546,7 +582,7 @@ export function movePlayer(
       !checkCollision(player.x + collisionMargin, newY, tiles) &&
       !checkCollision(player.x - collisionMargin, newY, tiles) &&
       (ignoreDecorativeCollisions || (!checkDecorativeObjectCollision(player.x + collisionMargin, newY, decorativeObjects) &&
-      !checkDecorativeObjectCollision(player.x - collisionMargin, newY, decorativeObjects)))
+        !checkDecorativeObjectCollision(player.x - collisionMargin, newY, decorativeObjects)))
     ) {
       player.y = newY;
     }
@@ -611,17 +647,17 @@ function tryOpenDoorForEnemy(enemy: Enemy, tiles: number[][], targetX: number, t
 
     // Erstelle eine tiefe Kopie der tiles-Array
     const tilesCopy = tiles.map(row => [...row]);
-    
+
     // Öffne die Tür (setze auf 0)
     tilesCopy[mapY][mapX] = 0;
-    
+
     // Spiele Türöffnungsgeräusch ab (3D-positioniert)
     soundSystem.play3dSound(
       { x: enemy.x, y: enemy.y },
       { x: targetX, y: targetY },
       () => soundSystem.playDoorOpen()
     );
-    
+
     return { tiles: tilesCopy, doorOpened: true };
   }
 
@@ -642,7 +678,7 @@ function findPathToPlayer(enemy: Enemy, player: Player, tiles: number[][], decor
   // Normalisierte Bewegungsrichtung
   const dirX = dx / distance;
   const dirY = dy / distance;
-  
+
   const speed = enemy.speed;
   let moveX = dirX * speed;
   let moveY = dirY * speed;
@@ -678,13 +714,13 @@ function findPathToPlayer(enemy: Enemy, player: Player, tiles: number[][], decor
     // Versuche seitliche Bewegung
     const sideX = -dirY * speed * 0.5; // Senkrecht zur Hauptrichtung
     const sideY = dirX * speed * 0.5;
-    
+
     if (!checkCollision(enemy.x + sideX, enemy.y, tiles) && !checkDecorativeObjectCollision(enemy.x + sideX, enemy.y, decorativeObjects)) {
       moveX = sideX;
     } else if (!checkCollision(enemy.x - sideX, enemy.y, tiles) && !checkDecorativeObjectCollision(enemy.x - sideX, enemy.y, decorativeObjects)) {
       moveX = -sideX;
     }
-    
+
     if (!checkCollision(enemy.x, enemy.y + sideY, tiles) && !checkDecorativeObjectCollision(enemy.x, enemy.y + sideY, decorativeObjects)) {
       moveY = sideY;
     } else if (!checkCollision(enemy.x, enemy.y - sideY, tiles) && !checkDecorativeObjectCollision(enemy.x, enemy.y - sideY, decorativeObjects)) {
@@ -746,17 +782,17 @@ export function updateEnemies(
     if (distance < 15 && distance > 0.1 && canMove) {
       // Verwende verbesserte Pathfinding mit dekorativen Objekten
       const pathResult = findPathToPlayer(enemy, player, updatedTiles, decorativeObjects);
-      
+
       // Wenn eine Tür geöffnet wurde, aktualisiere die Karte
       if (pathResult.tilesUpdated) {
         updatedTiles = pathResult.tilesUpdated;
       }
-      
+
       // Berechne Geschwindigkeitsmultiplikator für sanfte Beschleunigung
-      const speedMultiplier = levelStartTime 
+      const speedMultiplier = levelStartTime
         ? getEnemySpeedMultiplier(levelStartTime)
         : 1.0;
-      
+
       // Bewege den Gegner mit Geschwindigkeitsrampe
       const moveX = pathResult.moveX * multiplier * speedMultiplier * deltaTime;
       const moveY = pathResult.moveY * multiplier * speedMultiplier * deltaTime;
@@ -918,12 +954,12 @@ export function loadNextLevel(gameState: GameState): GameState {
   }
 
   const nextLevel = gameState.currentLevel + 1;
-  
+
   // Load map history and select variant for next level
   const history = loadMapHistory();
   const variant = selectMapVariant(nextLevel, history);
   const level = getMap(nextLevel, variant, LEVEL_VARIANTS);
-  
+
   // Record this map selection in history
   const updatedHistory = recordMapPlay(nextLevel, variant, history);
   saveMapHistory(updatedHistory);
@@ -937,7 +973,7 @@ export function loadNextLevel(gameState: GameState): GameState {
   gameState.levelStartTime = Date.now(); // Gegner-Spawn-Sicherheit: Zeitstempel für Bewegungsverzögerung
 
   // Füge einen Hund hinzu
-  const dog = createDog(gameState.currentMap.tiles);
+  const dog = createDog(gameState.currentMap.tiles, level.playerStartX, level.playerStartY, level.decorativeObjects);
   if (dog) {
     gameState.enemies.push(dog);
   }

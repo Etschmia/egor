@@ -157,67 +157,57 @@ class SoundSystem {
     if (!this.audioContext || !this.enabled) return;
 
     const t = this.audioContext.currentTime;
-    // Zufällige Variation für Natürlichkeit
-    const duration = 0.15 + Math.random() * 0.05;
-    const pitchBase = 120 + Math.random() * 40; // Tieferer Grundton für "Woof"
+    // Realistischeres Bellen: Höherer Pitch, komplexere Hüllkurve
+    const duration = 0.2;
+    const pitchBase = 300 + Math.random() * 50; // Höherer Grundton (300Hz statt 120Hz) - weniger "Klopfen"
 
-    // 1. Oscillator: Sawtooth (Hauptcharakter)
+    // 1. Oszillator: Sawtooth für rauhen Charakter
     const osc1 = this.audioContext.createOscillator();
     osc1.type = 'sawtooth';
     osc1.frequency.setValueAtTime(pitchBase, t);
-    osc1.frequency.exponentialRampToValueAtTime(pitchBase * 0.8, t + duration);
+    osc1.frequency.exponentialRampToValueAtTime(pitchBase * 0.6, t + duration); // Pitch-Drop
 
-    // 2. Oscillator: Square (Fülle) - leicht verstimmt
+    // 2. Oszillator: Square für Körper
     const osc2 = this.audioContext.createOscillator();
     osc2.type = 'square';
-    osc2.frequency.setValueAtTime(pitchBase * 1.01, t); // Detune
-    osc2.frequency.exponentialRampToValueAtTime(pitchBase * 0.8, t + duration);
+    osc2.frequency.setValueAtTime(pitchBase * 0.99, t); // Leicht verstimmt
+    osc2.frequency.exponentialRampToValueAtTime(pitchBase * 0.6, t + duration);
 
-    // Formant Filter für "O"-Vokal (Woof)
+    // Filter für Vokal-Formung ("Wuff")
     const filter = this.audioContext.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(400, t);
-    filter.frequency.linearRampToValueAtTime(800, t + 0.05); // Attack phase "W" -> "o"
-    filter.frequency.exponentialRampToValueAtTime(300, t + duration); // Schließen des Mundes "of"
-    filter.Q.value = 1;
+    filter.frequency.setValueAtTime(600, t);
+    filter.frequency.linearRampToValueAtTime(1200, t + 0.05); // Auf
+    filter.frequency.exponentialRampToValueAtTime(400, t + duration); // Zu
 
-    // Noise für "Luft" im Bellen
+    // Noise für das "Hhauche" Geräusch am Anfang
     const noiseNode = this.audioContext.createBufferSource();
     if (this.noiseBuffer) {
       noiseNode.buffer = this.noiseBuffer;
     }
     const noiseFilter = this.audioContext.createBiquadFilter();
-    noiseFilter.type = 'bandpass';
+    noiseFilter.type = 'highpass';
     noiseFilter.frequency.value = 1000;
 
-    // Mixing Gains
-    const oscGain = this.audioContext.createGain();
     const noiseGain = this.audioContext.createGain();
-    const masterGain = this.audioContext.createGain();
+    noiseGain.gain.setValueAtTime(0.5, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.1); // Nur kurzer Burst
 
-    // Routing
+    const masterGain = this.audioContext.createGain();
+    masterGain.gain.setValueAtTime(0, t);
+    masterGain.gain.linearRampToValueAtTime(0.8, t + 0.02); // Schneller Attack
+    masterGain.gain.exponentialRampToValueAtTime(0.01, t + duration); // Kurzer Release
+
     osc1.connect(filter);
     osc2.connect(filter);
-    filter.connect(oscGain);
+    filter.connect(masterGain);
 
     noiseNode.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
-
-    oscGain.connect(masterGain);
     noiseGain.connect(masterGain);
+
     masterGain.connect(this.audioContext.destination);
 
-    // Envelopes
-    // Oszillatoren: Lauter Attack, schneller Decay
-    oscGain.gain.setValueAtTime(0, t);
-    oscGain.gain.linearRampToValueAtTime(0.8, t + 0.02);
-    oscGain.gain.exponentialRampToValueAtTime(0.01, t + duration);
-
-    // Noise: Nur kurz am Anfang (der "W"-Laut)
-    noiseGain.gain.setValueAtTime(0.4, t);
-    noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
-
-    // Start/Stop
     osc1.start(t);
     osc2.start(t);
     noiseNode.start(t);
@@ -227,10 +217,9 @@ class SoundSystem {
     osc2.stop(stopTime);
     noiseNode.stop(stopTime);
 
-    // Cleanup nach Sound-Ende um Memory Leaks zu vermeiden
     setTimeout(() => {
       masterGain.disconnect();
-    }, (duration + 0.2) * 1000);
+    }, 500);
   }
 
   playFootstep() {
