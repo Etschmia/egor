@@ -17,8 +17,8 @@ Ein Ego-Shooter im Stil von Wolfenstein 3D, entwickelt mit React und TypeScript.
   - Pistole (Start)
   - Maschinenpistole (Level 2-3)
   - Kettensäge (Level 3)
-  - Sturmgewehr (Level 4-6)
-  - Schweres Maschinengewehr (Level 5-7)
+  - Sturmgewehr (Ab Level 3)
+  - Schweres Maschinengewehr (Ab Level 3)
 - **Backup-Waffen**: Falls du eine Waffe in einem früheren Level verpasst hast, findest du sie als Backup in späteren Levels
 - **Waffen-zu-Munition**: Wenn du eine Waffe aufsammelst, die du bereits besitzt, erhältst du stattdessen 30 Schuss Munition für alle Waffen
 - **Gegner**: Vier verschiedene Gegner-Typen mit KI
