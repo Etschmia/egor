@@ -154,9 +154,83 @@ class SoundSystem {
   }
 
   playDogBark() {
-    // Short aggressive noise burst
-    this.playTone(400, 0.1, 'square', 0.2, 300);
-    this.playNoise(0.15, 0.3, 0.7, 3000);
+    if (!this.audioContext || !this.enabled) return;
+
+    const t = this.audioContext.currentTime;
+    // Zufällige Variation für Natürlichkeit
+    const duration = 0.15 + Math.random() * 0.05;
+    const pitchBase = 120 + Math.random() * 40; // Tieferer Grundton für "Woof"
+
+    // 1. Oscillator: Sawtooth (Hauptcharakter)
+    const osc1 = this.audioContext.createOscillator();
+    osc1.type = 'sawtooth';
+    osc1.frequency.setValueAtTime(pitchBase, t);
+    osc1.frequency.exponentialRampToValueAtTime(pitchBase * 0.8, t + duration);
+
+    // 2. Oscillator: Square (Fülle) - leicht verstimmt
+    const osc2 = this.audioContext.createOscillator();
+    osc2.type = 'square';
+    osc2.frequency.setValueAtTime(pitchBase * 1.01, t); // Detune
+    osc2.frequency.exponentialRampToValueAtTime(pitchBase * 0.8, t + duration);
+
+    // Formant Filter für "O"-Vokal (Woof)
+    const filter = this.audioContext.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(400, t);
+    filter.frequency.linearRampToValueAtTime(800, t + 0.05); // Attack phase "W" -> "o"
+    filter.frequency.exponentialRampToValueAtTime(300, t + duration); // Schließen des Mundes "of"
+    filter.Q.value = 1;
+
+    // Noise für "Luft" im Bellen
+    const noiseNode = this.audioContext.createBufferSource();
+    if (this.noiseBuffer) {
+      noiseNode.buffer = this.noiseBuffer;
+    }
+    const noiseFilter = this.audioContext.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.value = 1000;
+
+    // Mixing Gains
+    const oscGain = this.audioContext.createGain();
+    const noiseGain = this.audioContext.createGain();
+    const masterGain = this.audioContext.createGain();
+
+    // Routing
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(oscGain);
+
+    noiseNode.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+
+    oscGain.connect(masterGain);
+    noiseGain.connect(masterGain);
+    masterGain.connect(this.audioContext.destination);
+
+    // Envelopes
+    // Oszillatoren: Lauter Attack, schneller Decay
+    oscGain.gain.setValueAtTime(0, t);
+    oscGain.gain.linearRampToValueAtTime(0.8, t + 0.02);
+    oscGain.gain.exponentialRampToValueAtTime(0.01, t + duration);
+
+    // Noise: Nur kurz am Anfang (der "W"-Laut)
+    noiseGain.gain.setValueAtTime(0.4, t);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.05);
+
+    // Start/Stop
+    osc1.start(t);
+    osc2.start(t);
+    noiseNode.start(t);
+
+    const stopTime = t + duration + 0.1;
+    osc1.stop(stopTime);
+    osc2.stop(stopTime);
+    noiseNode.stop(stopTime);
+
+    // Cleanup nach Sound-Ende um Memory Leaks zu vermeiden
+    setTimeout(() => {
+      masterGain.disconnect();
+    }, (duration + 0.2) * 1000);
   }
 
   playFootstep() {
