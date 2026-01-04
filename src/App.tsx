@@ -105,7 +105,6 @@ function App() {
     if (gameState && saveName.trim()) {
       const success = saveGame(gameState, saveName.trim());
       if (success) {
-        alert(`Spielstand "${saveName}" wurde gespeichert!`);
         setGameMode('playing');
         soundSystem.playPickup();
       } else {
