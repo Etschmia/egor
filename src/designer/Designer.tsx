@@ -143,7 +143,7 @@ export default function Designer() {
       
       try {
         themeData = JSON.parse(text);
-      } catch (parseError) {
+      } catch {
         toast.error('Invalid JSON file. Please check the file format.');
         return;
       }

@@ -25,7 +25,7 @@ global.localStorage = {
   clear: () => {
     for (const key in localStorageMock) delete localStorageMock[key];
   },
-  key: (index: number) => null,
+  key: () => null,
   length: 0
 };
 
@@ -160,7 +160,6 @@ async function runTests() {
 }
 
 runTests();
-
 
 
 

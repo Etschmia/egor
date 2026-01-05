@@ -401,7 +401,9 @@ export function testLocalStorageFallback(): { success: boolean; message: string 
         writable: true,
         configurable: true
       });
-    } catch {}
+    } catch {
+      // Ignore restore failures during test cleanup.
+    }
     
     return {
       success: false,

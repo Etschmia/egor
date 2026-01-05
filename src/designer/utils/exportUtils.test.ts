@@ -6,7 +6,6 @@ import { describe, it, expect } from 'vitest';
 import { 
   exportTheme, 
   validateThemeForExport, 
-  sanitizeFilename,
   getFileExtension,
   getMimeType
 } from './exportUtils';

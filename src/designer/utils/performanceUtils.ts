@@ -205,7 +205,7 @@ export function observeLongTasks(
 
     observer.observe({ entryTypes: ['longtask'] });
     return observer;
-  } catch (e) {
+  } catch {
     console.warn('Long task observation not supported');
     return null;
   }

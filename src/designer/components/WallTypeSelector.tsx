@@ -266,7 +266,7 @@ function generatePreviewTexture(
   const accent = wallType.colors.accent.value;
 
   switch (wallType.id) {
-    case 'brick':
+    case 'brick': {
       // Simple brick pattern
       ctx.fillStyle = primary; // Mortar
       ctx.fillRect(0, 0, width, height);
@@ -282,8 +282,9 @@ function generatePreviewTexture(
         }
       }
       break;
+    }
 
-    case 'wood':
+    case 'wood': {
       // Simple wood planks
       ctx.fillStyle = primary; // Base wood
       ctx.fillRect(0, 0, width, height);
@@ -300,8 +301,9 @@ function generatePreviewTexture(
         ctx.fillRect(0, y, width, 1);
       }
       break;
+    }
 
-    case 'stone':
+    case 'stone': {
       // Simple stone blocks
       ctx.fillStyle = primary; // Base stone
       ctx.fillRect(0, 0, width, height);
@@ -316,8 +318,9 @@ function generatePreviewTexture(
         }
       }
       break;
+    }
 
-    case 'door':
+    case 'door': {
       // Simple door pattern
       ctx.fillStyle = primary; // Door base
       ctx.fillRect(0, 0, width, height);
@@ -335,8 +338,9 @@ function generatePreviewTexture(
       ctx.fillStyle = accent;
       ctx.fillRect(width - 12, height / 2 - 2, 4, 4);
       break;
+    }
 
-    default:
+    default: {
       // Default pattern
       ctx.fillStyle = primary;
       ctx.fillRect(0, 0, width, height);
@@ -344,5 +348,6 @@ function generatePreviewTexture(
       ctx.fillStyle = secondary;
       ctx.fillRect(2, 2, width - 4, height - 4);
       break;
+    }
   }
 }

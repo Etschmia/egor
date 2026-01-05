@@ -102,7 +102,7 @@ export function DesignerWithThemeManager() {
  * Example: Multiple loading states
  */
 export function DesignerWithMultipleStates() {
-  const [loadingState, setLoadingState] = useState<{
+  const [loadingState] = useState<{
     type: 'idle' | 'loading' | 'saving' | 'generating' | 'importing' | 'exporting';
     message: string;
   }>({

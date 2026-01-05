@@ -171,7 +171,7 @@ export const ConfigMenu: React.FC<ConfigMenuProps> = ({ onBack, onGraphicsChange
         <div className="config-section" style={{ marginBottom: '20px' }}>
           <h3 style={{ color: '#fff', marginBottom: '10px' }}>Grafikqualität</h3>
           <div className="profile-selector" style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-            {['low', 'medium', 'high', 'ultra'].map((preset) => (
+            {(['low', 'medium', 'high', 'ultra'] as const).map((preset) => (
               <button
                 key={preset}
                 className="menu-button"
@@ -180,7 +180,7 @@ export const ConfigMenu: React.FC<ConfigMenuProps> = ({ onBack, onGraphicsChange
                   width: 'auto',
                   flex: 1
                 }}
-                onClick={() => handleQualityChange(preset as any)}
+                onClick={() => handleQualityChange(preset)}
               >
                 {preset.charAt(0).toUpperCase() + preset.slice(1)}
               </button>
